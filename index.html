@@ -1565,12 +1565,12 @@
       }).join('');
 
       return `
-        <button onclick="toggleDetails(${stop.id})" aria-expanded="${isOpen}"
+        <button id="details-btn-${stop.id}" onclick="toggleDetails(${stop.id})" aria-expanded="${isOpen}"
           class="${isOpen ? 'open-btn ' : ''}mt-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition">
-          <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i>${isOpen ? txt.lessLabel : txt.moreLabel} (${list.length})</span>
+          <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i><span class="details-label">${isOpen ? txt.lessLabel : txt.moreLabel}</span> (${list.length})</span>
           <i data-lucide="chevron-down" class="chevron w-4 h-4"></i>
         </button>
-        <div class="details-panel ${isOpen ? 'open' : ''} mt-3 space-y-5">
+        <div id="details-panel-${stop.id}" class="details-panel ${isOpen ? 'open' : ''} mt-3 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <button onclick="speakStop(${stop.id}, true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">
               <i data-lucide="headphones" class="w-4 h-4"></i> ${txt.listenDetailed}
@@ -1578,11 +1578,33 @@
             ${hasImages ? `<span class="text-[11px] text-slate-400">${txt.tapToEnlarge}</span>` : ''}
           </div>
           ${items}
+          <button onclick="toggleDetails(${stop.id}, true)" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-amber-200 text-amber-900 text-xs font-semibold hover:bg-amber-50 transition">
+            <i data-lucide="chevron-up" class="w-4 h-4"></i> ${txt.lessLabel}
+          </button>
         </div>`;
+    }
+
+    // Remember which card is at the top of the screen, so a full re-render
+    // (language switch, marking as visited) doesn't make the list jump.
+    function captureListAnchor() {
+      const limit = stickyOffset();
+      for (const card of document.querySelectorAll('#stops-container > [id^="stop-card-"]')) {
+        const r = card.getBoundingClientRect();
+        if (r.bottom > limit) return { id: card.id, top: r.top };
+      }
+      return null;
+    }
+    function restoreListAnchor(anchor) {
+      if (!anchor) return;
+      const card = document.getElementById(anchor.id);
+      if (!card) return;
+      const diff = card.getBoundingClientRect().top - anchor.top;
+      if (diff) window.scrollBy(0, diff);
     }
 
     function renderStops() {
       const container = document.getElementById('stops-container');
+      const anchor = captureListAnchor();
       container.innerHTML = '';
       const txt = uiTranslations[currentLang];
 
@@ -1655,6 +1677,7 @@
       });
 
       lucide.createIcons();
+      restoreListAnchor(anchor);
     }
 
     // ---------- Interactions ----------
@@ -1703,9 +1726,31 @@
       updateUI();
     };
 
-    window.toggleDetails = function(id) {
-      if (openDetails.has(id)) openDetails.delete(id); else openDetails.add(id);
-      renderStops();
+    // Open/close the details of one stop without rebuilding the list.
+    // fromBottom = the "close" button at the end of a long panel was used.
+    window.toggleDetails = function(id, fromBottom) {
+      const btn = document.getElementById(`details-btn-${id}`);
+      const panel = document.getElementById(`details-panel-${id}`);
+      if (!btn || !panel) return;
+      const txt = uiTranslations[currentLang];
+      const opening = !openDetails.has(id);
+      const before = btn.getBoundingClientRect().top;
+
+      if (opening) openDetails.add(id); else openDetails.delete(id);
+      panel.classList.toggle('open', opening);
+      btn.classList.toggle('open-btn', opening);
+      btn.setAttribute('aria-expanded', String(opening));
+      btn.querySelector('.details-label').textContent = opening ? txt.lessLabel : txt.moreLabel;
+
+      if (fromBottom) {
+        // Panel collapsed above the viewport: bring this stop's card back into view
+        const card = document.getElementById(`stop-card-${id}`);
+        if (card && card.getBoundingClientRect().top < stickyOffset()) scrollToElement(card);
+      } else {
+        // Keep the clicked button exactly where it was on screen
+        const diff = btn.getBoundingClientRect().top - before;
+        if (diff) window.scrollBy(0, diff);
+      }
     };
 
     window.toggleWC = function() {
