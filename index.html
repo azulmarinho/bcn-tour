@@ -127,19 +127,18 @@
   </header>
 
   <div id="toolbar" class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
-    <div class="max-w-5xl mx-auto flex flex-wrap gap-2 justify-between items-center text-xs">
-      <label class="flex items-center gap-2 px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 font-semibold min-w-0 flex-1 sm:flex-none">
+    <div class="max-w-5xl mx-auto flex flex-wrap gap-2 items-center text-xs">
+      <label class="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 font-semibold min-w-0 w-full sm:w-auto sm:flex-1">
         <i data-lucide="route" class="w-4 h-4 shrink-0"></i>
         <span id="label-route" class="sr-only">Rota</span>
-        <select id="route-select" onchange="setRoute(this.value)" class="bg-transparent font-semibold focus:outline-none min-w-0 w-full sm:w-auto cursor-pointer"></select>
+        <select id="route-select" onchange="setRoute(this.value)" class="bg-transparent font-semibold focus:outline-none min-w-0 w-full cursor-pointer text-base sm:text-xs truncate"></select>
       </label>
-      <button id="gps-btn" onclick="toggleGPS()" class="px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
-        <i data-lucide="navigation" class="w-4 h-4"></i> <span id="label-gps">Localização GPS</span>
-      </button>
-
-      <div class="flex items-center gap-2">
-        <button id="wc-toggle" onclick="toggleWC()" class="px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
-          <i data-lucide="bath" class="w-4 h-4"></i> <span id="label-wc">🚻 Ocultar Banheiros</span>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button id="gps-btn" onclick="toggleGPS()" class="flex-1 sm:flex-none justify-center px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
+          <i data-lucide="navigation" class="w-4 h-4 shrink-0"></i> <span id="label-gps" class="truncate">Localização GPS</span>
+        </button>
+        <button id="wc-toggle" onclick="toggleWC()" class="flex-1 sm:flex-none justify-center px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
+          <i data-lucide="bath" class="w-4 h-4 shrink-0"></i> <span id="label-wc" class="truncate">🚻 Ocultar Banheiros</span>
         </button>
       </div>
     </div>
@@ -2131,11 +2130,11 @@
             img: "Terrassa de la Fundació Joan Miró.JPG",
             de: {
               title: "Skulpturen auf dem Dach",
-              text: "Auf den Dachterrassen stehen zwischen den gewölbten Oberlichtern bunte Miró-Skulpturen, dahinter liegt die Stadt. Wer die andere Route gelaufen ist, kennt Miró schon: sein rundes Bodenmosaik mitten auf der Rambla."
+              text: "Auf den Dachterrassen stehen zwischen den gewölbten Oberlichtern bunte Miró-Skulpturen, dahinter liegt die Stadt. Ein weiteres Werk von ihm liegt mitten auf der Rambla: ein rundes, buntes Bodenmosaik, über das täglich Tausende laufen."
             },
             pt: {
               title: "Esculturas no terraço",
-              text: "Nos terraços, entre as claraboias curvas, ficam esculturas coloridas de Miró, com a cidade ao fundo. Quem fez a outra rota já conhece Miró: o mosaico redondo no chão, no meio da Rambla."
+              text: "Nos terraços, entre as claraboias curvas, ficam esculturas coloridas de Miró, com a cidade ao fundo. Outra obra dele fica no meio da Rambla: um mosaico redondo e colorido no chão, pisado todos os dias por milhares de pessoas."
             }
           }
         ]
@@ -2333,11 +2332,11 @@
           {
             de: {
               title: "Was siehst du da unten?",
-              text: "Von links nach rechts: die Kolumbussäule am Ende der Rambla, das Hafenbecken Port Vell mit der Holzbrücke Rambla de Mar, der Seilbahnturm Jaume I vor dem World Trade Center, die Barceloneta und ganz rechts das segelförmige W-Hotel. Bei guter Sicht erkennst du links in der Ferne sogar die Sagrada Família – das Ziel der anderen Route."
+              text: "Von links nach rechts: die Kolumbussäule am Ende der Rambla, das Hafenbecken Port Vell mit der Holzbrücke Rambla de Mar, der Seilbahnturm Jaume I vor dem World Trade Center, die Barceloneta und ganz rechts das segelförmige W-Hotel. Bei guter Sicht erkennst du links in der Ferne sogar die Sagrada Família."
             },
             pt: {
               title: "O que você vê lá embaixo?",
-              text: "Da esquerda para a direita: a coluna de Colombo no fim da Rambla, a doca do Port Vell com a passarela de madeira Rambla de Mar, a torre Jaume I do teleférico em frente ao World Trade Center, a Barceloneta e, bem à direita, o Hotel W em forma de vela. Com boa visibilidade dá para ver, à esquerda ao longe, até a Sagrada Família – o destino da outra rota."
+              text: "Da esquerda para a direita: a coluna de Colombo no fim da Rambla, a doca do Port Vell com a passarela de madeira Rambla de Mar, a torre Jaume I do teleférico em frente ao World Trade Center, a Barceloneta e, bem à direita, o Hotel W em forma de vela. Com boa visibilidade dá para ver, à esquerda ao longe, até a Sagrada Família."
             }
           }
         ]
@@ -2439,15 +2438,119 @@
         pt: {
           name: "Torre de Sant Sebastià",
           shortDesc: "Chegada à Barceloneta.",
-          longDesc: "A cabine chega ao alto da torre de aço de Sant Sebastià, e um elevador leva você até embaixo. Agora você está na praia de Sant Sebastià, a poucos passos do Hotel W. Daqui dá para emendar com a outra rota: a praia da Barceloneta, o bairro dos pescadores e o Palau de Mar estão logo ali."
+          longDesc: "A cabine chega ao alto da torre de aço de Sant Sebastià, e um elevador leva você até embaixo. Agora você está na praia de Sant Sebastià, a poucos passos do Hotel W. Daqui dá para emendar com a rota 'Diagonal → Sagrada Família': a praia da Barceloneta, o bairro dos pescadores e o Palau de Mar estão logo ali."
         },
         de: {
           name: "Torre de Sant Sebastià",
           shortDesc: "Ankunft in der Barceloneta.",
-          longDesc: "Die Kabine landet oben im Stahlturm von Sant Sebastià, ein Aufzug bringt dich hinunter. Du stehst jetzt am Strand von Sant Sebastià, wenige Schritte vom W-Hotel entfernt. Von hier kannst du direkt in die andere Route einsteigen: Barceloneta-Strand, Fischerviertel und Palau de Mar liegen gleich um die Ecke."
+          longDesc: "Die Kabine landet oben im Stahlturm von Sant Sebastià, ein Aufzug bringt dich hinunter. Du stehst jetzt am Strand von Sant Sebastià, wenige Schritte vom W-Hotel entfernt. Von hier kannst du in die Route »Diagonal → Sagrada Família« einsteigen: Barceloneta-Strand, Fischerviertel und Palau de Mar liegen gleich um die Ecke."
         }
       }
     ];
+
+    // ===== Route 3: Plaça d'Espanya -> Montjuïc (without the castle) -> port cable car -> boat -> old town =====
+    // Built from the stops of the other two routes, so a fix there shows up here too.
+    // reuseStop copies a stop under its new number; `edit` changes the few texts that only fit the original route.
+    function reuseStop(src, id, edit) {
+      const s = { ...src, id, pt: { ...src.pt }, de: { ...src.de } };
+      ['pt', 'de'].forEach(l => { if (src[l].notes) s[l].notes = src[l].notes.slice(); });
+      if (src.highlights) s.highlights = src.highlights.map(h => ({ ...h, pt: { ...h.pt }, de: { ...h.de } }));
+      if (edit) edit(s);
+      return s;
+    }
+    // Replaces part of a text; warns in the console if the original wording was changed
+    function swapText(obj, field, from, to) {
+      if (typeof obj[field] === 'string' && obj[field].includes(from)) obj[field] = obj[field].replace(from, to);
+      else console.warn('Route text not found:', from);
+    }
+    const fromMontjuic = id => montjuicStops.find(s => s.id === id);
+    const fromEixample = id => eixampleStops.find(s => s.id === id);
+
+    const portStops = [
+      reuseStop(fromMontjuic(1), 1, s => {
+        s.de.notes[0] = { type: 'info', text: 'Tipp: Diese Route ist lang (zu Fuß etwa 9–10 km) – erst geht es bergauf, dann mit Hafenseilbahn und Solarboot zurück in die Stadt und durch die Altstadt bis zur Plaça de Catalunya. Zwischen Font Màgica und Palau Nacional helfen Rolltreppen im Freien. Wasser, Sonnenschutz und etwas Bargeld für Seilbahn und Boot einpacken.' };
+        s.pt.notes[0] = { type: 'info', text: 'Dica: esta rota é longa (cerca de 9–10 km a pé) – primeiro subida, depois teleférico do porto e barco solar de volta à cidade e pelo centro antigo até a Plaça de Catalunya. Entre a Font Màgica e o Palau Nacional há escadas rolantes ao ar livre. Leve água, protetor solar e um pouco de dinheiro para o teleférico e o barco.' };
+      }),
+      ...[2, 3, 4, 5, 6, 7, 8, 9, 10].map(id => reuseStop(fromMontjuic(id), id)),
+      // Salts: no gondola to the castle on this route – walk on along the slope
+      reuseStop(fromMontjuic(11), 11, s => {
+        delete s.nextBy;
+        ['pt', 'de'].forEach(l => { delete s[l].nextHint; s[l].notes = s[l].notes.filter(n => n.type !== 'ticket'); });
+        swapText(s.de, 'longDesc', 'Direkt gegenüber liegt die Talstation Parc de Montjuïc, von der die Gondel hinauf zur Festung schwebt.',
+          'Auf dieser Route lässt du die Festung aus und gehst zu Fuß weiter – die Avinguda de Miramar entlang, immer am Hang mit Blick aufs Meer.');
+        swapText(s.pt, 'longDesc', 'Bem em frente fica a estação Parc de Montjuïc, de onde o teleférico sobe ao castelo.',
+          'Nesta rota você deixa o castelo de lado e segue a pé – pela Avinguda de Miramar, sempre pela encosta com vista para o mar.');
+        swapText(s.de, 'gastro', 'bevor es hoch zur Festung geht', 'bevor es weiter Richtung Hafen geht');
+        swapText(s.pt, 'gastro', 'antes de subir ao castelo', 'antes de seguir rumo ao porto');
+        s.highlights = s.highlights.slice(0, 2);   // the gondola highlight is not needed here
+      }),
+      reuseStop(fromMontjuic(13), 12, s => {
+        swapText(s.de, 'longDesc', "Von der Gondelstation Mirador kommst du am Mirador de l'Alcalde und am Sardana-Denkmal vorbei hierher.",
+          'Von der Salts-Bar bist du in gut 10 Minuten über die Avinguda de Miramar hierher gelaufen.');
+        swapText(s.pt, 'longDesc', "Da estação Mirador do teleférico você passa pelo Mirador de l'Alcalde e pelo monumento à Sardana até aqui.",
+          'Do bar Salts você chegou aqui em pouco mais de 10 minutos pela Avinguda de Miramar.');
+      }),
+      reuseStop(fromMontjuic(14), 13),
+      reuseStop(fromMontjuic(15), 14),
+      // Arrival at the beach: walk to Honest Greens; beach warnings from the other route
+      reuseStop(fromMontjuic(16), 15, s => {
+        swapText(s.de, 'longDesc', 'Von hier kannst du in die Route »Diagonal → Sagrada Família« einsteigen: Barceloneta-Strand, Fischerviertel und Palau de Mar liegen gleich um die Ecke.',
+          'Von hier sind es nur ein paar Schritte am Wasser entlang zum Honest Greens beim W-Hotel – gleich dahinter legt das Boot zurück in die Stadt ab.');
+        swapText(s.pt, 'longDesc', "Daqui dá para emendar com a rota 'Diagonal → Sagrada Família': a praia da Barceloneta, o bairro dos pescadores e o Palau de Mar estão logo ali.",
+          'Daqui são só alguns passos à beira-mar até o Honest Greens, junto ao Hotel W – logo atrás sai o barco de volta à cidade.');
+        const beach = fromEixample(20);
+        s.de.notes = beach.de.notes.slice();
+        s.pt.notes = beach.pt.notes.slice();
+        s.highlights = [beach.highlights[2], beach.highlights[3]];   // how many beaches + beach mojitos
+      }),
+      reuseStop(fromEixample(19), 16, s => {
+        s.nextByBoat = true;
+        s.de.nextHint = 'Zum Anleger hinter dem W-Hotel, dann ca. 10 Min. Boot';
+        s.pt.nextHint = 'Até o cais atrás do Hotel W, depois aprox. 10 min de barco';
+        s.de.notes = [{ type: 'info', text: 'Weiter mit dem Boot: Der Bus Nàutic legt hinter dem W-Hotel ab (Moll de Llevant / Rambla de la Nova Bocana) und fährt in etwa 10 Minuten quer durch den Hafen zum Portal de la Pau an der Kolumbussäule. Abfahrt etwa alle 15–30 Minuten, ca. 1,90 € pro Fahrt (Stand 2024).' }];
+        s.pt.notes = [{ type: 'info', text: 'Siga de barco: o Bus Nàutic sai de trás do Hotel W (Moll de Llevant / Rambla de la Nova Bocana) e atravessa o porto em cerca de 10 minutos até o Portal de la Pau, junto à coluna de Colombo. Saídas a cada 15–30 minutos, aprox. 1,90 € por trecho (valores de 2024).' }];
+      }),
+      // The boat stop of route 1, seen from the other direction: here you arrive
+      reuseStop(fromEixample(18), 17, s => {
+        delete s.nextByBoat;
+        s.img = 'Monument Christophe Colomb, Barcelone.jpg';
+        s.author = 'Bernard Gagnon';
+        s.license = 'CC BY-SA 4.0';
+        s.de = {
+          name: 'Bus Nàutic – Ankunft Portal de la Pau',
+          shortDesc: 'Mit dem Solarboot zurück in die Stadt.',
+          longDesc: 'Seit Juli 2024 verbindet der Bus Nàutic den Moll de Llevant beim W-Hotel mit dem Portal de la Pau. Die zwei elektrischen Katamarane laden auch über Solarpaneele und brauchen für die Fahrt quer durch den Hafen nur etwa 10 Minuten – zu Fuß wäre es ein langer Weg um das ganze Hafenbecken. Du legst direkt am Fuß der Kolumbussäule an. Hier beginnt die Rambla, die du ab jetzt bis zur Plaça de Catalunya hinaufgehst.'
+        };
+        s.pt = {
+          name: 'Bus Nàutic – chegada ao Portal de la Pau',
+          shortDesc: 'De barco solar de volta à cidade.',
+          longDesc: 'Desde julho de 2024, o Bus Nàutic liga o Moll de Llevant, junto ao Hotel W, ao Portal de la Pau. Os dois catamarãs elétricos também são carregados por painéis solares e levam só uns 10 minutos para atravessar o porto – a pé seria uma longa volta em torno de toda a doca. Você desembarca bem ao pé da coluna de Colombo. Aqui começa a Rambla, que você vai subir agora até a Plaça de Catalunya.'
+        };
+      }),
+      reuseStop(fromEixample(17), 18),
+      reuseStop(fromEixample(16), 19),
+      reuseStop(fromEixample(15), 20, s => {
+        swapText(s.highlights[1].de, 'text', 'derselbe, der später den Arc de Triomf baute (Station 26) –', 'derselbe, der später den Arc de Triomf baute –');
+        swapText(s.highlights[1].pt, 'text', 'o mesmo que depois construiu o Arc de Triomf (parada 26) –', 'o mesmo que depois construiu o Arc de Triomf –');
+        swapText(s.highlights[2].de, 'text', 'Nach dem Drachen der Casa Batlló ist das schon der zweite Drache der Tour.',
+          'Barcelona liebt Drachen – den berühmtesten trägt Gaudís Casa Batlló auf dem Dach.');
+        swapText(s.highlights[2].pt, 'text', 'Depois do dragão da Casa Batlló, este já é o segundo dragão do roteiro.',
+          'Barcelona adora dragões – o mais famoso está no telhado da Casa Batlló, de Gaudí.');
+      }),
+      reuseStop(fromEixample(14), 21, s => {
+        swapText(s.highlights[0].de, 'text', 'Weitere Gaudí-Laternen stehen am Pla de Palau, an dem du später vorbeikommst.',
+          'Weitere Gaudí-Laternen stehen am Pla de Palau beim Born-Viertel.');
+        swapText(s.highlights[0].pt, 'text', 'Outros postes de Gaudí estão no Pla de Palau, por onde você passará mais tarde.',
+          'Outros postes de Gaudí estão no Pla de Palau, perto do bairro do Born.');
+      }),
+      reuseStop(fromEixample(13), 22),
+      reuseStop(fromEixample(12), 23, s => {
+        swapText(s.de, 'longDesc', '(nächste Station)', '(vorige Station)');
+        swapText(s.pt, 'longDesc', '(próxima parada)', '(parada anterior)');
+      }),
+      ...[11, 10, 9, 8, 7, 6].map((id, i) => reuseStop(fromEixample(id), 24 + i))
+    ];
+    const portToilets = eixampleToilets.filter(t => /Barceloneta|Maremagnum|Boqueria|Catalunya/.test(t.name));
 
     // ===== Route registry =====
     // To add a route: create a stops array like the ones above and add an entry here.
@@ -2472,6 +2575,16 @@
         de: { title: "Plaça d'Espanya → Montjuïc → Seilbahn" },
         stops: montjuicStops,
         toilets: []
+      },
+      {
+        id: 'port',
+        storageKey: 'bcn_tour_completed_port',
+        distance: '~9–10 km',
+        duration: '~7–8 h',
+        pt: { title: 'Montjuïc → porto → Plaça de Catalunya' },
+        de: { title: 'Montjuïc → Hafen → Plaça de Catalunya' },
+        stops: portStops,
+        toilets: portToilets
       }
     ];
 
@@ -2938,8 +3051,8 @@
       const txt = uiTranslations[currentLang];
       document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
       document.getElementById('wc-toggle').className = showWC
-        ? "px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95"
-        : "px-3 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg font-semibold flex items-center gap-2 transition opacity-60 active:scale-95";
+        ? "flex-1 sm:flex-none justify-center px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95"
+        : "flex-1 sm:flex-none justify-center px-3 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg font-semibold flex items-center gap-2 transition opacity-60 active:scale-95";
     };
 
     // ---------- Text-to-Speech ----------
