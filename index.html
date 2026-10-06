@@ -73,6 +73,14 @@
     .hl-img-wrap img { transition: transform 0.3s ease; }
     .hl-img-wrap:hover img { transform: scale(1.03); }
 
+    /* Card selected on the map: short amber glow */
+    @keyframes cardFlash {
+      0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+      15%  { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.9); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+    .card-flash { animation: cardFlash 2s ease-out; }
+
     /* Lightbox */
     #lightbox { display: none; }
     #lightbox.open { display: flex; }
@@ -110,7 +118,7 @@
     </div>
   </header>
 
-  <div class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
+  <div id="toolbar" class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
     <div class="max-w-5xl mx-auto flex flex-wrap gap-2 justify-between items-center text-xs">
       <button id="gps-btn" onclick="toggleGPS()" class="px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
         <i data-lucide="navigation" class="w-4 h-4"></i> <span id="label-gps">Localização GPS</span>
@@ -127,7 +135,7 @@
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-4">
     <!-- Left Column: Map -->
     <div class="w-full md:w-1/2 flex flex-col gap-4">
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[130px]">
+      <div id="map-card" class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[130px]">
         <div id="map"></div>
         <div class="p-3 bg-slate-100 border-t border-slate-200 text-xs text-slate-600 flex justify-between items-center font-medium">
           <span class="flex items-center gap-1"><i data-lucide="footprints" class="w-4 h-4 text-indigo-500"></i> ~12-14 km</span>
@@ -1557,6 +1565,7 @@
         });
         if (!stopMarkers[stop.id]) {
           stopMarkers[stop.id] = L.marker(stop.coords, { icon: customIcon }).addTo(map);
+          stopMarkers[stop.id].on('click', () => scrollToCard(stop.id));
         } else {
           stopMarkers[stop.id].setIcon(customIcon);
         }
@@ -1615,12 +1624,39 @@
     }
 
     // ---------- Interactions ----------
+    const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Height covered by the sticky header + toolbar, so targets don't end up hidden behind them
+    function stickyOffset() {
+      const bar = document.getElementById('toolbar');
+      return (bar ? bar.getBoundingClientRect().bottom : 120) + 12;
+    }
+
+    function scrollToElement(el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - stickyOffset();
+      window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    }
+
+    // Map marker clicked -> bring its card into view and highlight it briefly
+    function scrollToCard(id) {
+      const card = document.getElementById(`stop-card-${id}`);
+      if (!card) return;
+      scrollToElement(card);
+      card.classList.remove('card-flash');
+      void card.offsetWidth; // restart animation if clicked twice
+      card.classList.add('card-flash');
+    }
+
+    // Card header clicked -> center the map on the stop.
+    // On phones the map sits above the list, so scroll back up to it.
     window.focusStop = function(id) {
       const stop = getStop(id);
-      if (stop) {
-        map.setView(stop.coords, 16);
-        stopMarkers[id].openPopup();
+      if (!stop) return;
+      if (window.innerWidth < 768) {
+        scrollToElement(document.getElementById('map-card'));
       }
+      map.setView(stop.coords, 16);
+      stopMarkers[id].openPopup();
     };
 
     window.toggleStop = function(id) {
