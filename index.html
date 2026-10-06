@@ -96,7 +96,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 26</span>
+        <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 27</span>
 
         <div class="flex items-center bg-indigo-800 p-1 rounded-lg border border-indigo-500/50">
           <button id="lang-pt-btn" onclick="setLanguage('pt')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm" title="Português (Brasil)">
@@ -241,12 +241,12 @@
         pt: {
           name: "Estação de Metrô Diagonal",
           shortDesc: "Ponto de partida no topo do Passeig de Gràcia.",
-          longDesc: "Aqui começa o seu roteiro a pé. O Passeig de Gràcia é a avenida mais famosa de Barcelona para admirar a arquitetura do Modernismo Catalão."
+          longDesc: "Aqui começa o seu roteiro a pé, descendo o Passeig de Gràcia – a avenida mais famosa de Barcelona para admirar a arquitetura do Modernismo Catalão. A história do passeio, dos ladrilhos e dos bancos com lampiões está na parada 3."
         },
         de: {
           name: "U-Bahn Station Diagonal",
           shortDesc: "Startpunkt am oberen Passeig de Gràcia.",
-          longDesc: "Hier startet die Route. Der Passeig de Gràcia ist die Prachtstraße Barcelonas mit beeindruckender Jugendstil-Architektur."
+          longDesc: "Hier startet die Route den Passeig de Gràcia hinunter – Barcelonas Prachtstraße mit beeindruckender Jugendstil-Architektur. Die Geschichte des Boulevards, der Bodenfliesen und der Laternenbänke findest du bei Station 3."
         }
       },
       {
@@ -331,6 +331,81 @@
       },
       {
         id: 3,
+        coords: [41.39355, 2.16305],
+        wiki: "https://pt.wikipedia.org/wiki/Passeig_de_Gr%C3%A0cia",
+        pt: {
+          name: "Passeig de Gràcia",
+          shortDesc: "O bulevar mais elegante de Barcelona.",
+          longDesc: "Entre a Casa Milà e a Casa Batlló você caminha pelo coração do Passeig de Gràcia. Hoje é a rua comercial mais cara da Espanha – mas começou como uma estrada de terra entre os campos."
+        },
+        de: {
+          name: "Passeig de Gràcia",
+          shortDesc: "Barcelonas elegantester Boulevard.",
+          longDesc: "Zwischen Casa Milà und Casa Batlló läufst du mitten durch den Passeig de Gràcia. Heute ist er die teuerste Einkaufsstraße Spaniens – angefangen hat er als staubiger Feldweg."
+        },
+        highlights: [
+          {
+            img: "Barcelona-MansanaDiscordia-008.jpg",
+            author: "Historische Postkarte, um 1910",
+            de: {
+              title: "Vom Feldweg zum Prachtboulevard",
+              text: "Früher hieß die Straße Camí de Jesús: ein Landweg durch Gärten und Felder, der Barcelona mit Gràcia verband – damals noch ein eigener Ort, erst 1897 eingemeindet. Als ab 1854 die mittelalterlichen Stadtmauern fielen und Ildefons Cerdà ab 1859 das neue Viertel Eixample plante, wurde der Weg zum Boulevard. Zuerst kamen Gärten, Cafés und Vergnügungslokale, dann bauten die reichen Fabrikantenfamilien hier ihre Häuser – und überboten sich mit den modernsten Architekten. Die Postkarte zeigt den Passeig um 1910."
+            },
+            pt: {
+              title: "De estrada de terra a bulevar",
+              text: "Antigamente a rua se chamava Camí de Jesús: um caminho entre hortas e campos que ligava Barcelona a Gràcia – na época uma vila independente, anexada só em 1897. Quando, a partir de 1854, as muralhas medievais caíram e Ildefons Cerdà planejou o novo bairro do Eixample a partir de 1859, o caminho virou bulevar. Primeiro vieram jardins, cafés e casas de diversão; depois as famílias ricas de industriais construíram aqui suas casas – competindo pelos arquitetos mais modernos. O cartão-postal mostra o Passeig por volta de 1910."
+            }
+          },
+          {
+            img: "Illa de la Discòrdia.jpg",
+            de: {
+              title: "Der Block der Zwietracht",
+              text: "Ein paar Schritte weiter, zwischen Carrer d'Aragó und Consell de Cent, stehen drei Stars des Modernisme nebeneinander: die Casa Batlló von Gaudí (Nr. 43), die Casa Amatller von Josep Puig i Cadafalch (Nr. 41) mit ihrem Treppengiebel und an der Ecke die Casa Lleó Morera von Lluís Domènech i Montaner (Nr. 35). Der Spitzname »Illa de la Discòrdia« ist ein Wortspiel: Auf Spanisch heißt »manzana« sowohl Häuserblock als auch Apfel – wie der Zankapfel der griechischen Sage, um den drei Schönheiten stritten."
+            },
+            pt: {
+              title: "A quadra da discórdia",
+              text: "Alguns passos adiante, entre a Carrer d'Aragó e a Consell de Cent, três estrelas do Modernismo ficam lado a lado: a Casa Batlló de Gaudí (nº 43), a Casa Amatller de Josep Puig i Cadafalch (nº 41), com seu frontão escalonado, e na esquina a Casa Lleó Morera de Lluís Domènech i Montaner (nº 35). O apelido 'Manzana de la Discordia' é um trocadilho: em espanhol 'manzana' significa tanto quarteirão quanto maçã – como o pomo da discórdia da mitologia grega, disputado por três beldades."
+            }
+          },
+          {
+            img: "073 Banc fanal del passeig de Gràcia (Barcelona).jpg",
+            author: "Enfo",
+            de: {
+              title: "Die Laternenbänke von 1906",
+              text: "Die 32 Bänke mit der geschwungenen Laterne darüber entwarf der Stadtarchitekt Pere Falqués. Sie wurden am 21. Dezember 1906 eingeweiht und ersetzten die alten Gaslaternen. Die Sitze sind mit weißem Keramikbruch (Trencadís) verkleidet, das schmiedeeiserne Gestell trägt zwei Lampen. Schau ganz oben in die Ecke: Dort sitzt das Stadtwappen mit einer kleinen Fledermaus."
+            },
+            pt: {
+              title: "Os bancos-lampiões de 1906",
+              text: "Os 32 bancos com o lampião curvo em cima foram desenhados pelo arquiteto municipal Pere Falqués. Foram inaugurados em 21 de dezembro de 1906 e substituíram os antigos lampiões a gás. Os assentos são revestidos de cacos de cerâmica branca (trencadís), e a estrutura de ferro forjado sustenta duas lâmpadas. Olhe bem no canto de cima: lá está o brasão da cidade com um pequeno morcego."
+            }
+          },
+          {
+            de: {
+              title: "Mythos: Bänke mit Kohleheizung?",
+              text: "An der Seite der Bänke, zur Fahrbahn hin, siehst du kleine Metalltürchen. Oft wird erzählt, man habe dort im Winter glühende Kohlen hineingelegt, um die Sitze zu wärmen. Das stimmt nicht – schon im Dezember 1906 stellte die Zeitung »La Veu de Catalunya« klar, dass dahinter die Mechanik zum Hoch- und Herunterlassen der Lampen steckte. Die Laternen hatten Bogenlampen mit Kohle-Elektroden, die regelmäßig ausgetauscht werden mussten. Wahrscheinlich lagerten die Ersatzstäbe in den Bänken – und so entstand aus »Kohle in der Bank« die Legende vom Ofen."
+            },
+            pt: {
+              title: "Mito: bancos aquecidos a carvão?",
+              text: "Na lateral dos bancos, voltadas para a rua, há portinhas de metal. Muita gente conta que ali se colocavam brasas no inverno para aquecer os assentos. Não é verdade – já em dezembro de 1906 o jornal 'La Veu de Catalunya' esclareceu que atrás delas ficava o mecanismo para subir e descer as lâmpadas. Os postes tinham lâmpadas de arco com eletrodos de carvão, que precisavam ser trocados regularmente. Provavelmente as peças de reposição eram guardadas nos bancos – e assim o 'carvão no banco' virou a lenda do forno."
+            }
+          },
+          {
+            img: "Panot Gaudí.JPG",
+            author: "Canaan",
+            license: "CC BY-SA 4.0",
+            de: {
+              title: "Gaudís Meeresfliesen unter deinen Füßen",
+              text: "Die sechseckigen Gehwegplatten hat Gaudí 1904 entworfen, ursprünglich für die Casa Batlló, verlegt wurden sie dann in der Casa Milà. Darauf sind ein Seestern, Algen und ein Ammonit zu sehen – erst sieben Platten zusammen ergeben das komplette Motiv. Seit den 1970er-Jahren liegt das Muster auf dem Passeig de Gràcia, ein Exemplar steht sogar im MoMA in New York."
+            },
+            pt: {
+              title: "Os ladrilhos marinhos de Gaudí",
+              text: "As lajotas hexagonais da calçada foram desenhadas por Gaudí em 1904, originalmente para a Casa Batlló, e acabaram instaladas na Casa Milà. Nelas aparecem uma estrela-do-mar, algas e um amonite – só sete peças juntas formam o desenho completo. Desde os anos 1970 o padrão cobre o Passeig de Gràcia, e um exemplar está até no MoMA de Nova York."
+            }
+          }
+        ]
+      },
+      {
+        id: 4,
         coords: [41.3917, 2.1649],
         wiki: "https://pt.wikipedia.org/wiki/Casa_Batll%C3%B3",
         pt: {
@@ -418,84 +493,196 @@
         ]
       },
       {
-        id: 4,
+        id: 5,
         coords: [41.390248, 2.167854],
         wiki: "",
         pt: {
           name: "El Nacional",
           shortDesc: "Espaço gastronômico icônico.",
-          longDesc: "Antigo edifício industrial do século XIX restaurado, reunindo quatro restaurantes e bares sob um teto de vidro e ferro.",
+          longDesc: "O edifício de 1889, escondido numa passagem do Passeig de Gràcia, já foi café-teatro, tinturaria de tecidos, concessionária de carros e por fim um estacionamento empoeirado. Desde 2014 reúne quatro restaurantes e quatro bares, com uma decoração que lembra a Barcelona dos anos 1930 e 1940.",
           gastro: "🍷 Tapas & Cava Bar – Perfeito para um aperitivo ou taça de Cava no meio da manhã."
         },
         de: {
           name: "El Nacional",
           shortDesc: "Spektakuläre Food-Hall im Industrie-Design.",
-          longDesc: "Ehemalige Fabrikhalle aus dem 19. Jahrhundert, die heute 4 Restaurants und 4 Spezialitätenbars unter einem Glasdach vereint.",
+          longDesc: "Das Gebäude von 1889, versteckt in einer Passage am Passeig de Gràcia, war schon Café-Theater, Stofffärberei, Autohaus und zuletzt ein staubiges Parkhaus. Seit 2014 vereint es 4 Restaurants und 4 Spezialitätenbars, eingerichtet im Stil des Barcelona der 1930er- und 40er-Jahre.",
           gastro: "🍷 Cava Bar – Perfekt für ein Glas gekühlten katalanischen Schaumwein zwischendurch."
-        }
+        },
+        highlights: [
+          {
+            de: {
+              title: "Ein Blick in die Toiletten lohnt sich",
+              text: "Auch wenn du nichts musst: Geh einmal zu den Toiletten. Sie sind aufwendig gestaltet, und dort hängen Fotos vom Umbau – auf denen siehst du die Halle noch als Parkhaus voller Autos, bevor daraus die heutige Food-Hall wurde. Danach schaust du die Eisenträger und das Glasdach mit ganz anderen Augen an."
+            },
+            pt: {
+              title: "Vale a pena dar uma olhada nos banheiros",
+              text: "Mesmo sem precisar: vá até os banheiros. Eles são muito bem decorados e têm fotos da reforma – nelas você vê o salão ainda como estacionamento cheio de carros, antes de virar o espaço gastronômico de hoje. Depois disso, você olha as vigas de ferro e o teto de vidro com outros olhos."
+            }
+          }
+        ]
       },
       {
-        id: 5,
+        id: 6,
         coords: [41.3870, 2.1700],
         wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_da_Catalunha",
         pt: {
           name: "Plaça de Catalunya",
           shortDesc: "A praça principal no centro da cidade.",
-          longDesc: "Ponto de encontro central que conecta o centro histórico ao moderno bairro de Eixample."
+          longDesc: "Ponto de encontro central que conecta o centro histórico ao moderno bairro de Eixample. Daqui começa La Rambla em direção ao mar."
         },
         de: {
           name: "Plaça de Catalunya",
           shortDesc: "Der zentrale Hauptplatz Barcelonas.",
-          longDesc: "Großer Platz und Knotenpunkt, der die Altstadt mit dem modernistischen Viertel Eixample verbindet."
-        }
+          longDesc: "Großer Platz und Knotenpunkt, der die Altstadt mit dem modernistischen Viertel Eixample verbindet. Von hier aus führt La Rambla hinunter zum Meer."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Die Treppe, die auf dem Kopf steht",
+              text: "An der Ecke zur Rambla steht ein Denkmal für Francesc Macià, den ersten Präsidenten der wiederhergestellten katalanischen Regierung (Generalitat) in den 1930er-Jahren. Der Bildhauer Josep Maria Subirachs – derselbe, der die Passionsfassade der Sagrada Família gestaltet hat – formte es 1991 als umgedrehte Treppe: ein Bild für ein Werk, das nie fertig wird."
+            },
+            pt: {
+              title: "A escada de cabeça para baixo",
+              text: "Na esquina com a Rambla fica um monumento a Francesc Macià, primeiro presidente da Generalitat restaurada nos anos 1930. O escultor Josep Maria Subirachs – o mesmo da fachada da Paixão da Sagrada Família – o criou em 1991 como uma escada invertida: a imagem de uma obra que nunca termina."
+            }
+          }
+        ]
       },
       {
-        id: 6,
+        id: 7,
         coords: [41.3847, 2.1751],
         wiki: "https://es.wikipedia.org/wiki/El_mundo_nace_en_cada_beso",
         pt: {
           name: "El món neix en cada bes",
           shortDesc: "Mosaico 'O Beijo' na Plaça d'Isidre Nonell.",
-          longDesc: "Criado pelo artista Joan Fontcuberta com 4.000 fotos enviadas por moradores locais sob o tema 'Momentos de Liberdade'."
+          longDesc: "Criado pelo artista Joan Fontcuberta em 2014 com milhares de fotos enviadas por moradores sob o tema 'Momentos de Liberdade'."
         },
         de: {
           name: "Fotomosaik 'Der Kuss' (El món neix en cada bes)",
           shortDesc: "Riesiges Mosaik auf der Plaça d'Isidre Nonell.",
-          longDesc: "Von Joan Fontcuberta aus 4.000 Einzelfotos lokaler Bürger zum Thema 'Freiheit' zusammengestellt."
-        }
+          longDesc: "Von Joan Fontcuberta 2014 aus Tausenden Fotos von Bürgern zum Thema 'Momente der Freiheit' zusammengesetzt."
+        },
+        highlights: [
+          {
+            img: "El mon neix en cada besada, Barcelona (P1170744).jpg",
+            author: "Matti Blume",
+            license: "CC BY-SA 4.0",
+            de: {
+              title: "Erst weit weg, dann ganz nah",
+              text: "Stell dich zuerst ein paar Meter entfernt hin: Dann siehst du einen Kuss, 8 × 3,8 Meter groß. Geh danach ganz nah heran – jede Fliese ist ein eigenes Foto, das Barcelonesen an die Zeitung El Periódico geschickt haben. Das Werk entstand 2014 zum 300. Jahrestag der Belagerung Barcelonas von 1714."
+            },
+            pt: {
+              title: "Primeiro de longe, depois de perto",
+              text: "Fique primeiro a alguns metros de distância: você verá um beijo de 8 × 3,8 metros. Depois chegue bem perto – cada azulejo é uma foto enviada por moradores ao jornal El Periódico. A obra foi criada em 2014 para os 300 anos do cerco de Barcelona de 1714."
+            }
+          }
+        ]
       },
       {
-        id: 7,
+        id: 8,
         coords: [41.3839, 2.1762],
         wiki: "https://pt.wikipedia.org/wiki/Catedral_de_Barcelona",
         pt: {
           name: "Catedral de Barcelona",
           shortDesc: "Catedral gótica principal.",
-          longDesc: "No belo claustro ajardinado vivem há séculos exatamente 13 gansos brancos, representando a idade de Santa Eulália."
+          longDesc: "A catedral gótica foi construída entre os séculos XIII e XV e é dedicada à Santa Cruz e a Santa Eulália, padroeira da cidade, cujo túmulo está na cripta. Aos domingos de manhã, muitas vezes se dança a sardana na praça em frente."
         },
         de: {
           name: "Kathedrale von Barcelona",
           shortDesc: "Gotische Hauptkathedrale (La Seu).",
-          longDesc: "Im grünen Kreuzgang leben seit Jahrhunderten genau 13 weiße Gänse, die das Alter der Heiligen Eulalia symbolisieren."
-        }
+          longDesc: "Die gotische Kathedrale entstand zwischen dem 13. und 15. Jahrhundert und ist dem Heiligen Kreuz und der Stadtpatronin Santa Eulàlia geweiht, deren Grab in der Krypta liegt. Sonntagvormittags wird auf dem Platz davor oft Sardana getanzt."
+        },
+        highlights: [
+          {
+            img: "Barcelona Cathedral cloister geese.jpg",
+            author: "Jnolan14",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Die 13 Gänse im Kreuzgang",
+              text: "Im schattigen Kreuzgang leben 13 weiße Gänse. Der Überlieferung nach war die heilige Eulàlia 13 Jahre alt, als sie unter den Römern als Märtyrerin starb. Gänse gelten seit der Antike außerdem als wachsame Wächter."
+            },
+            pt: {
+              title: "Os 13 gansos do claustro",
+              text: "No claustro sombreado vivem 13 gansos brancos. Segundo a tradição, Santa Eulália tinha 13 anos quando foi martirizada pelos romanos. Desde a Antiguidade, os gansos também são vistos como guardiões atentos."
+            }
+          },
+          {
+            img: "Gothic Cathedral of Barcelona.jpg",
+            author: "Mark.thurman92",
+            de: {
+              title: "Die Fassade ist jünger, als sie aussieht",
+              text: "Die prächtige Hauptfassade wirkt mittelalterlich, ist aber neugotisch: Sie wurde erst Ende des 19. Jahrhunderts gebaut, finanziert vom Bankier Manuel Girona. Jahrhundertelang hatte die Kathedrale nur eine schlichte, unfertige Front."
+            },
+            pt: {
+              title: "A fachada é mais nova do que parece",
+              text: "A imponente fachada principal parece medieval, mas é neogótica: só foi construída no fim do século XIX, financiada pelo banqueiro Manuel Girona. Durante séculos a catedral teve apenas uma frente simples e inacabada."
+            }
+          },
+          {
+            img: "Ou com balla catedral barcelona.jpg",
+            de: {
+              title: "Das tanzende Ei",
+              text: "Zu Fronleichnam (Corpus Christi, meist im Juni) legt man im Kreuzgang ein ausgeblasenes Ei auf den Wasserstrahl des Brunnens, umgeben von Blumen – »l'ou com balla«, das Ei, das tanzt. Der Brauch ist Jahrhunderte alt und findet auch in anderen Innenhöfen der Altstadt statt."
+            },
+            pt: {
+              title: "O ovo que dança",
+              text: "No Corpus Christi (geralmente em junho), um ovo vazio é colocado sobre o jato d'água da fonte do claustro, cercado de flores – 'l'ou com balla', o ovo que dança. O costume tem séculos e acontece também em outros pátios do centro antigo."
+            }
+          },
+          {
+            img: "Portal del Bisbe - Barcelona 2014.jpg",
+            author: "Jbribeiro1",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Das römische Tor und die Buchstaben BARCINO",
+              text: "Links von der Kathedrale, an der Plaça Nova, stehen zwei runde Türme: Reste des römischen Stadttors von Barcino, wie Barcelona damals hieß. Davor liegen große Metallbuchstaben, die »BARCINO« ergeben – ein visuelles Gedicht des Künstlers Joan Brossa."
+            },
+            pt: {
+              title: "O portão romano e as letras BARCINO",
+              text: "À esquerda da catedral, na Plaça Nova, ficam duas torres redondas: restos do portão romano de Barcino, como Barcelona se chamava. Na frente estão grandes letras de metal formando 'BARCINO' – um poema visual do artista Joan Brossa."
+            }
+          }
+        ]
       },
       {
-        id: 8,
+        id: 9,
         coords: [41.3837, 2.1756],
         wiki: "https://ca.wikipedia.org/wiki/Casa_de_l%27Ardiaca",
         pt: {
           name: "Casa de l'Ardiaca",
           shortDesc: "Antiga casa do Arquidiácono.",
-          longDesc: "Entre para ver o encantador pátio interno. Na porta fica a famosa caixa de correio em mármore decorada com uma tartaruga e andorinhas."
+          longDesc: "Palácio gótico-renascentista ao lado da catedral, construído sobre a muralha romana. Entre para ver o encantador pátio com palmeira e fonte – hoje funciona aqui o Arquivo Histórico da Cidade."
         },
         de: {
           name: "Casa de l'Ardiaca",
           shortDesc: "Ehemaliges Haus des Archidiakons.",
-          longDesc: "Versteckter Innenhof mit Palmen. Am Eingang befindet sich der berühmte Marmor-Briefkasten mit Schildkröte und Schwalben."
-        }
+          longDesc: "Gotisch-Renaissance-Palast direkt neben der Kathedrale, gebaut auf der römischen Stadtmauer. Wirf einen Blick in den Innenhof mit Palme und Brunnen – heute sitzt hier das Historische Stadtarchiv."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Der Briefkasten mit der Schildkröte",
+              text: "Neben dem Portal hängt ein Marmorbriefkasten, den Lluís Domènech i Montaner um 1902 für die Anwaltskammer entwarf: fünf Schwalben oben, sieben Efeublätter und unten eine Schildkröte. Die Schwalben stehen für die Schnelligkeit, die Justiz haben sollte, das Efeu für die Bürokratie – und die Schildkröte dafür, wie langsam sie tatsächlich ist. Angeblich bringt es Glück, den Panzer zu berühren."
+            },
+            pt: {
+              title: "A caixa de correio com a tartaruga",
+              text: "Ao lado do portal há uma caixa de correio de mármore que Lluís Domènech i Montaner desenhou por volta de 1902 para a Ordem dos Advogados: cinco andorinhas no alto, sete folhas de hera e uma tartaruga embaixo. As andorinhas representam a rapidez que a Justiça deveria ter, a hera a burocracia – e a tartaruga a lentidão real. Dizem que tocar o casco dá sorte."
+            }
+          },
+          {
+            de: {
+              title: "Rom zum Anfassen",
+              text: "Das Haus lehnt an der römischen Stadtmauer. Im Inneren sind ein Stück dieser Mauer und Bögen eines römischen Aquädukts aus dem 1. Jahrhundert v. Chr. erhalten."
+            },
+            pt: {
+              title: "Roma ao alcance da mão",
+              text: "A casa se apoia na muralha romana. No interior ainda se veem um trecho dessa muralha e arcos de um aqueduto romano do século I a.C."
+            }
+          }
+        ]
       },
       {
-        id: 9,
+        id: 10,
         coords: [41.383413, 2.175122],
         wiki: "",
         pt: {
@@ -507,87 +694,200 @@
           name: "Plaça de Sant Felip Neri",
           shortDesc: "Stiller historischer Platz im Gotischen Viertel.",
           longDesc: "Idyllischer Platz mit tragischer Geschichte: Die Narben an der Kirchenfassade stammen von Bombensplittern. Beim Luftangriff am 30. Januar 1938 im Spanischen Bürgerkrieg starben hier 42 Menschen, die meisten davon Kinder, die im Keller der Kirche Schutz gesucht hatten."
-        }
+        },
+        highlights: [
+          {
+            img: "Església de Sant Felip Neri.jpg",
+            author: "Enfo",
+            de: {
+              title: "Die Narben in der Wand",
+              text: "Die Löcher unten an der Barockfassade wurden bewusst nicht repariert. Lange hieß es, hier hätten Erschießungen stattgefunden – tatsächlich stammen die Spuren von der Bombe, die 1938 auf den Platz fiel. Eine Gedenktafel erinnert an die Opfer."
+            },
+            pt: {
+              title: "As cicatrizes na parede",
+              text: "Os buracos na parte de baixo da fachada barroca foram deixados de propósito. Por muito tempo se dizia que ali houve fuzilamentos – na verdade, as marcas são da bomba que caiu na praça em 1938. Uma placa lembra as vítimas."
+            }
+          },
+          {
+            de: {
+              title: "Romanschauplatz und umgezogene Häuser",
+              text: "Wer »Der Schatten des Windes« von Carlos Ruiz Zafón gelesen hat, kennt den Platz: Hier wohnt die Romanfigur Nuria Monfort. Zwei der Häuser standen übrigens ursprünglich woanders – die Zunfthäuser der Kesselschmiede und der Schuhmacher wurden hierher versetzt, als der Bau der Via Laietana sie verdrängte."
+            },
+            pt: {
+              title: "Cenário de romance e casas que mudaram de lugar",
+              text: "Quem leu 'A Sombra do Vento', de Carlos Ruiz Zafón, conhece a praça: aqui mora a personagem Nuria Monfort. Duas das casas, aliás, ficavam em outro lugar – as sedes das guildas dos caldeireiros e dos sapateiros foram transferidas para cá quando a construção da Via Laietana as desalojou."
+            }
+          }
+        ]
       },
       {
-        id: 10,
+        id: 11,
         coords: [41.383301, 2.176431],
         wiki: "",
         pt: {
           name: "Pont del Bisbe",
           shortDesc: "Ponte neogótica fotogênica.",
-          longDesc: "Conecta os edifícios governamentais na ruela Carrer del Bisbe. Há uma caveira esculpida de forma misteriosa na parte inferior da ponte."
+          longDesc: "Conecta o Palácio da Generalitat à Casa dels Canonges sobre a ruela Carrer del Bisbe. Parece medieval, mas foi construída em 1928 pelo arquiteto Joan Rubió i Bellver, discípulo de Gaudí."
         },
         de: {
           name: "Pont del Bisbe",
-          shortDesc: "Fotogene neogotische Seufzerbrücke.",
-          longDesc: "Verbindet zwei Regierungsgebäude in der Gasse Carrer del Bisbe. Auf der Unterseite ist ein geheimnisvoller Totenkopf eingraviert."
-        }
+          shortDesc: "Fotogene neogotische Brücke.",
+          longDesc: "Verbindet den Palau de la Generalitat mit der Casa dels Canonges über der Gasse Carrer del Bisbe. Sie wirkt mittelalterlich, wurde aber erst 1928 von Joan Rubió i Bellver gebaut, einem Schüler Gaudís."
+        },
+        highlights: [
+          {
+            img: "Pont del Bisbe.jpg",
+            author: "Daniel Kraft",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Der Totenkopf mit dem Dolch",
+              text: "Stell dich unter die Brücke und schau nach oben: In der Mitte ist ein Totenkopf versteckt, in dem ein Dolch steckt. Die bekannteste Legende: Wer den Dolch herauszieht, bringt Barcelona zum Einsturz – alle Gebäude der Stadt würden zusammenbrechen. Eine freundlichere Version: Wer rückwärts unter der Brücke hindurchgeht, den Blick auf den Schädel gerichtet, und sich dabei etwas wünscht, dem geht der Wunsch in Erfüllung. Manche sehen im Schädel auch Rubiós stille Antwort an seine Kritiker: Er wollte das ganze Viertel um die Kathedrale neugotisch umbauen – verwirklicht wurde nur diese Brücke."
+            },
+            pt: {
+              title: "A caveira com o punhal",
+              text: "Fique embaixo da ponte e olhe para cima: no centro há uma caveira escondida, atravessada por um punhal. A lenda mais famosa diz que, se alguém tirar o punhal, Barcelona desmorona – todos os prédios da cidade cairiam. Uma versão mais simpática: quem passar de costas sob a ponte, olhando para a caveira, e fizer um pedido, terá o desejo realizado. Há também quem veja na caveira uma resposta silenciosa de Rubió a seus críticos: ele queria transformar todo o bairro da catedral em neogótico – só a ponte saiu do papel."
+            }
+          }
+        ]
       },
       {
-        id: 11,
+        id: 12,
         coords: [41.3828, 2.1768],
         wiki: "",
         pt: {
           name: "Plaça de Sant Jaume",
           shortDesc: "O centro político da Catalunha.",
-          longDesc: "Aqui ficam frente a frente a Prefeitura de Barcelona (Ajuntament) e o Palácio da Generalitat de Catalunya."
+          longDesc: "Aqui ficam frente a frente a Prefeitura de Barcelona (Ajuntament) e o Palácio da Generalitat de Catalunya. Na época romana, este era o coração de Barcino, perto do fórum."
         },
         de: {
           name: "Plaça de Sant Jaume",
           shortDesc: "Politisches Zentrum Kataloniens.",
-          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und der Palau de la Generalitat direkt gegenüber."
-        }
+          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und der Palau de la Generalitat direkt gegenüber. Zur Römerzeit lag hier, nahe dem Forum, das Herz von Barcino."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Der heilige Georg über dem Portal",
+              text: "Schau an der Fassade der Generalitat nach oben: Über dem Eingang reitet Sant Jordi, Kataloniens Schutzpatron – derselbe Drachentöter wie an der Casa Batlló. Am 23. April, seinem Tag, schenkt man sich in Katalonien Rosen und Bücher."
+            },
+            pt: {
+              title: "São Jorge sobre o portal",
+              text: "Olhe para cima na fachada da Generalitat: sobre a entrada cavalga Sant Jordi, padroeiro da Catalunha – o mesmo matador de dragões da Casa Batlló. No dia 23 de abril, o dia dele, os catalães trocam rosas e livros."
+            }
+          },
+          {
+            de: {
+              title: "Geheimtipp: der Tempel des Augustus",
+              text: "Nur ein paar Schritte entfernt, in der Carrer del Paradís 10, stehen in einem Innenhof vier riesige römische Säulen – Reste des Augustus-Tempels auf dem höchsten Punkt des alten Barcino. Der Eintritt ist frei, und kaum jemand findet hin."
+            },
+            pt: {
+              title: "Dica secreta: o templo de Augusto",
+              text: "A poucos passos, na Carrer del Paradís 10, quatro enormes colunas romanas se erguem dentro de um pátio – restos do templo de Augusto no ponto mais alto da antiga Barcino. A entrada é gratuita e quase ninguém encontra o lugar."
+            }
+          },
+          {
+            de: {
+              title: "Menschentürme",
+              text: "Bei großen Festen wie La Mercè im September bauen hier Vereine »castells« – Menschentürme mit bis zu zehn Stockwerken, ganz oben klettert ein Kind hinauf. Die Tradition gehört seit 2010 zum immateriellen UNESCO-Kulturerbe."
+            },
+            pt: {
+              title: "Torres humanas",
+              text: "Em grandes festas como La Mercè, em setembro, grupos montam aqui os 'castells' – torres humanas de até dez andares, com uma criança subindo até o topo. A tradição é Patrimônio Imaterial da UNESCO desde 2010."
+            }
+          }
+        ]
       },
       {
-        id: 12,
+        id: 13,
         coords: [41.3798, 2.1752],
         wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_Real",
         pt: {
           name: "Plaça Reial",
           shortDesc: "Praça com palmeiras e arcadas.",
-          longDesc: "Observe os dois grandes postes de iluminação na praça: estão entre os primeiros trabalhos projetados pelo jovem Antoni Gaudí."
+          longDesc: "Praça do século XIX cercada de arcadas, construída no lugar de um antigo convento. Observe os dois grandes postes de iluminação: são uma das primeiras obras do jovem Antoni Gaudí."
         },
         de: {
           name: "Plaça Reial",
           shortDesc: "Mittelmeer-Platz mit Palmen und Arkaden.",
-          longDesc: "Achte auf die beiden Straßenlaternen in der Mitte: Sie gehören zu den allerersten Werken des jungen Gaudí."
-        }
+          longDesc: "Arkadenplatz aus dem 19. Jahrhundert, angelegt an der Stelle eines früheren Klosters. Achte auf die beiden Straßenlaternen in der Mitte: Sie gehören zu den allerersten Werken des jungen Gaudí."
+        },
+        highlights: [
+          {
+            img: "Plaça Reial02.jpg",
+            author: "Canaan",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Gaudís erster öffentlicher Auftrag",
+              text: "Die sechsarmigen Laternen entwarf Gaudí 1879, gerade mit dem Studium fertig – sein erster Auftrag der Stadt. Oben sitzt der geflügelte Helm des Merkur, um den Mast winden sich Schlangen: Symbole des Gottes des Handels. Weitere Gaudí-Laternen stehen am Pla de Palau, an dem du später vorbeikommst."
+            },
+            pt: {
+              title: "A primeira encomenda pública de Gaudí",
+              text: "Os postes de seis braços foram desenhados por Gaudí em 1879, recém-formado – sua primeira encomenda da prefeitura. No alto fica o elmo alado de Mercúrio, e serpentes se enrolam no mastro: símbolos do deus do comércio. Outros postes de Gaudí estão no Pla de Palau, por onde você passará mais tarde."
+            }
+          }
+        ]
       },
       {
-        id: 13,
+        id: 14,
         coords: [41.3817, 2.1715],
         wiki: "https://pt.wikipedia.org/wiki/Mercado_da_Boqueria",
         pt: {
           name: "Mercat de la Boqueria / La Rambla",
           shortDesc: "O mercado público mais famoso da Europa.",
-          longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico, frutos do mar e tapas.",
-          gastro: "🍍 Dica de Suco: Experimente um suco fresco de pitaia ou manga por 2–3 € nas bancas!"
+          longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico, frutos do mar e tapas. Já na Idade Média se vendia carne aqui, diante do portão da cidade; o grande teto de ferro atual é de 1914.",
+          gastro: "🍍 Dica de Suco: Experimente um suco fresco de pitaia ou manga por 2–3 € nas bancas! Nas bancas mais ao fundo os preços costumam ser melhores."
         },
         de: {
           name: "Mercat de la Boqueria / La Rambla",
           shortDesc: "Europas bekannteste Markthalle.",
-          longDesc: "Ein Rausch der Düfte und Farben mit frischem Obst, Jamón Ibérico, Meeresfrüchten und Tapas-Bars.",
-          gastro: "🍍 Saft-Tipp: Bei den Marktständen gibt es frische Drachenfrucht- oder Mangosäfte für 2–3 €!"
-        }
+          longDesc: "Ein Rausch der Düfte und Farben mit frischem Obst, Jamón Ibérico, Meeresfrüchten und Tapas-Bars. Schon im Mittelalter wurde hier vor dem Stadttor Fleisch verkauft; das heutige Eisendach stammt von 1914.",
+          gastro: "🍍 Saft-Tipp: Bei den Marktständen gibt es frische Drachenfrucht- oder Mangosäfte für 2–3 €! Weiter hinten in der Halle sind die Preise meist besser."
+        },
+        highlights: [
+          {
+            img: "2010-08-24 PM Ramblas - Joan Miro.jpg",
+            author: "eric (Flickr)",
+            license: "CC BY 2.0",
+            de: {
+              title: "Du läufst über einen Miró",
+              text: "Mitten auf der Rambla, fast gegenüber dem Markt, liegt ein rundes, buntes Bodenmosaik von Joan Miró (1976). Der Künstler wurde ganz in der Nähe, im Passatge del Crèdit, geboren. Er wollte ausdrücklich, dass die Leute darüber laufen – es soll Besucher begrüßen, die vom Meer her in die Stadt kommen."
+            },
+            pt: {
+              title: "Você está pisando num Miró",
+              text: "No meio da Rambla, quase em frente ao mercado, há um mosaico redondo e colorido no chão, de Joan Miró (1976). O artista nasceu bem perto, no Passatge del Crèdit. Ele queria justamente que as pessoas pisassem na obra – ela dá as boas-vindas a quem chega à cidade pelo mar."
+            }
+          }
+        ]
       },
       {
-        id: 14,
+        id: 15,
         coords: [41.3758, 2.1778],
         wiki: "https://pt.wikipedia.org/wiki/Monumento_a_Colombo",
         pt: {
           name: "Monumento a Colombo",
           shortDesc: "Coluna de 60 metros com mirante.",
-          longDesc: "Construído para a Exposição Universal de 1888. A estátua de Cristóvão Colombo aponta em direção ao mar."
+          longDesc: "Construído para a Exposição Universal de 1888. Lembra que Colombo, ao voltar de sua primeira viagem à América, foi recebido em Barcelona pelos Reis Católicos em 1493. Um pequeno elevador sobe até o mirante sob a estátua."
         },
         de: {
           name: "Kolumbus-Denkmal (Mirador de Colom)",
           shortDesc: "60 Meter hohe Säule am Hafen.",
-          longDesc: "Erbaut zur Weltausstellung 1888. Die Statue von Christoph Kolumbus zeigt symbolisch auf das Meer hinaus."
-        }
+          longDesc: "Erbaut zur Weltausstellung 1888. Es erinnert daran, dass Kolumbus nach seiner ersten Amerikareise 1493 in Barcelona vom spanischen Königspaar empfangen wurde. Ein kleiner Aufzug fährt zur Aussichtsplattform direkt unter der Statue."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Er zeigt in die falsche Richtung",
+              text: "Kolumbus streckt den Arm aus – aber nicht nach Amerika, das im Westen läge, sondern hinaus aufs Mittelmeer. Ein beliebter Witz der Barcelonesen. Unten bewachen acht bronzene Löwen den Sockel."
+            },
+            pt: {
+              title: "Ele aponta para o lado errado",
+              text: "Colombo estende o braço – mas não para a América, que ficaria a oeste, e sim para o Mediterrâneo. Uma piada antiga dos barceloneses. Embaixo, oito leões de bronze guardam a base."
+            }
+          }
+        ]
       },
       {
-        id: 15,
+        id: 16,
         coords: [41.3768, 2.1802],
         wiki: "",
         pt: {
@@ -602,7 +902,7 @@
         }
       },
       {
-        id: 16,
+        id: 17,
         coords: [41.375283, 2.178901],
         wiki: "",
         pt: {
@@ -617,158 +917,422 @@
         }
       },
       {
-        id: 17,
+        id: 18,
         coords: [41.3689, 2.1901],
         wiki: "",
         pt: {
           name: "Honest Greens Barceloneta",
           shortDesc: "Excelente opção para o almoço.",
-          longDesc: "Restaurante muito popular com bowls saudáveis, pratos frescos e limonadas artesanais à beira-mar.",
-          gastro: "🥗 Dica: Experimente o 'Latin Grill' ou uma das bowls sazonais com abacate."
+          longDesc: "Restaurante muito popular com bowls saudáveis, pratos frescos e limonadas artesanais à beira-mar."
         },
         de: {
           name: "Honest Greens Barceloneta",
           shortDesc: "Perfekter Mittagsstopp am Strand.",
-          longDesc: "Sehr beliebtes Restaurant für gesunde Bowls, Gegrilltes und hausgemachte Limonaden.",
-          gastro: "🥗 Tipp: 'Latin Grill' oder eine der saisonalen Avocado-Bowls probieren."
+          longDesc: "Sehr beliebtes Restaurant für gesunde Bowls, Gegrilltes und hausgemachte Limonaden."
         }
       },
       {
-        id: 18,
+        id: 19,
         coords: [41.375101, 2.190063],
         wiki: "",
         pt: {
           name: "Praia da Barceloneta",
           shortDesc: "A praia urbana mais famosa.",
-          longDesc: "Caminhada agradável pelo calçadão observando o mar e o marcante Hotel W em formato de vela."
+          longDesc: "Caminhada agradável pelo calçadão observando o mar e o marcante Hotel W em formato de vela, projetado por Ricardo Bofill."
         },
         de: {
           name: "Barceloneta Strand",
           shortDesc: "Barcelonas berühmter Stadtstrand.",
-          longDesc: "Entspannte Promenade entlang des Meeres mit Blick auf das segelförmige W-Hotel."
-        }
+          longDesc: "Entspannte Promenade entlang des Meeres mit Blick auf das segelförmige W-Hotel des Architekten Ricardo Bofill."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Ein Viertel für Vertriebene",
+              text: "Die Barceloneta mit ihren schmalen, schnurgeraden Gassen wurde Mitte des 18. Jahrhunderts angelegt – für die Familien, deren Häuser in La Ribera für den Bau der Zitadelle abgerissen worden waren. Mehr dazu erfährst du im El Born Kulturzentrum (Station 23)."
+            },
+            pt: {
+              title: "Um bairro para desalojados",
+              text: "A Barceloneta, com suas ruelas estreitas e retas, foi criada em meados do século XVIII – para as famílias cujas casas em La Ribera tinham sido demolidas para construir a Cidadela. Você saberá mais no centro cultural El Born (parada 23)."
+            }
+          },
+          {
+            de: {
+              title: "Der verwundete Stern",
+              text: "Am Strand ragen vier rostige, schief gestapelte Würfel in den Himmel: »L'Estel Ferit« (Der verwundete Stern) von Rebecca Horn, aufgestellt zu den Olympischen Spielen 1992. Die Würfel erinnern an die kleinen Strandbars und Hütten, die früher hier standen."
+            },
+            pt: {
+              title: "A estrela ferida",
+              text: "Na praia, quatro cubos enferrujados empilhados tortos apontam para o céu: 'L'Estel Ferit' (A estrela ferida), de Rebecca Horn, instalada para os Jogos Olímpicos de 1992. Os cubos lembram os pequenos bares e barracas que existiam aqui antigamente."
+            }
+          }
+        ]
       },
       {
-        id: 19,
+        id: 20,
         coords: [41.3810, 2.1862],
         wiki: "",
         pt: {
           name: "Museu d'Història de Catalunya",
           shortDesc: "Armazém histórico do porto (Palau de Mar).",
-          longDesc: "No último andar do prédio há um bar no terraço com vista panorâmica espetacular da marina."
+          longDesc: "O Palau de Mar foi construído por volta de 1900 como armazém do porto e hoje abriga o museu de história da Catalunha. No último andar há um bar no terraço com vista panorâmica da marina."
         },
         de: {
           name: "Museu d'Història de Catalunya",
           shortDesc: "Historischer Hafenspeicher (Palau de Mar).",
-          longDesc: "Im obersten Stockwerk befindet sich eine Dachterrassen-Bar mit fantastischem Blick über den Yachthafen."
-        }
+          longDesc: "Der Palau de Mar entstand um 1900 als Lagerhaus des Hafens und beherbergt heute das Museum für katalanische Geschichte. Im obersten Stock gibt es eine Dachterrassen-Bar mit fantastischem Blick über den Yachthafen."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Noch mehr Gaudí-Laternen",
+              text: "Auf dem Weg Richtung Santa Maria del Mar überquerst du den Pla de Palau. Achte dort auf die Straßenlaternen: Sie stammen wie die an der Plaça Reial vom jungen Gaudí."
+            },
+            pt: {
+              title: "Mais postes de Gaudí",
+              text: "A caminho de Santa Maria del Mar, você atravessa o Pla de Palau. Repare nos postes de luz: assim como os da Plaça Reial, são do jovem Gaudí."
+            }
+          }
+        ]
       },
       {
-        id: 20,
+        id: 21,
         coords: [41.3836, 2.1821],
         wiki: "https://pt.wikipedia.org/wiki/Bas%C3%ADlica_de_Santa_Maria_do_Mar",
         pt: {
           name: "Santa Maria del Mar",
           shortDesc: "A 'Catedral do Mar'.",
-          longDesc: "Uma obra-prima do gótico catalão, construída pelos marinheiros e trabalhadores do bairro no século XIV."
+          longDesc: "Obra-prima do gótico catalão, erguida em apenas 54 anos (1329–1383) pelos marinheiros e trabalhadores do bairro. O romance 'A Catedral do Mar', de Ildefonso Falcones, conta essa história."
         },
         de: {
           name: "Santa Maria del Mar",
           shortDesc: "Die berühmte 'Kathedrale des Meeres'.",
-          longDesc: "Meisterwerk der katalanischen Gotik, im 14. Jahrhundert von den Seefahrern und Hafenarbeitern des Viertels erbaut."
-        }
+          longDesc: "Meisterwerk der katalanischen Gotik, in nur 54 Jahren (1329–1383) von den Seefahrern und Hafenarbeitern des Viertels erbaut. Der Roman »Die Kathedrale des Meeres« von Ildefonso Falcones erzählt diese Geschichte."
+        },
+        highlights: [
+          {
+            img: "Bastaixos.jpg",
+            author: "Xcaballe",
+            license: "CC BY-SA 2.0",
+            de: {
+              title: "Die Steinträger an der Tür",
+              text: "Schau dir das Hauptportal genau an: Die Bronzefiguren zeigen »bastaixos«, Hafenträger, die einen Stein auf dem Rücken schleppen. Sie trugen die Steine für den Bau unentgeltlich vom Steinbruch am Montjuïc bis hierher – Santa Maria del Mar ist eine Kirche des Volkes, nicht der Adligen."
+            },
+            pt: {
+              title: "Os carregadores de pedra na porta",
+              text: "Observe bem o portal principal: as figuras de bronze mostram 'bastaixos', carregadores do porto levando uma pedra nas costas. Eles carregaram de graça as pedras da pedreira de Montjuïc até aqui – Santa Maria del Mar é uma igreja do povo, não da nobreza."
+            }
+          },
+          {
+            img: "Basílica de Santa María del Mar , interior .- Barcelona, Cataluña, España.JPG",
+            author: "Tassilirosmar",
+            license: "CC BY-SA 3.0 ES",
+            de: {
+              title: "Leer und gerade deshalb schön",
+              text: "1936, zu Beginn des Bürgerkriegs, brannte die Kirche elf Tage lang. Dabei wurde die barocke Ausstattung zerstört – übrig blieb der nackte gotische Raum. Die schlanken achteckigen Säulen stehen rund 13 Meter auseinander, was die Halle ungewöhnlich weit und hell wirken lässt."
+            },
+            pt: {
+              title: "Vazia e por isso tão bonita",
+              text: "Em 1936, no início da Guerra Civil, a igreja ardeu durante onze dias. A decoração barroca foi destruída – restou o espaço gótico puro. As colunas octogonais e esbeltas ficam a cerca de 13 metros umas das outras, o que deixa a nave incrivelmente ampla e luminosa."
+            }
+          },
+          {
+            de: {
+              title: "Die ewige Flamme",
+              text: "Direkt neben der Kirche liegt der Fossar de les Moreres: Hier wurden die Verteidiger Barcelonas begraben, die 1714 im Spanischen Erbfolgekrieg fielen. Eine ewige Flamme erinnert an sie – am 11. September, dem katalanischen Nationalfeiertag, legen hier viele Menschen Blumen nieder."
+            },
+            pt: {
+              title: "A chama eterna",
+              text: "Ao lado da igreja fica o Fossar de les Moreres: aqui foram enterrados os defensores de Barcelona mortos em 1714, na Guerra de Sucessão Espanhola. Uma chama eterna os lembra – em 11 de setembro, dia nacional da Catalunha, muita gente deixa flores aqui."
+            }
+          }
+        ]
       },
       {
-        id: 21,
+        id: 22,
         coords: [41.3849, 2.1835],
         wiki: "",
         pt: {
           name: "Ruas de El Born",
           shortDesc: "Bairro charmoso e criativo.",
-          longDesc: "Passeie pelas ruelas históricas perto da Carrer de Montcada (Museu Picasso) e do Passeig del Born.",
+          longDesc: "Passeie pelas ruelas históricas perto da Carrer de Montcada e do Passeig del Born. 'Born' significa torneio: na Idade Média aconteciam justas e festas neste passeio.",
           gastro: "🍸 Dica Speakeasy: 'Paradiso' (Carrer de Rera Palau 4) – Drinks premiados escondidos atrás de uma lanchonete de pastrami!"
         },
         de: {
           name: "Gassen von El Born",
           shortDesc: "Trendy Szeneviertel mit Boutiquen.",
-          longDesc: "Schlendere durch die malerischen Altstadtgassen rund um das Picasso-Museum und den Passeig del Born.",
+          longDesc: "Schlendere durch die malerischen Altstadtgassen rund um die Carrer de Montcada und den Passeig del Born. »Born« bedeutet Turnier: Im Mittelalter fanden auf diesem Platz Ritterspiele und Feste statt.",
           gastro: "🍸 Speakeasy-Tipp: 'Paradiso' (Carrer de Rera Palau 4) – Weltberühmte Cocktailbar, versteckt hinter einem Pastrami-Imbiss!"
-        }
+        },
+        highlights: [
+          {
+            de: {
+              title: "Picasso in fünf Palästen",
+              text: "In der Carrer de Montcada reihten sich einst die Stadtpaläste reicher Kaufleute. Fünf davon bilden heute zusammen das Museu Picasso mit einer der wichtigsten Sammlungen seines Frühwerks. Auch ohne Ticket lohnt ein Blick in die gotischen Innenhöfe."
+            },
+            pt: {
+              title: "Picasso em cinco palácios",
+              text: "Na Carrer de Montcada ficavam os palácios dos ricos comerciantes medievais. Cinco deles formam hoje o Museu Picasso, com uma das coleções mais importantes de suas obras de juventude. Mesmo sem ingresso, vale espiar os pátios góticos."
+            }
+          }
+        ]
       },
       {
-        id: 22,
+        id: 23,
         coords: [41.3855, 2.1849],
         wiki: "",
         pt: {
           name: "El Born Centre de Cultura i Memòria",
           shortDesc: "Ruínas sob o antigo mercado de ferro.",
-          longDesc: "É possível visualizar gratuitamente as ruínas arqueológicas das casas destruídas em 1714."
+          longDesc: "O antigo mercado de ferro de 1876 foi o mercado central de Barcelona até 1971. Durante a reforma, encontraram-se embaixo dele ruas inteiras de 1714 – que podem ser vistas gratuitamente."
         },
         de: {
           name: "El Born Kulturzentrum",
           shortDesc: "Historische Markthalle über Ausgrabungen.",
-          longDesc: "Unter der Gusseisenkonstruktion liegen freigelegte Ruinen der Stadt aus dem Jahr 1714, die man kostenlos besichtigen kann."
-        }
+          longDesc: "Die gusseiserne Markthalle von 1876 war bis 1971 Barcelonas Zentralmarkt. Beim Umbau fand man darunter ganze Straßenzüge aus dem Jahr 1714 – man kann sie kostenlos von oben betrachten."
+        },
+        highlights: [
+          {
+            img: "Jaciment del Born 08.jpg",
+            author: "Joe Mabel",
+            license: "CC BY-SA 4.0",
+            de: {
+              title: "Eine Stadt unter der Stadt",
+              text: "Nach der 13-monatigen Belagerung fiel Barcelona am 11. September 1714. Der siegreiche König Philipp V. ließ danach große Teile des Viertels La Ribera abreißen, um eine Festung zu bauen. Unter dir liegen die Grundmauern dieser Häuser, Gassen und sogar der mittelalterliche Kanal Rec Comtal. Der 11. September ist seitdem Kataloniens Nationalfeiertag."
+            },
+            pt: {
+              title: "Uma cidade debaixo da cidade",
+              text: "Depois de um cerco de 13 meses, Barcelona caiu em 11 de setembro de 1714. O rei vencedor, Filipe V, mandou demolir grande parte do bairro de La Ribera para construir uma fortaleza. Abaixo de você estão as fundações dessas casas, ruelas e até o canal medieval Rec Comtal. Desde então, 11 de setembro é o dia nacional da Catalunha."
+            }
+          }
+        ]
       },
       {
-        id: 23,
+        id: 24,
         coords: [41.3882, 2.1874],
         wiki: "https://pt.wikipedia.org/wiki/Parque_da_Cidadela",
         pt: {
           name: "Parc de la Ciutadella",
           shortDesc: "O grande parque urbano da cidade.",
-          longDesc: "Conta com lago para pedalinhos, palmeiras e a imponente fonte 'Cascada Monumental', que teve participação do jovem Gaudí."
+          longDesc: "Onde hoje há um parque ficava a odiada fortaleza (Cidadela) construída após 1714. Depois de sua demolição, o parque recebeu a Exposição Universal de 1888. No antigo arsenal funciona hoje o Parlamento da Catalunha."
         },
         de: {
           name: "Parc de la Ciutadella",
           shortDesc: "Grüne Oase im Stadtzentrum.",
-          longDesc: "Mit Ruderboot-Teich, Palmen und dem imposanten Barockbrunnen 'Cascada Monumental', an dem der junge Gaudí mitwirkte."
-        }
+          longDesc: "Wo heute der Park liegt, stand die verhasste Zitadelle, die nach 1714 errichtet wurde. Nach ihrem Abriss fand hier die Weltausstellung von 1888 statt. Im ehemaligen Arsenal tagt heute das katalanische Parlament."
+        },
+        highlights: [
+          {
+            img: "Barcelona Parc Ciutadella cascada.jpg",
+            author: "Isiwal",
+            license: "CC BY-SA 3.0 AT",
+            de: {
+              title: "Die Cascada – mit Gaudí als Gehilfe",
+              text: "Den monumentalen Brunnen entwarf Josep Fontserè, der Architekt des Parks. Sein Assistent war ein junger Architekturstudent namens Antoni Gaudí, der unter anderem an der Wasserführung mitarbeitete. Steig die Treppen hinauf – von oben hast du einen schönen Blick über den Park."
+            },
+            pt: {
+              title: "A Cascada – com Gaudí como assistente",
+              text: "A fonte monumental foi projetada por Josep Fontserè, o arquiteto do parque. Seu assistente era um jovem estudante de arquitetura chamado Antoni Gaudí, que trabalhou, entre outras coisas, no sistema hidráulico. Suba as escadas – lá de cima a vista do parque é linda."
+            }
+          },
+          {
+            img: "Barcelona - Mammoth sculpture.JPG",
+            author: "Selbymay",
+            de: {
+              title: "Ein Mammut im Park",
+              text: "Am Rand des Sees steht ein lebensgroßes Mammut aus Stein, aufgestellt 1907. Ursprünglich sollten weitere Urzeittiere folgen, gebaut wurde aber nur dieses. Kinder lieben es – und es ist eines der beliebtesten Fotomotive im Park."
+            },
+            pt: {
+              title: "Um mamute no parque",
+              text: "À beira do lago há um mamute de pedra em tamanho real, instalado em 1907. A ideia era incluir outros animais pré-históricos, mas só ele foi construído. As crianças adoram – e é uma das fotos mais populares do parque."
+            }
+          }
+        ]
       },
       {
-        id: 24,
+        id: 25,
         coords: [41.3911, 2.1806],
         wiki: "https://pt.wikipedia.org/wiki/Arco_do_Triunfo_(Barcelona)",
         pt: {
           name: "Arc de Triomf",
           shortDesc: "Arco do triunfo em tijolos vermelhos.",
-          longDesc: "Construído como portão de entrada principal para a Exposição Universal de 1888."
+          longDesc: "Construído pelo arquiteto Josep Vilaseca como portão de entrada principal da Exposição Universal de 1888, em estilo neomudéjar. Diferente de outros arcos do triunfo, não celebra uma vitória militar, mas o progresso, a arte e a ciência."
         },
         de: {
           name: "Arc de Triomf",
           shortDesc: "Triumphbogen aus roten Backsteinen.",
-          longDesc: "Erbaut als imposantes Haupteingangstor zur Weltausstellung von 1888 im Neomudéjar-Stil."
-        }
+          longDesc: "Vom Architekten Josep Vilaseca als Haupteingangstor zur Weltausstellung von 1888 im Neomudéjar-Stil erbaut. Anders als die meisten Triumphbögen feiert er keinen militärischen Sieg, sondern Fortschritt, Kunst und Wissenschaft."
+        },
+        highlights: [
+          {
+            img: "Arc de Triomf de Barcelona.jpg",
+            author: "Bene Riobó",
+            license: "CC BY-SA 4.0",
+            de: {
+              title: "Backstein statt Marmor",
+              text: "Der knapp 30 Meter hohe Bogen ist aus rotem Ziegel gemauert – ein Zitat der maurisch beeinflussten Mudéjar-Baukunst Spaniens. Oben sind die Wappen der spanischen Provinzen angebracht, in der Mitte groß das Wappen Barcelonas."
+            },
+            pt: {
+              title: "Tijolo em vez de mármore",
+              text: "O arco de quase 30 metros é feito de tijolo vermelho – uma referência à arquitetura mudéjar espanhola, de influência moura. No alto estão os brasões das províncias espanholas e, no centro, em destaque, o de Barcelona."
+            }
+          },
+          {
+            img: "128 Barcelona rep les nacions, de Josep Reynés (Arc de Triomf).jpg",
+            author: "Enfo",
+            license: "CC BY-SA 3.0 ES",
+            de: {
+              title: "Barcelona empfängt die Welt",
+              text: "Das Relief auf der Stadtseite von Josep Reynés heißt »Barcelona rep les nacions« – Barcelona empfängt die Nationen. Geh einmal durch den Bogen: Auf der Parkseite zeigt ein Relief von Josep Llimona die Preisverleihung an die Aussteller."
+            },
+            pt: {
+              title: "Barcelona recebe o mundo",
+              text: "O relevo do lado da cidade, de Josep Reynés, chama-se 'Barcelona rep les nacions' – Barcelona recebe as nações. Atravesse o arco: do lado do parque, um relevo de Josep Llimona mostra a entrega de prêmios aos expositores."
+            }
+          }
+        ]
       },
       {
-        id: 25,
+        id: 26,
         coords: [41.4005, 2.1798],
         wiki: "",
         pt: {
           name: "La Monumental",
           shortDesc: "Antiga arena de touros.",
-          longDesc: "Construída em estilo neo-mourisco. Hoje é utilizada para eventos culturais e concertos musicais."
+          longDesc: "Inaugurada em 1914 e ampliada em 1916, em estilo neomudéjar, para cerca de 20.000 espectadores. Hoje é usada ocasionalmente para eventos e concertos."
         },
         de: {
           name: "La Monumental",
           shortDesc: "Historische Stierkampfarena.",
-          longDesc: "Erbaut im Neomudéjar-Stil. Heute geschützte Event-Location für Konzerte und Märkte."
-        }
+          longDesc: "1914 eröffnet und 1916 im Neomudéjar-Stil erweitert, für rund 20.000 Zuschauer. Heute wird sie gelegentlich für Veranstaltungen und Konzerte genutzt."
+        },
+        highlights: [
+          {
+            img: "050529 Barcelona 027.jpg",
+            author: "SergiL",
+            license: "GFDL",
+            de: {
+              title: "Keramik-Eier und das Ende der Stierkämpfe",
+              text: "Achte auf die Türme: Sie tragen eiförmige Kuppeln, überzogen mit bunter Keramik. Der letzte Stierkampf fand hier am 25. September 2011 statt, kurz bevor das katalanische Verbot in Kraft trat. Das spanische Verfassungsgericht hob das Verbot 2016 zwar auf, Stierkämpfe gab es seitdem aber keine mehr."
+            },
+            pt: {
+              title: "Ovos de cerâmica e o fim das touradas",
+              text: "Repare nas torres: elas têm cúpulas em forma de ovo revestidas de cerâmica colorida. A última tourada aconteceu aqui em 25 de setembro de 2011, pouco antes de a proibição catalã entrar em vigor. O Tribunal Constitucional espanhol anulou a proibição em 2016, mas desde então não houve mais touradas."
+            }
+          }
+        ]
       },
       {
-        id: 26,
+        id: 27,
         coords: [41.4036, 2.1744],
         wiki: "https://pt.wikipedia.org/wiki/Templo_Expiat%C3%B3rio_da_Sagrada_Fam%C3%ADlia",
         pt: {
           name: "Sagrada Família",
           shortDesc: "O grande encerramento do roteiro.",
-          longDesc: "A grande obra da vida de Gaudí e o símbolo máximo de Barcelona. Combina formas da natureza com arquitetura monumental."
+          longDesc: "A pedra fundamental foi lançada em 1882; um ano depois, Gaudí assumiu a obra e dedicou a ela o resto da vida. Em 2026, centenário de sua morte, a basílica atingiu a altura máxima e se tornou a igreja mais alta do mundo. Ainda falta a fachada principal, a da Glória."
         },
         de: {
           name: "Sagrada Família",
           shortDesc: "Das krönende Highlight der Tour.",
-          longDesc: "Gaudís unvollendetes Meisterwerk und Wahrzeichen Barcelonas. Verbindet gotische Kathedralbaukunst mit organischen Formen der Natur."
-        }
+          longDesc: "Der Grundstein wurde 1882 gelegt, ein Jahr später übernahm Gaudí den Bau und widmete ihm den Rest seines Lebens. 2026, zu seinem 100. Todestag, hat die Basilika ihre volle Höhe erreicht und ist nun die höchste Kirche der Welt. Noch fehlt die Hauptfassade, die Glorienfassade."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Der Turm Jesu Christi",
+              text: "Am 20. Februar 2026 wurde das letzte Stück des weißen Kreuzes auf den Mittelturm gesetzt – 17 Meter hoch, 13,5 Meter breit. Mit 172,5 Metern ist die Sagrada Família seitdem die höchste Kirche der Welt. Gaudí soll sie bewusst knapp niedriger geplant haben als den Hausberg Montjuïc: Menschenwerk dürfe Gottes Werk nicht übertreffen. Am 10. Juni 2026, Gaudís 100. Todestag, segnete Papst Leo XIV. den Turm."
+            },
+            pt: {
+              title: "A torre de Jesus Cristo",
+              text: "Em 20 de fevereiro de 2026, a última peça da cruz branca foi colocada sobre a torre central – 17 metros de altura e 13,5 de largura. Com 172,5 metros, a Sagrada Família é desde então a igreja mais alta do mundo. Dizem que Gaudí a planejou propositalmente um pouco mais baixa que o morro de Montjuïc: a obra humana não deveria superar a de Deus. Em 10 de junho de 2026, centenário da morte de Gaudí, o papa Leão XIV abençoou a torre."
+            }
+          },
+          {
+            img: "Sagrada Família. Nativity Facade.jpg",
+            author: "Andrew Moore",
+            license: "CC BY-SA 2.0",
+            de: {
+              title: "Die Geburtsfassade – Gaudís eigene Hand",
+              text: "Sie ist die einzige Fassade, die zum großen Teil noch zu Gaudís Lebzeiten entstand. Sie erzählt die Geburt Jesu und quillt über vor Natur: Pflanzen, Vögel, Sterne, sogar Eiszapfen aus Stein. Gaudí baute sie bewusst zuerst – sie sollte zeigen, wie die Kirche einmal aussehen würde, und Spender begeistern."
+            },
+            pt: {
+              title: "A fachada da Natividade – feita por Gaudí",
+              text: "É a única fachada construída em grande parte ainda em vida de Gaudí. Ela conta o nascimento de Jesus e transborda de natureza: plantas, pássaros, estrelas e até estalactites de pedra. Gaudí a construiu primeiro de propósito – ela deveria mostrar como a igreja seria e entusiasmar os doadores."
+            }
+          },
+          {
+            img: "Sagrada familia fachada tortuga terrestre 00001.jpg",
+            author: "Poniol60",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Schildkröten tragen die Säulen",
+              text: "Schau am Mittelportal ganz nach unten: Die beiden Säulen stehen auf Schildkröten. Auf der Meerseite ist es eine Meeresschildkröte, auf der Bergseite eine Landschildkröte. Sie stehen für das Beständige, das sich nicht verändert."
+            },
+            pt: {
+              title: "Tartarugas sustentam as colunas",
+              text: "No portal central, olhe bem para baixo: as duas colunas se apoiam em tartarugas. Do lado do mar é uma tartaruga marinha, do lado da montanha uma terrestre. Elas simbolizam o que é estável e não muda."
+            }
+          },
+          {
+            img: "Sagrada-familia-passion-facade.jpg",
+            author: "Rp22",
+            license: "CC BY 3.0",
+            de: {
+              title: "Die Passionsfassade – kantig und kahl",
+              text: "Auf der Westseite zeigt die Passionsfassade Leiden und Tod Jesu. Der Bildhauer Josep Maria Subirachs gestaltete sie ab 1987 mit harten, eckigen Figuren – ein bewusster Kontrast zur verspielten Geburtsfassade. Unter den Figuren hat Subirachs auch Gaudí selbst verewigt."
+            },
+            pt: {
+              title: "A fachada da Paixão – angulosa e austera",
+              text: "No lado oeste, a fachada da Paixão mostra o sofrimento e a morte de Jesus. O escultor Josep Maria Subirachs a criou a partir de 1987 com figuras duras e angulosas – um contraste proposital com a fachada da Natividade. Entre as figuras, Subirachs eternizou também o próprio Gaudí."
+            }
+          },
+          {
+            img: "Barcelona Sagrada Familia passion facade magic square.jpg",
+            author: "Ad Meskens",
+            license: "CC BY-SA 4.0",
+            de: {
+              title: "Das magische Quadrat",
+              text: "Neben der Kuss-Szene des Judas ist ein Zahlenquadrat in den Stein gemeißelt. Egal ob Zeile, Spalte oder Diagonale: Die Summe ist immer 33 – das Alter, in dem Jesus der Überlieferung nach starb. Rechne mal nach!"
+            },
+            pt: {
+              title: "O quadrado mágico",
+              text: "Ao lado da cena do beijo de Judas há um quadrado de números esculpido na pedra. Seja na linha, na coluna ou na diagonal: a soma é sempre 33 – a idade com que, segundo a tradição, Jesus morreu. Faça as contas!"
+            }
+          },
+          {
+            img: "Sagrada Família, Columns.jpg",
+            de: {
+              title: "Ein Wald aus Stein",
+              text: "Innen verzweigen sich die Säulen nach oben wie Bäume, und die Decke wirkt wie ein Blätterdach. Gaudí wollte, dass man sich wie in einem Wald fühlt. Die Äste sind dabei kein Schmuck, sondern Statik: Sie verteilen die Last so, dass keine äußeren Strebepfeiler nötig sind."
+            },
+            pt: {
+              title: "Uma floresta de pedra",
+              text: "Por dentro, as colunas se ramificam para cima como árvores, e o teto parece uma copa de folhas. Gaudí queria que as pessoas se sentissem numa floresta. Os galhos não são enfeite, e sim estrutura: distribuem o peso de modo que não são necessários contrafortes externos."
+            }
+          },
+          {
+            img: "Sagrada Familia interior.jpg",
+            author: "Ospingou",
+            de: {
+              title: "Morgens blau, abends rot",
+              text: "Die Glasfenster auf der Ostseite leuchten in Blau und Grün, die auf der Westseite in Rot und Orange. So taucht die Morgensonne den Raum in kühles Licht und die Abendsonne in warmes – am schönsten ist es am späten Nachmittag."
+            },
+            pt: {
+              title: "Azul de manhã, vermelho à tarde",
+              text: "Os vitrais do lado leste brilham em azul e verde, os do lado oeste em vermelho e laranja. Assim, o sol da manhã enche o espaço de luz fria e o do fim do dia de luz quente – o mais bonito é no fim da tarde."
+            }
+          },
+          {
+            de: {
+              title: "Gaudís Grab",
+              text: "Am 7. Juni 1926 wurde Gaudí auf dem Weg zur Kirche von einer Straßenbahn erfasst. Weil er so ärmlich gekleidet war, hielt man ihn zunächst für einen Bettler; drei Tage später starb er. Er liegt in der Krypta seiner Kirche begraben."
+            },
+            pt: {
+              title: "O túmulo de Gaudí",
+              text: "Em 7 de junho de 1926, a caminho da igreja, Gaudí foi atropelado por um bonde. Por estar vestido de forma tão simples, primeiro foi tomado por um mendigo; morreu três dias depois. Ele está enterrado na cripta de sua igreja."
+            }
+          }
+        ]
       }
     ];
 
@@ -797,7 +1361,12 @@
 
     // ---------- App state ----------
     let currentLang = loadStored('bcn_tour_lang_v2', 'pt');
-    let completedStops = loadStored('bcn_tour_completed', []);
+    // v2: a new stop 3 (Passeig de Gràcia) was inserted, so old ids >= 3 move up by one
+    let completedStops = loadStored('bcn_tour_completed_v2', null);
+    if (completedStops === null) {
+      completedStops = loadStored('bcn_tour_completed', []).map(id => id >= 3 ? id + 1 : id);
+      saveStored('bcn_tour_completed_v2', completedStops);
+    }
     let showWC = true;
     let userMarker = null;
     let watchId = null;
@@ -1012,7 +1581,7 @@
       } else {
         completedStops.push(id);
       }
-      saveStored('bcn_tour_completed', completedStops);
+      saveStored('bcn_tour_completed_v2', completedStops);
       updateUI();
     };
 
