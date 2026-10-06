@@ -4,20 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Barcelona Walking Tour & Audioguide</title>
-  
+
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <style>
     #map { height: 380px; width: 100%; z-index: 10; }
     @media (min-width: 768px) {
       #map { height: 100%; min-height: 550px; }
     }
-    
+
     /* Custom Map Markers */
     .custom-div-icon {
       background: #4f46e5;
@@ -31,12 +31,10 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       transition: transform 0.2s ease;
     }
-    .custom-div-icon:hover {
-      transform: scale(1.15);
-    }
-    .custom-div-icon.completed { 
-      background: #22c55e; 
-    }
+    .custom-div-icon:hover { transform: scale(1.15); }
+    .custom-div-icon.completed { background: #22c55e; }
+    /* Stops with extra highlights get a small amber ring */
+    .custom-div-icon.has-details { box-shadow: 0 0 0 3px #fbbf24, 0 2px 6px rgba(0,0,0,0.3); }
 
     /* WC Marker */
     .wc-icon {
@@ -63,6 +61,26 @@
       70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
       100% { box-shadow: 0 0 0 0px rgba(37, 99, 235, 0); }
     }
+
+    /* Details panel open/close */
+    .details-panel { display: none; }
+    .details-panel.open { display: block; }
+    .chevron { transition: transform 0.2s ease; }
+    .open-btn .chevron { transform: rotate(180deg); }
+
+    /* Highlight image: placeholder colour while loading */
+    .hl-img-wrap { background: #e2e8f0; }
+    .hl-img-wrap img { transition: transform 0.3s ease; }
+    .hl-img-wrap:hover img { transform: scale(1.03); }
+
+    /* Lightbox */
+    #lightbox { display: none; }
+    #lightbox.open { display: flex; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+    button:focus-visible, a:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans">
@@ -76,12 +94,10 @@
           <p class="text-xs text-indigo-200" id="app-subtitle">Diagonal → Sagrada Família</p>
         </div>
       </div>
-      
+
       <div class="flex items-center gap-3">
-        <!-- Progress Badge -->
         <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 26</span>
-        
-        <!-- Language Switcher Buttons -->
+
         <div class="flex items-center bg-indigo-800 p-1 rounded-lg border border-indigo-500/50">
           <button id="lang-pt-btn" onclick="setLanguage('pt')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm" title="Português (Brasil)">
             <span class="text-sm">🇧🇷</span> <span class="hidden sm:inline font-bold">PT</span>
@@ -96,22 +112,19 @@
 
   <div class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
     <div class="max-w-5xl mx-auto flex flex-wrap gap-2 justify-between items-center text-xs">
-      <!-- GPS Toggle Button -->
       <button id="gps-btn" onclick="toggleGPS()" class="px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
         <i data-lucide="navigation" class="w-4 h-4"></i> <span id="label-gps">Localização GPS</span>
       </button>
 
-      <!-- Filter Toggles -->
       <div class="flex items-center gap-2">
         <button id="wc-toggle" onclick="toggleWC()" class="px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
-          <i data-lucide="bath" class="w-4 h-4"></i> <span id="label-wc">🚻 Mostrar Banheiros</span>
+          <i data-lucide="bath" class="w-4 h-4"></i> <span id="label-wc">🚻 Ocultar Banheiros</span>
         </button>
       </div>
     </div>
   </div>
 
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-4">
-    
     <!-- Left Column: Map -->
     <div class="w-full md:w-1/2 flex flex-col gap-4">
       <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[130px]">
@@ -124,17 +137,46 @@
     </div>
 
     <!-- Right Column: Interactive List -->
-    <div class="w-full md:w-1/2 flex flex-col gap-3" id="stops-container">
-      <!-- Cards rendered via JS -->
-    </div>
-
+    <div class="w-full md:w-1/2 flex flex-col gap-3" id="stops-container"></div>
   </main>
+
+  <!-- Lightbox for highlight photos -->
+  <div id="lightbox" class="fixed inset-0 z-[2000] bg-slate-950/95 text-white flex-col" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+    <div class="flex items-center justify-between p-3 text-sm">
+      <span id="lb-counter" class="text-slate-300 font-medium"></span>
+      <button id="lb-close" onclick="closeLightbox()" class="p-2 rounded-lg hover:bg-white/10" aria-label="Fechar">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <div class="relative flex-1 min-h-0 flex items-center justify-center px-2" id="lb-stage">
+      <button id="lb-prev" onclick="stepLightbox(-1)" class="absolute left-2 z-10 p-2 rounded-full bg-black/40 hover:bg-black/60" aria-label="Anterior">
+        <i data-lucide="chevron-left" class="w-7 h-7"></i>
+      </button>
+      <img id="lb-img" src="" alt="" class="max-h-full max-w-full object-contain rounded" />
+      <button id="lb-next" onclick="stepLightbox(1)" class="absolute right-2 z-10 p-2 rounded-full bg-black/40 hover:bg-black/60" aria-label="Próximo">
+        <i data-lucide="chevron-right" class="w-7 h-7"></i>
+      </button>
+    </div>
+    <div class="p-4 max-w-2xl w-full mx-auto">
+      <h2 id="lb-title" class="font-bold text-base"></h2>
+      <p id="lb-text" class="text-sm text-slate-300 mt-1 leading-relaxed max-h-32 overflow-y-auto"></p>
+      <p id="lb-credit" class="text-[11px] text-slate-400 mt-2"></p>
+    </div>
+  </div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // System UI Translations
+    // ---------- Wikimedia Commons helpers ----------
+    // Images are loaded directly from Wikimedia Commons via Special:FilePath,
+    // which redirects to a resized thumbnail. Only the file name is needed.
+    const COMMONS = 'https://commons.wikimedia.org/wiki/';
+    const fileKey = f => encodeURIComponent(f.replace(/ /g, '_'));
+    const commonsImg = (f, w) => `${COMMONS}Special:FilePath/${fileKey(f)}?width=${w}`;
+    const commonsPage = f => `${COMMONS}File:${fileKey(f)}`;
+
+    // ---------- UI translations ----------
     const uiTranslations = {
       pt: {
         appTitle: "Tour Barcelona",
@@ -149,6 +191,14 @@
         audioTooltip: "Ouvir audioguia",
         userLocation: "Sua localização atual",
         visitedLabel: "visitados",
+        markVisited: "Marcar como visitado",
+        moreLabel: "Descobrir detalhes",
+        lessLabel: "Fechar detalhes",
+        listenDetailed: "Ouvir versão completa",
+        photo: "Foto",
+        source: "fonte e licença",
+        tapToEnlarge: "Toque na foto para ampliar",
+        close: "Fechar",
         ttsUnsupported: "O seu navegador não suporta a função de áudio síntese.",
         gpsError: "Não foi possível obter a sua localização GPS.",
         noGps: "O seu navegador não suporta geolocalização."
@@ -166,13 +216,23 @@
         audioTooltip: "Audioguide anhören",
         userLocation: "Dein aktueller Standort",
         visitedLabel: "besucht",
-        ttsUnsupported: "Ihr Browser unterstützt leider keine Sprachausgabe.",
+        markVisited: "Als besucht markieren",
+        moreLabel: "Details entdecken",
+        lessLabel: "Details schließen",
+        listenDetailed: "Ausführlich anhören",
+        photo: "Foto",
+        source: "Quelle & Lizenz",
+        tapToEnlarge: "Tippe aufs Foto zum Vergrößern",
+        close: "Schließen",
+        ttsUnsupported: "Dein Browser unterstützt leider keine Sprachausgabe.",
         gpsError: "GPS-Standort konnte nicht ermittelt werden.",
-        noGps: "Ihr Browser unterstützt keine Ortung."
+        noGps: "Dein Browser unterstützt keine Ortung."
       }
     };
 
-    // Complete Multilingual Dataset (26 Stops)
+    // ---------- Tour data (26 stops) ----------
+    // Optional "highlights": { img, author, license, de:{title,text}, pt:{title,text} }
+    // "img" is a Wikimedia Commons file name. Leave it out for a text-only highlight.
     const stops = [
       {
         id: 1,
@@ -195,16 +255,79 @@
         wiki: "https://pt.wikipedia.org/wiki/Casa_Mil%C3%A0",
         pt: {
           name: "Casa Milà (La Pedrera)",
-          shortDesc: "Famoso edifício residencial de Gaudí.",
-          longDesc: "Devido à sua fachada de pedra ondulada, é conhecida como 'La Pedrera' (A Pedreira). A estrutura não possui paredes mestras e apoia-se inteiramente em colunas e arcos.",
+          shortDesc: "O último edifício residencial de Gaudí.",
+          longDesc: "Último edifício residencial de Gaudí (1906–1912), construído para Pere Milà e Roser Segimon. Por causa da fachada de pedra ondulada e rústica, os moradores zombavam chamando-o de 'A Pedreira' – e o apelido pegou. O terraço, o sótão e um apartamento histórico podem ser visitados com ingresso (melhor comprar online).",
           gastro: "☕ Café de la Pedrera – Café histórico no térreo para um café expresso rápido."
         },
         de: {
           name: "Casa Milà (La Pedrera)",
-          shortDesc: "Gaudís berühmtes Wohngebäude.",
-          longDesc: "Wegen der wellenförmigen Stein-Fassade auch 'Der Steinbruch' genannt. Das Dach mit den skulpturalen Schornsteinen ist weltberühmt.",
+          shortDesc: "Gaudís letztes Wohnhaus.",
+          longDesc: "Gaudís letztes Wohnhaus (1906–1912), gebaut für Pere Milà und Roser Segimon. Wegen der rauen, wellenförmigen Steinfassade spotteten die Leute über »den Steinbruch« (La Pedrera) – der Spitzname blieb. Dach, Dachboden und eine historische Wohnung kannst du mit Ticket besichtigen (am besten vorher online buchen).",
           gastro: "☕ Café de la Pedrera – Historisches Café im Erdgeschoss für einen schnellen Espresso."
-        }
+        },
+        highlights: [
+          {
+            img: "Casa Milà - Barcelona, Spain - Jan 2007.jpg",
+            author: "Diliff",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Eine Fassade wie das Meer",
+              text: "Die Steinfassade hat keine einzige gerade Linie und trägt nicht einmal das Haus: Das Gewicht ruht auf Säulen und Stahlträgern, tragende Wände gibt es nicht. Die Wellen erinnern an Brandung oder eine Felsküste. Die schmiedeeisernen Balkongitter von Josep Maria Jujol sehen aus wie Seetang, der an den Klippen hängt."
+            },
+            pt: {
+              title: "Uma fachada como o mar",
+              text: "A fachada de pedra não tem nenhuma linha reta e nem sequer sustenta o prédio: o peso fica em colunas e vigas de aço, sem paredes mestras. As ondas lembram a arrebentação ou um paredão de rochas à beira-mar. As grades de ferro forjado das varandas, criadas por Josep Maria Jujol, parecem algas penduradas nas pedras."
+            }
+          },
+          {
+            img: "Casa Milà 01.jpg",
+            author: "Bernard Gagnon",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Die Krieger auf dem Dach",
+              text: "Die 28 Schornsteine und die Lüftungstürme stehen in Gruppen wie Wachen mit Ritter- oder Kriegerhelmen. Auf Katalanisch heißen sie »espantabruixes« – Hexenschreck. Angeblich haben sie die Helme der Sturmtruppen in Star Wars inspiriert, belegt ist das aber nicht. Such die Schornsteingruppe, die mit Scherben grüner Glasflaschen verkleidet ist."
+            },
+            pt: {
+              title: "Os guerreiros do terraço",
+              text: "As 28 chaminés e as torres de ventilação ficam agrupadas como sentinelas usando elmos de cavaleiros. Em catalão são chamadas de 'espantabruixes' – espanta-bruxas. Diz-se que inspiraram os capacetes dos stormtroopers de Star Wars, mas isso nunca foi confirmado. Procure o grupo de chaminés revestido com cacos de garrafas de vidro verde."
+            }
+          },
+          {
+            img: "Roof of Casa Mila, Barcelona.jpg",
+            author: "Phillip Capper",
+            license: "CC BY 2.0",
+            de: {
+              title: "Eine Dachlandschaft zum Spazierengehen",
+              text: "Das Dach ist nicht flach, sondern ein Auf und Ab aus Treppen und Wegen, fast wie Dünen. Die Höhenunterschiede entstehen durch die unterschiedlich hohen Bögen im Dachboden darunter. Von hier oben siehst du zwischen den Türmen die Sagrada Família – das Ziel dieser Tour."
+            },
+            pt: {
+              title: "Um terraço para passear",
+              text: "O telhado não é plano: é um sobe e desce de escadas e caminhos, quase como dunas. Os desníveis vêm dos arcos de alturas diferentes no sótão logo abaixo. Daqui de cima dá para ver a Sagrada Família entre as torres – o destino final deste roteiro."
+            }
+          },
+          {
+            img: "Attic of Casa Milà (3).jpg",
+            de: {
+              title: "Das Walskelett im Dachboden",
+              text: "Unter dem Dach tragen 270 Ziegelbögen in Kettenlinienform die Konstruktion – man fühlt sich wie im Bauch eines Wals. Früher lagen hier Waschküchen und Trockenräume, und die Luftschicht schützte das Haus vor Hitze und Kälte. Heute zeigt das »Espai Gaudí« Modelle und Pläne seiner Werke."
+            },
+            pt: {
+              title: "O esqueleto de baleia no sótão",
+              text: "Sob o terraço, 270 arcos de tijolo em forma de catenária sustentam a cobertura – a sensação é de estar dentro da barriga de uma baleia. Antigamente aqui ficavam as lavanderias e os varais, e o colchão de ar protegia o prédio do calor e do frio. Hoje o 'Espai Gaudí' mostra maquetes e plantas das obras do arquiteto."
+            }
+          },
+          {
+            // No verified free photo yet – text-only highlight
+            de: {
+              title: "Decken wie der Meeresgrund",
+              text: "Schau in den Wohnräumen nach oben: Die Gipsdecken sind mit Wellen und Strudeln modelliert, wie Sand, den die Strömung am Meeresgrund geformt hat. Im Hauptgeschoss (1. Stock), wo die Familie Milà wohnte, sind nur noch Teile der Originaldecken erhalten – nach Gaudís Tod 1926 ließ Roser Segimon die Wohnung umgestalten. Gut zu sehen sind die Reliefdecken in der historischen Wohnung im 4. Stock."
+            },
+            pt: {
+              title: "Tetos como o fundo do mar",
+              text: "Nos ambientes internos, olhe para cima: os tetos de gesso são modelados com ondas e redemoinhos, como a areia esculpida pela correnteza no fundo do mar. No andar principal (1º andar), onde morava a família Milà, restam só fragmentos dos tetos originais – depois da morte de Gaudí, em 1926, Roser Segimon mandou reformar o apartamento. Os tetos com relevos aparecem bem no apartamento histórico do 4º andar."
+            }
+          }
+        ]
       },
       {
         id: 3,
@@ -212,14 +335,87 @@
         wiki: "https://pt.wikipedia.org/wiki/Casa_Batll%C3%B3",
         pt: {
           name: "Casa Batlló",
-          shortDesc: "O castelo de fadas de Antoni Gaudí.",
-          longDesc: "A fachada colorida representa o mosaico da lenda de São Jorge. O teto escamosado lembra o lombo de um dragão."
+          shortDesc: "A casa do dragão de Antoni Gaudí.",
+          longDesc: "Entre 1904 e 1906, Gaudí transformou completamente um prédio já existente para o industrial têxtil Josep Batlló. A interpretação mais famosa da fachada é a lenda de São Jorge (Sant Jordi), padroeiro da Catalunha, matando o dragão. Gaudí nunca a confirmou – mas, depois que você vê o dragão, encontra pistas por toda parte. Interior e terraço só com ingresso."
         },
         de: {
           name: "Casa Batlló",
-          shortDesc: "Gaudís farbenfrohes Märchenhaus.",
-          longDesc: "Die bunte Mosaikfassade stellt die Legende des Drachentöters St. Georg dar. Das schuppige Dach erinnert an einen Drachenrücken."
-        }
+          shortDesc: "Gaudís Drachenhaus.",
+          longDesc: "Gaudí baute ein bestehendes Wohnhaus 1904–1906 für den Textilfabrikanten Josep Batlló komplett um. Die bekannteste Deutung der Fassade: die Legende vom heiligen Georg (Sant Jordi), Kataloniens Schutzpatron, der den Drachen tötet. Gaudí selbst hat sie nie bestätigt – aber wer den Drachen einmal gesehen hat, entdeckt überall Hinweise. Innenräume und Dach nur mit Ticket."
+        },
+        highlights: [
+          {
+            img: "Casa Batlló 01.jpg",
+            author: "Bernard Gagnon",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Der Drache auf dem Dach",
+              text: "Der geschwungene Dachfirst ist der Rücken eines Drachen. Die glasierten Keramikziegel sind seine Schuppen und schimmern je nach Licht grün, blau und rosa. Die runden Ziegel oben auf dem Grat bilden seine Wirbelsäule."
+            },
+            pt: {
+              title: "O dragão no telhado",
+              text: "A cumeeira curva do telhado é o dorso de um dragão. As telhas de cerâmica vitrificada são as escamas e brilham em verde, azul e rosa conforme a luz. As peças arredondadas no alto formam a espinha."
+            }
+          },
+          {
+            img: "Crucifix and Dragon's back in Casa Batlló - Barcelona 2014.JPG",
+            author: "Jbribeiro1",
+            de: {
+              title: "Die Lanze des heiligen Georg",
+              text: "Am Ende des Drachenrückens ragt ein runder Turm mit einem Kreuz auf. Er gilt als die Lanze – oft auch als Schwert beschrieben – des heiligen Georg, die er dem Drachen in den Rücken gestoßen hat. Das Kreuz hat vier Arme, die in alle vier Himmelsrichtungen zeigen."
+            },
+            pt: {
+              title: "A lança de São Jorge",
+              text: "Na ponta do dorso do dragão ergue-se uma torre redonda com uma cruz. Ela é vista como a lança – às vezes descrita como espada – de São Jorge, cravada nas costas do dragão. A cruz tem quatro braços, apontando para os quatro pontos cardeais."
+            }
+          },
+          {
+            img: "Mask-Like Balconies (4027004761).jpg",
+            de: {
+              title: "Schädel als Balkone",
+              text: "Die Balkone aus Gusseisen sehen aus wie Schädel oder Masken mit leeren Augenhöhlen. In der Georgs-Legende sind es die Überreste der Opfer des Drachen. Andere sehen darin Karnevalsmasken – passend zum »Konfetti« der Fassade."
+            },
+            pt: {
+              title: "Varandas em forma de caveira",
+              text: "As varandas de ferro fundido parecem caveiras ou máscaras com órbitas vazias. Na leitura da lenda, são os restos das vítimas do dragão. Outros veem máscaras de Carnaval – combinando com o 'confete' da fachada."
+            }
+          },
+          {
+            img: "Casa Batlló - columneta.jpg",
+            de: {
+              title: "Knochen am Hauptgeschoss",
+              text: "Im ersten Stock stützen schlanke Steinsäulen die großen Fenster. Mit der Verdickung in der Mitte wirken sie wie Knochen mit Gelenken. Deshalb heißt das Haus auch »Casa dels Ossos« – Haus der Knochen. Die weit geöffneten Fensterbögen erinnern außerdem an ein gähnendes Maul."
+            },
+            pt: {
+              title: "Os ossos do andar nobre",
+              text: "No primeiro andar, colunas finas de pedra sustentam as grandes janelas. Com o engrossamento no meio, parecem ossos com articulações. Por isso o prédio também é chamado de 'Casa dels Ossos' – Casa dos Ossos. As grandes aberturas das janelas lembram ainda uma boca bocejando."
+            }
+          },
+          {
+            img: "Casa Batlló - detail of facade (49832520121).jpg",
+            de: {
+              title: "Wasser oder Konfetti?",
+              text: "Die Fassade ist mit Glasscherben und runden, bunten Keramikscheiben bedeckt (Trencadís). In der Sonne glitzert sie wie ein Teich mit Seerosen – manche denken an Monets Seerosenbilder. Andere sehen darin das Konfetti eines Karnevalsumzugs."
+            },
+            pt: {
+              title: "Água ou confete?",
+              text: "A fachada é coberta com cacos de vidro e discos de cerâmica coloridos (trencadís). Com sol, ela cintila como um lago com nenúfares – há quem lembre das ninfeias de Monet. Outros enxergam os confetes de um desfile de Carnaval."
+            }
+          },
+          {
+            img: "Casa Batlló Light Well.jpg",
+            author: "FrancoisLagunas",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Der blaue Lichthof",
+              text: "Der Lichthof im Inneren ist mit blauen Fliesen ausgekleidet: oben dunkel, nach unten immer heller. Die hellen Fliesen unten reflektieren mehr Licht, damit auch die unteren Etagen genug Tageslicht bekommen. Von unten wirkt das Blau fast gleichmäßig – wie der Blick vom Grund eines Schwimmbeckens."
+            },
+            pt: {
+              title: "O pátio de luz azul",
+              text: "O poço de luz interno é revestido de azulejos azuis: escuros no alto e cada vez mais claros embaixo. Os azulejos claros refletem mais luz, para que os andares de baixo também recebam claridade. Visto de baixo, o azul parece quase uniforme – como olhar do fundo de uma piscina."
+            }
+          }
+        ]
       },
       {
         id: 4,
@@ -235,7 +431,7 @@
           name: "El Nacional",
           shortDesc: "Spektakuläre Food-Hall im Industrie-Design.",
           longDesc: "Ehemalige Fabrikhalle aus dem 19. Jahrhundert, die heute 4 Restaurants und 4 Spezialitätenbars unter einem Glasdach vereint.",
-          gastro: "🍷 Cava Bar – Perfekt für ein Glas gekühlten Katalanischen Schaumwein zwischendurch."
+          gastro: "🍷 Cava Bar – Perfekt für ein Glas gekühlten katalanischen Schaumwein zwischendurch."
         }
       },
       {
@@ -250,7 +446,7 @@
         de: {
           name: "Plaça de Catalunya",
           shortDesc: "Der zentrale Hauptplatz Barcelonas.",
-          longDesc: "Großer Platz und Knotenpunkt, der die altspanische Altstadt mit dem modernistischen Viertel Eixample verbindet."
+          longDesc: "Großer Platz und Knotenpunkt, der die Altstadt mit dem modernistischen Viertel Eixample verbindet."
         }
       },
       {
@@ -294,7 +490,7 @@
         },
         de: {
           name: "Casa de l'Ardiaca",
-          shortDesc: "Ehemaliges Haus des Archdiakons.",
+          shortDesc: "Ehemaliges Haus des Archidiakons.",
           longDesc: "Versteckter Innenhof mit Palmen. Am Eingang befindet sich der berühmte Marmor-Briefkasten mit Schildkröte und Schwalben."
         }
       },
@@ -305,12 +501,12 @@
         pt: {
           name: "Plaça de Sant Felip Neri",
           shortDesc: "Praça histórica escondida no Bairro Gótico.",
-          longDesc: "Um local calmo com história marcante: as marcas nas paredes da igreja são resultantes de um bombardeio em 1938 durante a Guerra Civil Espanhola."
+          longDesc: "Um local calmo com uma história trágica: as marcas na fachada da igreja são de estilhaços de bomba. No bombardeio de 30 de janeiro de 1938, durante a Guerra Civil Espanhola, morreram aqui 42 pessoas, a maioria crianças que haviam se abrigado no porão da igreja."
         },
         de: {
           name: "Plaça de Sant Felip Neri",
-          shortDesc: "Mysteröser historischer Platz im Gotischen Viertel.",
-          longDesc: "Idyllischer Platz mit tragischer Geschichte: Die Einschusslöcher an der Kirche stammen von einer Bombe aus dem Spanischen Bürgerkrieg (1938)."
+          shortDesc: "Stiller historischer Platz im Gotischen Viertel.",
+          longDesc: "Idyllischer Platz mit tragischer Geschichte: Die Narben an der Kirchenfassade stammen von Bombensplittern. Beim Luftangriff am 30. Januar 1938 im Spanischen Bürgerkrieg starben hier 42 Menschen, die meisten davon Kinder, die im Keller der Kirche Schutz gesucht hatten."
         }
       },
       {
@@ -324,7 +520,7 @@
         },
         de: {
           name: "Pont del Bisbe",
-          shortDesc: "Photogene neogotische Seufzerbrücke.",
+          shortDesc: "Fotogene neogotische Seufzerbrücke.",
           longDesc: "Verbindet zwei Regierungsgebäude in der Gasse Carrer del Bisbe. Auf der Unterseite ist ein geheimnisvoller Totenkopf eingraviert."
         }
       },
@@ -340,7 +536,7 @@
         de: {
           name: "Plaça de Sant Jaume",
           shortDesc: "Politisches Zentrum Kataloniens.",
-          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und o Palau de la Generalitat direkt gegenüber."
+          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und der Palau de la Generalitat direkt gegenüber."
         }
       },
       {
@@ -355,7 +551,7 @@
         de: {
           name: "Plaça Reial",
           shortDesc: "Mittelmeer-Platz mit Palmen und Arkaden.",
-          longDesc: "Achten Sie auf die beiden Straßenlaternen in der Mitte: Sie gehören zu den allerersten Werken des jungen Gaudí."
+          longDesc: "Achte auf die beiden Straßenlaternen in der Mitte: Sie gehören zu den allerersten Werken des jungen Gaudí."
         }
       },
       {
@@ -365,7 +561,7 @@
         pt: {
           name: "Mercat de la Boqueria / La Rambla",
           shortDesc: "O mercado público mais famoso da Europa.",
-          longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico serrano, frutos do mar e tapas.",
+          longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico, frutos do mar e tapas.",
           gastro: "🍍 Dica de Suco: Experimente um suco fresco de pitaia ou manga por 2–3 € nas bancas!"
         },
         de: {
@@ -433,7 +629,7 @@
         de: {
           name: "Honest Greens Barceloneta",
           shortDesc: "Perfekter Mittagsstopp am Strand.",
-          longDesc: "Sehr beliebtes Restaurant für gesunde Bowls, Gegrilltes und hausgemachte Inhouse-Limonaden.",
+          longDesc: "Sehr beliebtes Restaurant für gesunde Bowls, Gegrilltes und hausgemachte Limonaden.",
           gastro: "🥗 Tipp: 'Latin Grill' oder eine der saisonalen Avocado-Bowls probieren."
         }
       },
@@ -495,7 +691,7 @@
         de: {
           name: "Gassen von El Born",
           shortDesc: "Trendy Szeneviertel mit Boutiquen.",
-          longDesc: "Schlendern Sie durch die malerischen Altstadtgassen rund um das Picasso-Museum und den Passeig del Born.",
+          longDesc: "Schlendere durch die malerischen Altstadtgassen rund um das Picasso-Museum und den Passeig del Born.",
           gastro: "🍸 Speakeasy-Tipp: 'Paradiso' (Carrer de Rera Palau 4) – Weltberühmte Cocktailbar, versteckt hinter einem Pastrami-Imbiss!"
         }
       },
@@ -541,7 +737,7 @@
         de: {
           name: "Arc de Triomf",
           shortDesc: "Triumphbogen aus roten Backsteinen.",
-          longDesc: "Erbaut als imposable Haupteingangstor zur Weltausstellung von 1888 im Mudejar-Stil."
+          longDesc: "Erbaut als imposantes Haupteingangstor zur Weltausstellung von 1888 im Neomudéjar-Stil."
         }
       },
       {
@@ -588,15 +784,27 @@
       { name: "WC Sagrada Família (Praça)", coords: [41.4032, 2.1740] }
     ];
 
-    // App State Variables
-    let currentLang = localStorage.getItem('bcn_tour_lang') || 'pt';
-    let completedStops = JSON.parse(localStorage.getItem('bcn_tour_completed') || '[]');
+    // ---------- Storage (wrapped so the page still works if storage is blocked) ----------
+    function loadStored(key, fallback) {
+      try {
+        const v = localStorage.getItem(key);
+        return v === null ? fallback : JSON.parse(v);
+      } catch (e) { return fallback; }
+    }
+    function saveStored(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
+
+    // ---------- App state ----------
+    let currentLang = loadStored('bcn_tour_lang_v2', 'pt');
+    let completedStops = loadStored('bcn_tour_completed', []);
     let showWC = true;
     let userMarker = null;
     let watchId = null;
+    const openDetails = new Set();     // stop ids with expanded details
+    let lightboxState = null;           // { stopId, index }
 
     const map = L.map('map').setView([41.385, 2.175], 13);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
@@ -607,34 +815,45 @@
     const stopMarkers = {};
     const wcMarkersGroup = L.layerGroup().addTo(map);
 
+    // ---------- Helpers ----------
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function creditHtml(h, txt) {
+      if (!h.img) return '';
+      const who = h.author ? escapeHtml(h.author) : 'Wikimedia Commons';
+      const lic = h.license ? ` (${escapeHtml(h.license)})` : '';
+      return `${txt.photo}: ${who}${lic} – <a href="${commonsPage(h.img)}" target="_blank" rel="noopener noreferrer" class="underline hover:text-indigo-600">${txt.source}</a>`;
+    }
+
+    function getStop(id) { return stops.find(s => s.id === id); }
+
+    // ---------- Render ----------
     function updateUI() {
       const txt = uiTranslations[currentLang];
+      document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'de';
 
-      // Update Titles & Buttons
       document.getElementById('app-title').innerText = txt.appTitle;
       document.getElementById('app-subtitle').innerText = txt.appSubtitle;
-      document.getElementById('label-wc').innerText = showWC ? txt.wcShow : txt.wcHide;
-      
-      if (!watchId) {
+      document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
+
+      if (watchId === null) {
         document.getElementById('label-gps').innerText = txt.gpsLabel;
       }
 
-      // Language Buttons Style
       const ptBtn = document.getElementById('lang-pt-btn');
       const deBtn = document.getElementById('lang-de-btn');
+      const activeCls = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm font-bold";
+      const idleCls = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white";
+      ptBtn.className = currentLang === 'pt' ? activeCls : idleCls;
+      deBtn.className = currentLang === 'de' ? activeCls : idleCls;
 
-      if (currentLang === 'pt') {
-        ptBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm font-bold";
-        deBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white";
-      } else {
-        deBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm font-bold";
-        ptBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white";
-      }
-
-      // Update Progress
       document.getElementById('progress-text').innerText = `${completedStops.length} / ${stops.length} ${txt.visitedLabel}`;
+      document.getElementById('lb-close').setAttribute('aria-label', txt.close);
 
-      // Render Cards & Markers
       renderStops();
       renderToilets();
     }
@@ -642,34 +861,65 @@
     function setLanguage(lang) {
       if (currentLang !== lang) {
         currentLang = lang;
-        localStorage.setItem('bcn_tour_lang', lang);
-        
-        // Stop active audio when switching language
-        if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
-
+        saveStored('bcn_tour_lang_v2', lang);
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         updateUI();
+        if (lightboxState) renderLightbox();
       }
     }
 
     function renderToilets() {
       wcMarkersGroup.clearLayers();
       const txt = uiTranslations[currentLang];
+      if (!showWC) return;
+      publicToilets.forEach(wc => {
+        const wcIcon = L.divIcon({ className: 'wc-icon', html: '🚻', iconSize: [24, 24], iconAnchor: [12, 12] });
+        L.marker(wc.coords, { icon: wcIcon })
+          .bindPopup(`<b>${txt.wcPopupTitle}</b><br>${escapeHtml(wc.name)}`)
+          .addTo(wcMarkersGroup);
+      });
+    }
 
-      if (showWC) {
-        publicToilets.forEach(wc => {
-          const wcIcon = L.divIcon({
-            className: 'wc-icon',
-            html: '🚻',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-          });
-          L.marker(wc.coords, { icon: wcIcon })
-            .bindPopup(`<b>${txt.wcPopupTitle}</b><br>${wc.name}`)
-            .addTo(wcMarkersGroup);
-        });
-      }
+    function highlightsHtml(stop, txt) {
+      const list = stop.highlights || [];
+      if (!list.length) return '';
+      const isOpen = openDetails.has(stop.id);
+      const hasImages = list.some(h => h.img);
+
+      const items = list.map((h, idx) => {
+        const t = h[currentLang];
+        const imgBlock = h.img ? `
+          <button onclick="openLightbox(${stop.id}, ${idx})" class="hl-img-wrap block w-full aspect-[16/10] overflow-hidden rounded-lg" aria-label="${escapeHtml(t.title)}">
+            <img src="${commonsImg(h.img, 500)}" alt="${escapeHtml(t.title)}" loading="lazy" decoding="async"
+                 class="w-full h-full object-cover"
+                 onerror="this.parentElement.style.display='none'">
+          </button>` : '';
+        return `
+          <figure class="space-y-2">
+            ${imgBlock}
+            <figcaption>
+              <h4 class="font-bold text-sm text-slate-800">${escapeHtml(t.title)}</h4>
+              <p class="text-xs text-slate-600 leading-relaxed mt-1">${escapeHtml(t.text)}</p>
+              ${h.img ? `<p class="text-[10px] text-slate-400 mt-1">${creditHtml(h, txt)}</p>` : ''}
+            </figcaption>
+          </figure>`;
+      }).join('');
+
+      return `
+        <button onclick="toggleDetails(${stop.id})" aria-expanded="${isOpen}"
+          class="${isOpen ? 'open-btn ' : ''}mt-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition">
+          <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i>${isOpen ? txt.lessLabel : txt.moreLabel} (${list.length})</span>
+          <i data-lucide="chevron-down" class="chevron w-4 h-4"></i>
+        </button>
+        <div class="details-panel ${isOpen ? 'open' : ''} mt-3 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <button onclick="speakStop(${stop.id}, true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">
+              <i data-lucide="headphones" class="w-4 h-4"></i> ${txt.listenDetailed}
+            </button>
+            ${hasImages ? `<span class="text-[11px] text-slate-400">${txt.tapToEnlarge}</span>` : ''}
+          </div>
+          ${items}
+        </div>`;
     }
 
     function renderStops() {
@@ -680,61 +930,54 @@
       stops.forEach((stop) => {
         const isCompleted = completedStops.includes(stop.id);
         const data = stop[currentLang];
+        const hasDetails = !!(stop.highlights && stop.highlights.length);
 
-        // Update or create map marker
+        const customIcon = L.divIcon({
+          className: `custom-div-icon ${isCompleted ? 'completed' : ''} ${hasDetails ? 'has-details' : ''}`,
+          html: `${stop.id}`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
         if (!stopMarkers[stop.id]) {
-          const customIcon = L.divIcon({
-            className: `custom-div-icon ${isCompleted ? 'completed' : ''}`,
-            html: `${stop.id}`,
-            iconSize: [26, 26],
-            iconAnchor: [13, 13]
-          });
-
-          const marker = L.marker(stop.coords, { icon: customIcon }).addTo(map);
-          stopMarkers[stop.id] = marker;
+          stopMarkers[stop.id] = L.marker(stop.coords, { icon: customIcon }).addTo(map);
         } else {
-          // Refresh marker icon state
-          const customIcon = L.divIcon({
-            className: `custom-div-icon ${isCompleted ? 'completed' : ''}`,
-            html: `${stop.id}`,
-            iconSize: [26, 26],
-            iconAnchor: [13, 13]
-          });
           stopMarkers[stop.id].setIcon(customIcon);
         }
 
-        // Refresh Popup content
-        stopMarkers[stop.id].bindPopup(`<b>${stop.id}. ${data.name}</b><br>${data.shortDesc}`);
+        // Popup: show first highlight photo as a teaser if available
+        const firstImg = hasDetails ? stop.highlights.find(h => h.img) : null;
+        const popupImg = firstImg
+          ? `<img src="${commonsImg(firstImg.img, 330)}" alt="" style="width:200px;height:120px;object-fit:cover;border-radius:6px;margin-top:6px" loading="lazy" onerror="this.remove()">`
+          : '';
+        stopMarkers[stop.id].bindPopup(`<b>${stop.id}. ${escapeHtml(data.name)}</b><br>${escapeHtml(data.shortDesc)}${popupImg}`);
 
-        // Create Card HTML
         const card = document.createElement('div');
+        card.id = `stop-card-${stop.id}`;
         card.className = `p-4 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/30' : 'border-slate-200'} transition-all hover:shadow-md`;
-
-        const escapedSpeechText = `${data.name}. ${data.longDesc}`.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
         card.innerHTML = `
           <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="focusStop(${stop.id})">
             <div class="flex items-start gap-3">
-              <button onclick="event.stopPropagation(); toggleStop(${stop.id})" class="mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${isCompleted ? 'bg-green-500 text-white border-green-500' : 'border-slate-300 text-slate-500 hover:border-indigo-500'}" title="Marcar como visitado">
+              <button onclick="event.stopPropagation(); toggleStop(${stop.id})" class="mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${isCompleted ? 'bg-green-500 text-white border-green-500' : 'border-slate-300 text-slate-500 hover:border-indigo-500'}" title="${txt.markVisited}" aria-label="${txt.markVisited}">
                 ${isCompleted ? '✓' : stop.id}
               </button>
               <div>
-                <h3 class="font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}">${data.name}</h3>
-                <p class="text-xs text-slate-500 mt-0.5">${data.shortDesc}</p>
+                <h3 class="font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}">${escapeHtml(data.name)}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">${escapeHtml(data.shortDesc)}</p>
               </div>
             </div>
-            <button onclick="event.stopPropagation(); toggleSpeech('${escapedSpeechText}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg shrink-0 transition" title="${txt.audioTooltip}">
+            <button onclick="event.stopPropagation(); speakStop(${stop.id}, false)" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg shrink-0 transition" title="${txt.audioTooltip}" aria-label="${txt.audioTooltip}">
               <i data-lucide="volume-2" class="w-4 h-4"></i>
             </button>
           </div>
 
           <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-2">
-            <p class="leading-relaxed">${data.longDesc}</p>
-            
+            <p class="leading-relaxed">${escapeHtml(data.longDesc)}</p>
+
             ${data.gastro ? `
               <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 font-medium flex items-start gap-1.5">
                 <span class="shrink-0">💡</span>
-                <div>${data.gastro}</div>
+                <div>${escapeHtml(data.gastro)}</div>
               </div>
             ` : ''}
 
@@ -743,6 +986,8 @@
                 ${txt.readMoreWiki} <i data-lucide="external-link" class="w-3 h-3"></i>
               </a>
             ` : ''}
+
+            ${highlightsHtml(stop, txt)}
           </div>
         `;
 
@@ -752,8 +997,9 @@
       lucide.createIcons();
     }
 
+    // ---------- Interactions ----------
     window.focusStop = function(id) {
-      const stop = stops.find(s => s.id === id);
+      const stop = getStop(id);
       if (stop) {
         map.setView(stop.coords, 16);
         stopMarkers[id].openPopup();
@@ -766,39 +1012,116 @@
       } else {
         completedStops.push(id);
       }
-      localStorage.setItem('bcn_tour_completed', JSON.stringify(completedStops));
+      saveStored('bcn_tour_completed', completedStops);
       updateUI();
+    };
+
+    window.toggleDetails = function(id) {
+      if (openDetails.has(id)) openDetails.delete(id); else openDetails.add(id);
+      renderStops();
     };
 
     window.toggleWC = function() {
       showWC = !showWC;
       renderToilets();
       const txt = uiTranslations[currentLang];
-      const btn = document.getElementById('wc-toggle');
-      document.getElementById('label-wc').innerText = showWC ? txt.wcShow : txt.wcHide;
-
-      btn.className = showWC 
+      document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
+      document.getElementById('wc-toggle').className = showWC
         ? "px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95"
         : "px-3 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg font-semibold flex items-center gap-2 transition opacity-60 active:scale-95";
     };
 
-    // Text-to-Speech Audio Engine
-    window.toggleSpeech = function(text) {
-      if ('speechSynthesis' in window) {
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-          return;
-        }
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = currentLang === 'pt' ? 'pt-BR' : 'de-DE';
-        utterance.rate = 0.95;
-        window.speechSynthesis.speak(utterance);
-      } else {
-        alert(uiTranslations[currentLang].ttsUnsupported);
+    // ---------- Text-to-Speech ----------
+    // detailed=true also reads all highlight texts of the stop.
+    window.speakStop = function(id, detailed) {
+      const txt = uiTranslations[currentLang];
+      if (!('speechSynthesis' in window)) { alert(txt.ttsUnsupported); return; }
+      if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
+
+      const stop = getStop(id);
+      const data = stop[currentLang];
+      let text = `${data.name}. ${data.longDesc}`;
+      if (detailed && stop.highlights) {
+        text += ' ' + stop.highlights.map(h => `${h[currentLang].title}. ${h[currentLang].text}`).join(' ');
       }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = currentLang === 'pt' ? 'pt-BR' : 'de-DE';
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
     };
 
-    // Live GPS Location Tracking
+    // ---------- Lightbox ----------
+    function lightboxList(stopId) {
+      return getStop(stopId).highlights
+        .map((h, idx) => ({ h, idx }))
+        .filter(item => item.h.img);
+    }
+
+    function renderLightbox() {
+      const { stopId, index } = lightboxState;
+      const txt = uiTranslations[currentLang];
+      const list = lightboxList(stopId);
+      const pos = list.findIndex(item => item.idx === index);
+      const h = list[pos].h;
+      const t = h[currentLang];
+
+      const img = document.getElementById('lb-img');
+      img.src = commonsImg(h.img, 1280);
+      img.alt = t.title;
+      document.getElementById('lb-title').innerText = t.title;
+      document.getElementById('lb-text').innerText = t.text;
+      document.getElementById('lb-credit').innerHTML = creditHtml(h, txt);
+      document.getElementById('lb-counter').innerText = `${pos + 1} / ${list.length}`;
+      document.getElementById('lb-prev').style.visibility = list.length > 1 ? 'visible' : 'hidden';
+      document.getElementById('lb-next').style.visibility = list.length > 1 ? 'visible' : 'hidden';
+    }
+
+    window.openLightbox = function(stopId, index) {
+      lightboxState = { stopId, index };
+      renderLightbox();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('lb-close').focus();
+    };
+
+    window.closeLightbox = function() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('lb-img').src = '';
+      lightboxState = null;
+    };
+
+    window.stepLightbox = function(dir) {
+      if (!lightboxState) return;
+      const list = lightboxList(lightboxState.stopId);
+      const pos = list.findIndex(item => item.idx === lightboxState.index);
+      const next = (pos + dir + list.length) % list.length;
+      lightboxState.index = list[next].idx;
+      renderLightbox();
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (!lightboxState) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') stepLightbox(-1);
+      if (e.key === 'ArrowRight') stepLightbox(1);
+    });
+
+    // Swipe left/right on phones; tap on dark background closes
+    (function initSwipe() {
+      const stage = document.getElementById('lb-stage');
+      let startX = null;
+      stage.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+      stage.addEventListener('touchend', e => {
+        if (startX === null) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 50) stepLightbox(dx < 0 ? 1 : -1);
+        startX = null;
+      });
+      stage.addEventListener('click', e => { if (e.target === stage) closeLightbox(); });
+    })();
+
+    // ---------- Live GPS ----------
     window.toggleGPS = function() {
       const btn = document.getElementById('gps-btn');
       const label = document.getElementById('label-gps');
@@ -809,7 +1132,6 @@
         watchId = null;
         if (userMarker) map.removeLayer(userMarker);
         userMarker = null;
-
         btn.classList.remove('bg-indigo-600', 'text-white');
         btn.classList.add('bg-slate-100');
         label.innerText = txt.gpsLabel;
@@ -824,25 +1146,19 @@
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
             const userCoords = [pos.coords.latitude, pos.coords.longitude];
-            
             if (!userMarker) {
-              const userIcon = L.divIcon({
-                className: 'user-location-marker',
-                iconSize: [16, 16],
-                iconAnchor: [8, 8]
-              });
+              const userIcon = L.divIcon({ className: 'user-location-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
               userMarker = L.marker(userCoords, { icon: userIcon })
                 .addTo(map)
-                .bindPopup(`<b>${txt.userLocation}</b>`);
-              
+                .bindPopup(`<b>${uiTranslations[currentLang].userLocation}</b>`);
               map.setView(userCoords, 16);
             } else {
               userMarker.setLatLng(userCoords);
             }
-            label.innerText = txt.gpsActive;
+            label.innerText = uiTranslations[currentLang].gpsActive;
           },
-          (err) => {
-            alert(txt.gpsError);
+          () => {
+            alert(uiTranslations[currentLang].gpsError);
             toggleGPS();
           },
           { enableHighAccuracy: true }
@@ -852,7 +1168,7 @@
       }
     };
 
-    // Initialize Viewport and App Render
+    // ---------- Init ----------
     map.fitBounds(L.latLngBounds(latLngs), { padding: [25, 25] });
     updateUI();
   </script>
