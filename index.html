@@ -81,6 +81,14 @@
     }
     .card-flash { animation: cardFlash 2s ease-out; }
 
+    /* Card of the stop you are standing at (GPS) */
+    .is-near { outline: 3px solid #2563eb; outline-offset: 2px; }
+    .is-near::before {
+      content: attr(data-near-label);
+      display: inline-block; margin-bottom: 8px; padding: 2px 8px; border-radius: 999px;
+      background: #2563eb; color: #fff; font-size: 11px; font-weight: 700;
+    }
+
     /* Lightbox */
     #lightbox { display: none; }
     #lightbox.open { display: flex; }
@@ -104,7 +112,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 27</span>
+        <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 28</span>
 
         <div class="flex items-center bg-indigo-800 p-1 rounded-lg border border-indigo-500/50">
           <button id="lang-pt-btn" onclick="setLanguage('pt')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm" title="Português (Brasil)">
@@ -172,6 +180,19 @@
     </div>
   </div>
 
+  <!-- "You are here" banner (GPS proximity) -->
+  <div id="near-banner" class="fixed inset-x-0 bottom-0 z-[1500] px-3 pt-3 hidden" style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));" role="status" aria-live="polite">
+    <div class="max-w-xl mx-auto bg-blue-600 text-white rounded-xl shadow-lg p-3 flex flex-wrap items-center gap-2">
+      <span id="near-text" class="text-sm font-semibold flex-1 min-w-[160px]"></span>
+      <button id="near-show" onclick="nearAction('show')" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-semibold"></button>
+      <button id="near-listen" onclick="nearAction('listen')" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-semibold"></button>
+      <button id="near-visit" onclick="nearAction('visit')" class="px-3 py-1.5 rounded-lg bg-white text-blue-700 hover:bg-blue-50 text-xs font-semibold"></button>
+      <button id="near-close" onclick="nearAction('close')" class="p-1.5 rounded-lg hover:bg-white/15" aria-label="Schließen">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -209,7 +230,15 @@
         close: "Fechar",
         ttsUnsupported: "O seu navegador não suporta a função de áudio síntese.",
         gpsError: "Não foi possível obter a sua localização GPS.",
-        noGps: "O seu navegador não suporta geolocalização."
+        noGps: "O seu navegador não suporta geolocalização.",
+        nextStop: "Caminho até a parada",
+        walkMin: "min a pé",
+        boatLeg: "De barco (Bus Nàutic), aprox. 10 min",
+        endOfTour: "Fim do roteiro – parabéns! 🎉",
+        hereNow: "Você está aqui",
+        show: "Mostrar",
+        listen: "Ouvir",
+        markVisitedShort: "Visitado ✓"
       },
       de: {
         appTitle: "Barcelona Rundgang",
@@ -234,7 +263,15 @@
         close: "Schließen",
         ttsUnsupported: "Dein Browser unterstützt leider keine Sprachausgabe.",
         gpsError: "GPS-Standort konnte nicht ermittelt werden.",
-        noGps: "Dein Browser unterstützt keine Ortung."
+        noGps: "Dein Browser unterstützt keine Ortung.",
+        nextStop: "Weg zu Station",
+        walkMin: "Min. zu Fuß",
+        boatLeg: "Mit dem Boot (Bus Nàutic), ca. 10 Min.",
+        endOfTour: "Ende der Tour – geschafft! 🎉",
+        hereNow: "Du bist hier",
+        show: "Anzeigen",
+        listen: "Anhören",
+        markVisitedShort: "Besucht ✓"
       }
     };
 
@@ -246,12 +283,21 @@
         id: 1,
         coords: [41.3965, 2.1588],
         wiki: "https://pt.wikipedia.org/wiki/Passeig_de_Gr%C3%A0cia",
+        img: "Passeig de Gràcia, Barcelona.jpg",
+        author: "Bernard Gagnon",
+        license: "CC BY-SA 3.0",
         pt: {
+          notes: [
+            {"type": "info", "text": "Dica para o dia: o roteiro é longo (cerca de 13–14 km a pé). Leve sapatos confortáveis, água e protetor solar. Reserve o ingresso da Sagrada Família de preferência para o fim da tarde – assim você chega no horário certo ao fim do roteiro e vê os vitrais vermelhos do lado oeste brilhando (parada 28)."}
+          ],
           name: "Estação de Metrô Diagonal",
           shortDesc: "Ponto de partida no topo do Passeig de Gràcia.",
           longDesc: "Aqui começa o seu roteiro a pé, descendo o Passeig de Gràcia – a avenida mais famosa de Barcelona para admirar a arquitetura do Modernismo Catalão. A história do passeio, dos ladrilhos e dos bancos com lampiões está na parada 3."
         },
         de: {
+          notes: [
+            {"type": "info", "text": "Tipp für den Tag: Die Tour ist lang (zu Fuß etwa 13–14 km). Bequeme Schuhe, Wasser und Sonnenschutz einpacken. Das Sagrada-Família-Ticket am besten für den späten Nachmittag buchen – dann kommst du am Tourende passend an und siehst die roten Westfenster leuchten (Station 28)."}
+          ],
           name: "U-Bahn Station Diagonal",
           shortDesc: "Startpunkt am oberen Passeig de Gràcia.",
           longDesc: "Hier startet die Route den Passeig de Gràcia hinunter – Barcelonas Prachtstraße mit beeindruckender Jugendstil-Architektur. Die Geschichte des Boulevards, der Bodenfliesen und der Laternenbänke findest du bei Station 3."
@@ -262,12 +308,18 @@
         coords: [41.3954, 2.1612],
         wiki: "https://pt.wikipedia.org/wiki/Casa_Mil%C3%A0",
         pt: {
+          notes: [
+            {"type": "ticket", "text": "Terraço, sótão e apartamento histórico só com ingresso e horário marcado – melhor comprar antes online.", "url": "https://www.lapedrera.com", "linkLabel": "lapedrera.com"}
+          ],
           name: "Casa Milà (La Pedrera)",
           shortDesc: "O último edifício residencial de Gaudí.",
           longDesc: "Último edifício residencial de Gaudí (1906–1912), construído para Pere Milà e Roser Segimon. Por causa da fachada de pedra ondulada e rústica, os moradores zombavam chamando-o de 'A Pedreira' – e o apelido pegou. O terraço, o sótão e um apartamento histórico podem ser visitados com ingresso (melhor comprar online).",
           gastro: "☕ Café de la Pedrera – Café histórico no térreo para um café expresso rápido. 🍫 Logo ao lado: torró da Vicens e chocolate Amatller."
         },
         de: {
+          notes: [
+            {"type": "ticket", "text": "Dach, Dachboden und historische Wohnung nur mit Ticket und festem Zeitfenster – am besten vorher online buchen.", "url": "https://www.lapedrera.com", "linkLabel": "lapedrera.com"}
+          ],
           name: "Casa Milà (La Pedrera)",
           shortDesc: "Gaudís letztes Wohnhaus.",
           longDesc: "Gaudís letztes Wohnhaus (1906–1912), gebaut für Pere Milà und Roser Segimon. Wegen der rauen, wellenförmigen Steinfassade spotteten die Leute über »den Steinbruch« (La Pedrera) – der Spitzname blieb. Dach, Dachboden und eine historische Wohnung kannst du mit Ticket besichtigen (am besten vorher online buchen).",
@@ -427,16 +479,22 @@
         coords: [41.3917, 2.1649],
         wiki: "https://pt.wikipedia.org/wiki/Casa_Batll%C3%B3",
         pt: {
+          notes: [
+            {"type": "ticket", "text": "Interior e terraço só com ingresso e horário marcado – melhor comprar antes online.", "url": "https://www.casabatllo.es", "linkLabel": "casabatllo.es"},
+            {"type": "info", "text": "A loja de souvenirs no térreo pode ser visitada sem ingresso – e de lá se tem um vislumbre do interior da casa."}
+          ],
           name: "Casa Batlló",
           shortDesc: "A casa do dragão de Antoni Gaudí.",
-          longDesc: "Entre 1904 e 1906, Gaudí transformou completamente um prédio já existente para o industrial têxtil Josep Batlló. A interpretação mais famosa da fachada é a lenda de São Jorge (Sant Jordi), padroeiro da Catalunha, matando o dragão. Gaudí nunca a confirmou – mas, depois que você vê o dragão, encontra pistas por toda parte. Interior e terraço só com ingresso.",
-          gastro: "🛍️ Dica: a loja de souvenirs no térreo pode ser visitada sem ingresso – e de lá se tem um vislumbre do interior da casa."
+          longDesc: "Entre 1904 e 1906, Gaudí transformou completamente um prédio já existente para o industrial têxtil Josep Batlló. A interpretação mais famosa da fachada é a lenda de São Jorge (Sant Jordi), padroeiro da Catalunha, matando o dragão. Gaudí nunca a confirmou – mas, depois que você vê o dragão, encontra pistas por toda parte. Interior e terraço só com ingresso."
         },
         de: {
+          notes: [
+            {"type": "ticket", "text": "Innenräume und Dach nur mit Ticket und festem Zeitfenster – am besten vorher online buchen.", "url": "https://www.casabatllo.es", "linkLabel": "casabatllo.es"},
+            {"type": "info", "text": "Den Souvenirshop im Erdgeschoss kannst du ohne Eintrittskarte betreten – und von dort einen Blick ins Innere des Hauses erhaschen."}
+          ],
           name: "Casa Batlló",
           shortDesc: "Gaudís Drachenhaus.",
-          longDesc: "Gaudí baute ein bestehendes Wohnhaus 1904–1906 für den Textilfabrikanten Josep Batlló komplett um. Die bekannteste Deutung der Fassade: die Legende vom heiligen Georg (Sant Jordi), Kataloniens Schutzpatron, der den Drachen tötet. Gaudí selbst hat sie nie bestätigt – aber wer den Drachen einmal gesehen hat, entdeckt überall Hinweise. Innenräume und Dach nur mit Ticket.",
-          gastro: "🛍️ Tipp: Den Souvenirshop im Erdgeschoss kannst du ohne Eintrittskarte betreten – und von dort einen Blick ins Innere des Hauses erhaschen."
+          longDesc: "Gaudí baute ein bestehendes Wohnhaus 1904–1906 für den Textilfabrikanten Josep Batlló komplett um. Die bekannteste Deutung der Fassade: die Legende vom heiligen Georg (Sant Jordi), Kataloniens Schutzpatron, der den Drachen tötet. Gaudí selbst hat sie nie bestätigt – aber wer den Drachen einmal gesehen hat, entdeckt überall Hinweise. Innenräume und Dach nur mit Ticket."
         },
         highlights: [
           {
@@ -526,6 +584,8 @@
         id: 5,
         coords: [41.390248, 2.167854],
         wiki: "",
+        img: "Restaurant El Nacional Barcelona - 04.JPG",
+        author: "Jordiferrer",
         pt: {
           name: "El Nacional",
           shortDesc: "Espaço gastronômico icônico.",
@@ -579,6 +639,9 @@
             }
           },
           {
+            img: "Plaça Catalunya Barcelona.JPG",
+            author: "1997",
+            license: "CC BY-SA 2.5",
             de: {
               title: "Die Treppe, die auf dem Kopf steht",
               text: "An der Ecke zur Rambla steht ein Denkmal für Francesc Macià, den ersten Präsidenten der wiederhergestellten katalanischen Regierung (Generalitat) in den 1930er-Jahren. Der Bildhauer Josep Maria Subirachs – derselbe, der die Passionsfassade der Sagrada Família gestaltet hat – formte es 1991 als umgedrehte Treppe: ein Bild für ein Werk, das nie fertig wird."
@@ -625,11 +688,17 @@
         coords: [41.384525, 2.17593],
         wiki: "https://pt.wikipedia.org/wiki/Catedral_de_Barcelona",
         pt: {
+          notes: [
+            {"type": "info", "text": "Código de vestimenta: ombros e joelhos cobertos, nada de roupa de praia. Para visitas fora do horário das missas, geralmente é cobrada entrada."}
+          ],
           name: "Catedral de Barcelona",
           shortDesc: "Catedral gótica principal.",
           longDesc: "A catedral gótica foi construída entre os séculos XIII e XV e é dedicada à Santa Cruz e a Santa Eulália, padroeira da cidade, cujo túmulo está na cripta. Aos domingos de manhã, muitas vezes se dança a sardana na praça em frente."
         },
         de: {
+          notes: [
+            {"type": "info", "text": "Kleiderordnung: Schultern und Knie bedeckt, keine Strandkleidung. Für Besichtigungen außerhalb der Gottesdienste wird in der Regel Eintritt verlangt."}
+          ],
           name: "Kathedrale von Barcelona",
           shortDesc: "Gotische Hauptkathedrale (La Seu).",
           longDesc: "Die gotische Kathedrale entstand zwischen dem 13. und 15. Jahrhundert und ist dem Heiligen Kreuz und der Stadtpatronin Santa Eulàlia geweiht, deren Grab in der Krypta liegt. Sonntagvormittags wird auf dem Platz davor oft Sardana getanzt."
@@ -702,6 +771,8 @@
         },
         highlights: [
           {
+            img: "Casa de l'Ardiaca (Barcelona) - 12.jpg",
+            author: "jorapa (Flickr)",
             de: {
               title: "Der Briefkasten mit der Schildkröte",
               text: "Neben dem Portal hängt ein Marmorbriefkasten, den Lluís Domènech i Montaner um 1902 für die Anwaltskammer entwarf: fünf Schwalben oben, sieben Efeublätter und unten eine Schildkröte. Die Schwalben stehen für die Schnelligkeit, die Justiz haben sollte, das Efeu für die Bürokratie – und die Schildkröte dafür, wie langsam sie tatsächlich ist. Angeblich bringt es Glück, den Panzer zu berühren."
@@ -712,13 +783,16 @@
             }
           },
           {
+            img: "Casa de l'Ardiaca 02.jpg",
+            author: "Bernard Gagnon",
+            license: "CC BY-SA 3.0",
             de: {
               title: "Rom zum Anfassen",
-              text: "Das Haus lehnt an der römischen Stadtmauer. Im Inneren sind ein Stück dieser Mauer und Bögen eines römischen Aquädukts aus dem 1. Jahrhundert v. Chr. erhalten."
+              text: "Das Haus lehnt an der römischen Stadtmauer – auf dem Foto siehst du es von der Plaça Nova aus, davor die rekonstruierten Bögen des römischen Aquädukts. Auch im Inneren ist ein Stück der Mauer erhalten."
             },
             pt: {
               title: "Roma ao alcance da mão",
-              text: "A casa se apoia na muralha romana. No interior ainda se veem um trecho dessa muralha e arcos de um aqueduto romano do século I a.C."
+              text: "A casa se apoia na muralha romana – na foto, vista da Plaça Nova, com os arcos reconstruídos do aqueduto romano à frente. No interior também se conserva um trecho da muralha."
             }
           }
         ]
@@ -728,11 +802,17 @@
         coords: [41.383413, 2.175122],
         wiki: "",
         pt: {
+          notes: [
+            {"type": "info", "text": "Em dias letivos (seg–sex) a praça vira pátio de escola e fica fechada para visitantes, aprox. 10h00–11h30 e 12h30–14h30."}
+          ],
           name: "Plaça de Sant Felip Neri",
           shortDesc: "Praça histórica escondida no Bairro Gótico.",
           longDesc: "Um local calmo com uma história trágica: as marcas na fachada da igreja são de estilhaços de bomba. No bombardeio de 30 de janeiro de 1938, durante a Guerra Civil Espanhola, morreram aqui 42 pessoas, a maioria crianças que haviam se abrigado no porão da igreja."
         },
         de: {
+          notes: [
+            {"type": "info", "text": "An Schultagen (Mo–Fr) wird der Platz zum Pausenhof und ist für Besucher gesperrt, ca. 10:00–11:30 und 12:30–14:30 Uhr."}
+          ],
           name: "Plaça de Sant Felip Neri",
           shortDesc: "Stiller historischer Platz im Gotischen Viertel.",
           longDesc: "Idyllischer Platz mit tragischer Geschichte: Die Narben an der Kirchenfassade stammen von Bombensplittern. Beim Luftangriff am 30. Januar 1938 im Spanischen Bürgerkrieg starben hier 42 Menschen, die meisten davon Kinder, die im Keller der Kirche Schutz gesucht hatten."
@@ -758,6 +838,16 @@
             pt: {
               title: "Cenário de romance e casas que mudaram de lugar",
               text: "Quem leu 'A Sombra do Vento', de Carlos Ruiz Zafón, conhece a praça: aqui mora a personagem Nuria Monfort. Duas das casas, aliás, ficavam em outro lugar – as sedes das guildas dos caldeireiros e dos sapateiros foram transferidas para cá quando a construção da Via Laietana as desalojou."
+            }
+          },
+          {
+            de: {
+              title: "Der Platz als Pausenhof",
+              text: "Direkt am Platz liegt die Schule Sant Felip Neri. Weil sie selbst kaum Außenfläche hat, wird der Platz an Schultagen zum Pausenhof: Die Schule sperrt dann die Zugänge über die Carrer de Sant Felip Neri und die Carrer de Montjuïc del Bisbe ab, Besucher müssen draußen bleiben. Laut Stadtverwaltung gilt das montags bis freitags etwa von 10:00 bis 11:30 und von 12:30 bis 14:30 Uhr, solange die Schule erweitert wird. Komm am besten früh am Morgen, am späten Nachmittag oder am Wochenende. Und gerade an diesem Ort ist es ein schönes Bild: Wo 1938 Kinder starben, spielen heute wieder Kinder."
+            },
+            pt: {
+              title: "A praça como pátio de escola",
+              text: "Bem na praça fica a escola Sant Felip Neri. Como ela quase não tem área externa, a praça vira pátio nos dias de aula: a escola fecha os acessos pela Carrer de Sant Felip Neri e pela Carrer de Montjuïc del Bisbe, e os visitantes ficam do lado de fora. Segundo a prefeitura, isso vale de segunda a sexta, aproximadamente das 10h00 às 11h30 e das 12h30 às 14h30, enquanto durarem as obras de ampliação da escola. Venha de manhã cedo, no fim da tarde ou no fim de semana. E justamente aqui é uma imagem bonita: onde em 1938 morreram crianças, hoje crianças voltam a brincar."
             }
           }
         ]
@@ -799,15 +889,18 @@
         pt: {
           name: "Plaça de Sant Jaume",
           shortDesc: "O centro político da Catalunha.",
-          longDesc: "Aqui ficam frente a frente a Prefeitura de Barcelona (Ajuntament) e o Palácio da Generalitat de Catalunya. Na época romana, este era o coração de Barcino, perto do fórum."
+          longDesc: "Aqui ficam frente a frente a Prefeitura de Barcelona (Ajuntament) e o Palácio da Generalitat de Catalunya. Na época romana, este era o coração de Barcino, perto do fórum – a poucos passos ainda estão colunas do seu templo (próxima parada)."
         },
         de: {
           name: "Plaça de Sant Jaume",
           shortDesc: "Politisches Zentrum Kataloniens.",
-          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und der Palau de la Generalitat direkt gegenüber. Zur Römerzeit lag hier, nahe dem Forum, das Herz von Barcino."
+          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und der Palau de la Generalitat direkt gegenüber. Zur Römerzeit lag hier, nahe dem Forum, das Herz von Barcino – ein paar Schritte weiter stehen noch Säulen seines Tempels (nächste Station)."
         },
         highlights: [
           {
+            img: "014 Plaça de Sant Jaume, sant Jordi a la Generalitat.jpg",
+            author: "Enfo",
+            license: "CC BY-SA 3.0 ES",
             de: {
               title: "Der heilige Georg über dem Portal",
               text: "Schau an der Fassade der Generalitat nach oben: Über dem Eingang reitet Sant Jordi, Kataloniens Schutzpatron – derselbe Drachentöter wie an der Casa Batlló. Am 23. April, seinem Tag, schenkt man sich in Katalonien Rosen und Bücher."
@@ -818,16 +911,7 @@
             }
           },
           {
-            de: {
-              title: "Geheimtipp: der Tempel des Augustus",
-              text: "Nur ein paar Schritte entfernt, in der Carrer del Paradís 10, stehen in einem Innenhof vier riesige römische Säulen – Reste des Augustus-Tempels auf dem höchsten Punkt des alten Barcino. Der Eintritt ist frei, und kaum jemand findet hin."
-            },
-            pt: {
-              title: "Dica secreta: o templo de Augusto",
-              text: "A poucos passos, na Carrer del Paradís 10, quatro enormes colunas romanas se erguem dentro de um pátio – restos do templo de Augusto no ponto mais alto da antiga Barcino. A entrada é gratuita e quase ninguém encontra o lugar."
-            }
-          },
-          {
+            img: "105 Castellers de Barcelona, 4 de 9 amb folre, pl. Sant Jaume.jpg",
             de: {
               title: "Menschentürme",
               text: "Bei großen Festen wie La Mercè im September bauen hier Vereine »castells« – Menschentürme mit bis zu zehn Stockwerken, ganz oben klettert ein Kind hinauf. Die Tradition gehört seit 2010 zum immateriellen UNESCO-Kulturerbe."
@@ -841,6 +925,63 @@
       },
       {
         id: 13,
+        coords: [41.383384, 2.177149],
+        wiki: "https://ca.wikipedia.org/wiki/Temple_d%27August_de_Barcelona",
+        pt: {
+          notes: [
+            {"type": "info", "text": "Entrada gratuita, mas só abre em determinados horários – confira antes.", "url": "https://www.barcelona.cat/museuhistoria/en/heritages/els-espais-del-muhba/muhba-temple-daugust", "linkLabel": "MUHBA"}
+          ],
+          name: "Temple d'August",
+          shortDesc: "Colunas romanas escondidas num pátio.",
+          longDesc: "Escondidas no pátio de um prédio medieval da Carrer del Paradís 10 estão quatro colunas de mais de 2.000 anos – os restos do templo que os romanos ergueram no século I a.C. em honra ao imperador Augusto. A entrada é gratuita (faz parte do Museu de História de Barcelona, MUHBA); os horários são limitados."
+        },
+        de: {
+          notes: [
+            {"type": "info", "text": "Eintritt frei, aber nur zu bestimmten Zeiten geöffnet – Öffnungszeiten vorher prüfen.", "url": "https://www.barcelona.cat/museuhistoria/en/heritages/els-espais-del-muhba/muhba-temple-daugust", "linkLabel": "MUHBA"}
+          ],
+          name: "Temple d'August (Augustus-Tempel)",
+          shortDesc: "Römische Säulen im Hinterhof.",
+          longDesc: "Versteckt im Innenhof eines mittelalterlichen Hauses in der Carrer del Paradís 10 stehen vier über 2.000 Jahre alte Säulen – die Reste des Tempels, den die Römer im 1. Jahrhundert v. Chr. zu Ehren von Kaiser Augustus errichteten. Der Eintritt ist frei (gehört zum Stadtgeschichtsmuseum MUHBA), die Öffnungszeiten sind allerdings begrenzt."
+        },
+        highlights: [
+          {
+            img: "Columnes del temple d'August (I).jpg",
+            author: "Enfo",
+            license: "CC BY-SA 3.0",
+            de: {
+              title: "Vier Säulen, neun Meter hoch",
+              text: "Die korinthischen Säulen sind rund 9 Meter hoch. Drei davon stehen noch genau dort, wo die Römer sie aufgestellt haben. Jahrhundertelang waren sie in mittelalterliche Häuser eingebaut und auf mehrere Stockwerke verteilt – bis der Wanderverein Centre Excursionista de Catalunya das Gebäude kaufte und Lluís Domènech i Montaner 1903/04 den Innenhof um die Säulen herum anlegte. Die vierte Säule wurde aus Fragmenten zusammengesetzt, stand ab 1879 auf der Plaça del Rei und kam 1956 dazu."
+            },
+            pt: {
+              title: "Quatro colunas de nove metros",
+              text: "As colunas coríntias têm cerca de 9 metros de altura. Três delas continuam exatamente onde os romanos as ergueram. Durante séculos ficaram embutidas em casas medievais, divididas entre vários andares – até que o clube de excursionismo Centre Excursionista de Catalunya comprou o prédio e Lluís Domènech i Montaner criou, em 1903/04, o pátio em volta delas. A quarta coluna foi montada a partir de fragmentos, ficou na Plaça del Rei a partir de 1879 e foi trazida para cá em 1956."
+            }
+          },
+          {
+            img: "MAC30992 - Maqueta del temple d'August a Barcino, 1936 (Barcelona).jpg",
+            de: {
+              title: "So sah der Tempel aus",
+              text: "Das Modell zeigt den Tempel, wie er einmal war: 37 Meter lang, 17 Meter breit, mit sechs Säulen an der Front, auf einem hohen Podium mit Freitreppe. Er stand am Forum, dem Marktplatz und Zentrum der römischen Stadt, umgeben von Säulenhallen und Amtsgebäuden – und war schon von außerhalb der Stadt zu sehen."
+            },
+            pt: {
+              title: "Assim era o templo",
+              text: "A maquete mostra o templo como ele era: 37 metros de comprimento, 17 de largura, com seis colunas na fachada, sobre um pódio alto com escadaria. Ficava junto ao fórum, a praça do mercado e centro da cidade romana, cercado de pórticos e prédios públicos – e era visível de fora da cidade."
+            }
+          },
+          {
+            de: {
+              title: "Der Gipfel von Barcino",
+              text: "Achte am Eingang auf den alten Mühlstein im Boden: Er markiert den höchsten Punkt des Mons Taber, des Hügels, auf dem die Römer Barcino gründeten – ganze 16,9 Meter über dem Meer. Du stehst also gerade auf dem »Gipfel« der Altstadt, auch wenn man den Anstieg kaum bemerkt."
+            },
+            pt: {
+              title: "O cume de Barcino",
+              text: "Repare, na entrada, na antiga mó de moinho no chão: ela marca o ponto mais alto do Mons Taber, a colina onde os romanos fundaram Barcino – nada menos que 16,9 metros acima do mar. Você está, portanto, no 'cume' da cidade antiga, mesmo que mal perceba a subida."
+            }
+          }
+        ]
+      },
+      {
+        id: 14,
         coords: [41.380107, 2.175285],
         wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_Real",
         pt: {
@@ -870,16 +1011,22 @@
         ]
       },
       {
-        id: 14,
+        id: 15,
         coords: [41.3817, 2.1715],
         wiki: "https://pt.wikipedia.org/wiki/Mercado_da_Boqueria",
         pt: {
+          notes: [
+            {"type": "warn", "text": "Cuidado com batedores de carteira! Na Rambla, na Boqueria e no metrô os furtos são muito frequentes. Mochila na frente, celular nunca no bolso de trás ou largado na mesa. Atenção a distrações: uma suposta mancha na roupa, pedidos de informação, abaixo-assinados ou empurra-empurra repentino."}
+          ],
           name: "Mercat de la Boqueria / La Rambla",
           shortDesc: "O mercado público mais famoso da Europa.",
           longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico, frutos do mar e tapas. Já na Idade Média se vendia carne aqui, diante do portão da cidade; o grande teto de ferro atual é de 1914.",
           gastro: "🍍 Dica de Suco: Experimente um suco fresco de pitaia ou manga por 2–3 € nas bancas! Nas bancas mais ao fundo os preços costumam ser melhores."
         },
         de: {
+          notes: [
+            {"type": "warn", "text": "Achtung, Taschendiebe! Auf der Rambla, in der Boqueria und in der Metro wird besonders viel gestohlen. Rucksack nach vorne, Handy nicht in die Gesäßtasche oder offen auf den Tisch legen. Vorsicht bei Ablenkungen: angeblicher Fleck auf der Kleidung, Fragen nach dem Weg, Unterschriftenlisten oder plötzliches Gedränge."}
+          ],
           name: "Mercat de la Boqueria / La Rambla",
           shortDesc: "Europas bekannteste Markthalle.",
           longDesc: "Ein Rausch der Düfte und Farben mit frischem Obst, Jamón Ibérico, Meeresfrüchten und Tapas-Bars. Schon im Mittelalter wurde hier vor dem Stadttor Fleisch verkauft; das heutige Eisendach stammt von 1914.",
@@ -898,11 +1045,34 @@
               title: "Você está pisando num Miró",
               text: "No meio da Rambla, quase em frente ao mercado, há um mosaico redondo e colorido no chão, de Joan Miró (1976). O artista nasceu bem perto, no Passatge del Crèdit. Ele queria justamente que as pessoas pisassem na obra – ela dá as boas-vindas a quem chega à cidade pelo mar."
             }
+          },
+          {
+            img: "416 Casa Bruno Cuadros, la Rambla 82 (Barcelona).jpg",
+            author: "Enric",
+            de: {
+              title: "Das Haus der Regenschirme",
+              text: "Direkt neben dem Miró-Mosaik, an der Ecke Rambla 82 / Pla de la Boqueria, steht die Casa Bruno Cuadros – von den Barcelonesen »Casa dels Paraigües« genannt, Haus der Regenschirme. Das Haus von 1858 ließ der Schirmhändler Bruno Cuadros ab 1883 umgestalten, als Werbung für seinen Laden im Erdgeschoss. Der Architekt Josep Vilaseca – derselbe, der später den Arc de Triomf baute (Station 26) – bedeckte die Fassade mit Schirmen und Fächern, bunten Glasfenstern und Bildern nach japanischen Holzschnitten. Schau auch nach oben: Balkone und Galerie im obersten Stock stecken voller ägyptischer Motive."
+            },
+            pt: {
+              title: "A casa dos guarda-chuvas",
+              text: "Bem ao lado do mosaico de Miró, na esquina da Rambla 82 com o Pla de la Boqueria, fica a Casa Bruno Cuadros – chamada pelos barceloneses de 'Casa dels Paraigües', a casa dos guarda-chuvas. O prédio de 1858 foi reformado a partir de 1883 a pedido do comerciante de guarda-chuvas Bruno Cuadros, como propaganda da sua loja no térreo. O arquiteto Josep Vilaseca – o mesmo que depois construiu o Arc de Triomf (parada 26) – cobriu a fachada de guarda-chuvas e leques, vitrais coloridos e pinturas inspiradas em gravuras japonesas. Olhe também para cima: as varandas e a galeria do último andar estão cheias de motivos egípcios."
+            }
+          },
+          {
+            img: "568 Casa Bruno Cuadros, pla de la Boqueria 1 - la Rambla 82 (Barcelona), drac xinès.jpg",
+            de: {
+              title: "Der Drache mit dem Schirm",
+              text: "Das auffälligste Detail hängt an der Hausecke: ein großer chinesischer Drache aus Schmiedeeisen, der eine Laterne, einen Fächer und einen Regenschirm hält – ein Werbeschild, das niemand übersehen konnte. Nach dem Drachen der Casa Batlló ist das schon der zweite Drache der Tour. Die Fassade wurde 1980 restauriert und gehört heute zu den meistfotografierten Ecken der Rambla."
+            },
+            pt: {
+              title: "O dragão com o guarda-chuva",
+              text: "O detalhe mais chamativo fica na esquina do prédio: um grande dragão chinês de ferro forjado segurando uma lanterna, um leque e um guarda-chuva – uma placa de propaganda impossível de ignorar. Depois do dragão da Casa Batlló, este já é o segundo dragão do roteiro. A fachada foi restaurada em 1980 e hoje é um dos cantos mais fotografados da Rambla."
+            }
           }
         ]
       },
       {
-        id: 15,
+        id: 16,
         coords: [41.3758, 2.1778],
         wiki: "https://pt.wikipedia.org/wiki/Monumento_a_Colombo",
         pt: {
@@ -917,6 +1087,9 @@
         },
         highlights: [
           {
+            img: "Monument Christophe Colomb, Barcelone.jpg",
+            author: "Bernard Gagnon",
+            license: "CC BY-SA 4.0",
             de: {
               title: "Er zeigt in die falsche Richtung",
               text: "Kolumbus streckt den Arm aus – aber nicht nach Amerika, das im Westen läge, sondern hinaus aufs Mittelmeer. Ein beliebter Witz der Barcelonesen. Unten bewachen acht bronzene Löwen den Sockel."
@@ -929,9 +1102,10 @@
         ]
       },
       {
-        id: 16,
+        id: 17,
         coords: [41.375138, 2.180848],
         wiki: "",
+        img: "J23 539 Rambla de Mar, geöffnet.jpg",
         pt: {
           name: "Rambla de Mar",
           shortDesc: "Passarela de madeira ondulada sobre a água.",
@@ -944,22 +1118,31 @@
         }
       },
       {
-        id: 17,
+        id: 18,
         coords: [41.375283, 2.178901],
         wiki: "",
+        img: "W Barcelona (Hotel Vela) des del mar 02.jpg",
+        author: "Jordiferrer",
+        nextByBoat: true,
         pt: {
+          notes: [
+            {"type": "info", "text": "Saídas a cada 15–30 minutos, aprox. 1,90 € por trecho (valores de 2024)."}
+          ],
           name: "Embarque Bus Nàutic",
-          shortDesc: "Barco solar até a área do Hotel W.",
-          longDesc: "Uma travessia rápida e relaxante pelo porto por cerca de 1,90 €, economizando caminhada e oferecendo uma vista linda da cidade."
+          shortDesc: "Barco solar atravessando o porto até o Hotel W.",
+          longDesc: "Desde julho de 2024, o Bus Nàutic sai do Portal de la Pau, bem ao pé da coluna de Colombo, e atravessa o porto até o Moll de Llevant, junto ao Hotel W. Os dois catamarãs elétricos também são carregados por painéis solares. A travessia leva cerca de 10 minutos, poupa a longa caminhada em volta da doca – e a foto acima mostra o que espera você na chegada."
         },
         de: {
+          notes: [
+            {"type": "info", "text": "Abfahrt etwa alle 15–30 Minuten, ca. 1,90 € pro Fahrt (Stand 2024)."}
+          ],
           name: "Bus Nàutic Haltestelle",
-          shortDesc: "Solarfähre zur Barceloneta / Hotel W.",
-          longDesc: "Sehr günstige Hafenüberfahrt (~1,90 €), die Fußweg spart und wunderschöne Panoramablicke bietet."
+          shortDesc: "Solarfähre quer durch den Hafen zum W-Hotel.",
+          longDesc: "Seit Juli 2024 fährt der Bus Nàutic vom Portal de la Pau, direkt am Fuß der Kolumbussäule, quer durch den Hafen zum Moll de Llevant beim W-Hotel. Die zwei elektrischen Katamarane laden auch über Solarpaneele. Die Fahrt dauert etwa 10 Minuten, spart den langen Fußweg um das Hafenbecken – und das Foto oben zeigt, was dich am Ziel erwartet."
         }
       },
       {
-        id: 18,
+        id: 19,
         coords: [41.369966, 2.188416],
         wiki: "",
         pt: {
@@ -971,34 +1154,53 @@
           name: "Honest Greens Barceloneta",
           shortDesc: "Perfekter Mittagsstopp am Strand.",
           longDesc: "Sehr beliebtes Restaurant für gesunde Bowls, Gegrilltes und hausgemachte Limonaden."
-        }
+        },
+        highlights: [
+          {
+            img: "Hotel vela W, Barcelona, Catalunya, España.jpg",
+            author: "Iván Melenchón Serrano",
+            license: "CC0",
+            de: {
+              title: "Das Segel am Hafen",
+              text: "Gleich nebenan ragt das W Barcelona auf – wegen seiner Form »Hotel Vela« (Segel-Hotel) genannt. Entworfen hat es Ricardo Bofill, eröffnet wurde es 2009. Es steht auf rund 7 Hektar Land, das beim Bau der neuen Hafeneinfahrt dem Meer abgerungen wurde."
+            },
+            pt: {
+              title: "A vela do porto",
+              text: "Logo ao lado se ergue o W Barcelona – chamado de 'Hotel Vela' por causa da forma. Foi projetado por Ricardo Bofill e inaugurado em 2009. Fica sobre cerca de 7 hectares de terreno conquistado ao mar na construção da nova entrada do porto."
+            }
+          }
+        ]
       },
       {
-        id: 19,
+        id: 20,
         coords: [41.374774, 2.190016],
         wiki: "https://pt.wikipedia.org/wiki/Barceloneta",
         pt: {
+          notes: [
+            {"type": "warn", "text": "Não compre mojitos, cerveja ou frutas dos vendedores ambulantes na praia – sem qualquer controle de higiene (detalhes abaixo). E nunca deixe objetos de valor sozinhos na toalha: também há ladrões por aqui."}
+          ],
           name: "Praia da Barceloneta",
           shortDesc: "A praia do antigo bairro de pescadores.",
-          longDesc: "A praia da Barceloneta pertence ao bairro de mesmo nome, logo atrás do calçadão – um antigo bairro de pescadores e trabalhadores do porto, de ruelas estreitas e casas pequenas coladas umas às outras. Ao sul, o Hotel W em forma de vela, de Ricardo Bofill, marca o horizonte.",
-          gastro: "⚠️ Não compre mojitos, cerveja ou frutas dos vendedores ambulantes na praia – sem qualquer controle de higiene (detalhes abaixo)."
+          longDesc: "A praia da Barceloneta pertence ao bairro de mesmo nome, logo atrás do calçadão – um antigo bairro de pescadores e trabalhadores do porto, de ruelas estreitas e casas pequenas coladas umas às outras. Ao sul, o Hotel W em forma de vela, de Ricardo Bofill, marca o horizonte."
         },
         de: {
+          notes: [
+            {"type": "warn", "text": "Kauf keine Mojitos, Bier oder Obst bei den fliegenden Händlern am Strand – ohne jede Hygienekontrolle (Details unten). Und lass Wertsachen nie unbeaufsichtigt auf dem Handtuch liegen, auch hier sind Diebe unterwegs."}
+          ],
           name: "Barceloneta Strand",
           shortDesc: "Der Strand des alten Fischerviertels.",
-          longDesc: "Der Strand gehört zum gleichnamigen Viertel direkt hinter der Promenade – einem alten Fischer- und Hafenarbeiterviertel mit schmalen Gassen und kleinen, eng aneinandergebauten Häusern. Im Süden setzt das segelförmige W-Hotel von Ricardo Bofill den Akzent am Horizont.",
-          gastro: "⚠️ Kauf keine Mojitos, Bier oder Obst bei den fliegenden Händlern am Strand – ohne jede Hygienekontrolle (Details unten)."
+          longDesc: "Der Strand gehört zum gleichnamigen Viertel direkt hinter der Promenade – einem alten Fischer- und Hafenarbeiterviertel mit schmalen Gassen und kleinen, eng aneinandergebauten Häusern. Im Süden setzt das segelförmige W-Hotel von Ricardo Bofill den Akzent am Horizont."
         },
         highlights: [
           {
             img: "Barrio de la Barceloneta.jpg",
             de: {
               title: "Das Fischerviertel hinter dem Strand",
-              text: "Die Barceloneta entstand ab 1753 auf angeschwemmtem Land am Hafen – für die Familien, deren Häuser in La Ribera für die Zitadelle abgerissen worden waren (mehr dazu bei Station 23). Militäringenieure planten ein strenges Raster aus langen, schmalen Häuserblöcken. Hier wohnten Fischer, Seeleute und Hafenarbeiter, später auch die Arbeiter der Werften und Fabriken am Hafen. Lauf ruhig ein paar Meter in die Gassen hinein: Wäsche an den Balkonen, kleine Bars, Nachbarn, die sich über die Straße hinweg unterhalten – das Viertel hat bis heute ein eigenes Dorfgefühl."
+              text: "Die Barceloneta entstand ab 1753 auf angeschwemmtem Land am Hafen – für die Familien, deren Häuser in La Ribera für die Zitadelle abgerissen worden waren (mehr dazu bei Station 24). Militäringenieure planten ein strenges Raster aus langen, schmalen Häuserblöcken. Hier wohnten Fischer, Seeleute und Hafenarbeiter, später auch die Arbeiter der Werften und Fabriken am Hafen. Lauf ruhig ein paar Meter in die Gassen hinein: Wäsche an den Balkonen, kleine Bars, Nachbarn, die sich über die Straße hinweg unterhalten – das Viertel hat bis heute ein eigenes Dorfgefühl."
             },
             pt: {
               title: "O bairro de pescadores atrás da praia",
-              text: "A Barceloneta surgiu a partir de 1753 em terreno aterrado junto ao porto – para as famílias cujas casas em La Ribera tinham sido demolidas para a Cidadela (mais na parada 23). Engenheiros militares traçaram uma grade rígida de quarteirões longos e estreitos. Aqui moravam pescadores, marinheiros e trabalhadores do porto, depois também os operários dos estaleiros e fábricas da região. Entre alguns metros nas ruelas: roupa estendida nas varandas, barzinhos, vizinhos conversando de um lado ao outro da rua – o bairro tem até hoje um clima de vila."
+              text: "A Barceloneta surgiu a partir de 1753 em terreno aterrado junto ao porto – para as famílias cujas casas em La Ribera tinham sido demolidas para a Cidadela (mais na parada 24). Engenheiros militares traçaram uma grade rígida de quarteirões longos e estreitos. Aqui moravam pescadores, marinheiros e trabalhadores do porto, depois também os operários dos estaleiros e fábricas da região. Entre alguns metros nas ruelas: roupa estendida nas varandas, barzinhos, vizinhos conversando de um lado ao outro da rua – o bairro tem até hoje um clima de vila."
             }
           },
           {
@@ -1059,9 +1261,11 @@
         ]
       },
       {
-        id: 20,
+        id: 21,
         coords: [41.3810, 2.1862],
         wiki: "",
+        img: "014 Port Vell, moll del Dipòsit i Palau de Mar.JPG",
+        author: "Enfo",
         pt: {
           name: "Museu d'Història de Catalunya",
           shortDesc: "Armazém histórico do porto (Palau de Mar).",
@@ -1074,6 +1278,9 @@
         },
         highlights: [
           {
+            img: "156 Fanal de Gaudí, pla de Palau.JPG",
+            author: "Enfo",
+            license: "CC BY-SA 3.0 ES",
             de: {
               title: "Noch mehr Gaudí-Laternen",
               text: "Auf dem Weg Richtung Santa Maria del Mar überquerst du den Pla de Palau. Achte dort auf die Straßenlaternen: Sie stammen wie die an der Plaça Reial vom jungen Gaudí."
@@ -1086,7 +1293,7 @@
         ]
       },
       {
-        id: 21,
+        id: 22,
         coords: [41.3836, 2.1821],
         wiki: "https://pt.wikipedia.org/wiki/Bas%C3%ADlica_de_Santa_Maria_do_Mar",
         pt: {
@@ -1139,7 +1346,7 @@
         ]
       },
       {
-        id: 22,
+        id: 23,
         coords: [41.3849, 2.1835],
         wiki: "",
         pt: {
@@ -1156,6 +1363,9 @@
         },
         highlights: [
           {
+            img: "Carrer Montcada- Museu Picasso.jpg",
+            author: "Kippelboy",
+            license: "CC BY-SA 3.0 ES",
             de: {
               title: "Picasso in fünf Palästen",
               text: "In der Carrer de Montcada reihten sich einst die Stadtpaläste reicher Kaufleute. Fünf davon bilden heute zusammen das Museu Picasso mit einer der wichtigsten Sammlungen seines Frühwerks. Auch ohne Ticket lohnt ein Blick in die gotischen Innenhöfe."
@@ -1168,7 +1378,7 @@
         ]
       },
       {
-        id: 23,
+        id: 24,
         coords: [41.38577, 2.183695],
         wiki: "",
         pt: {
@@ -1198,7 +1408,7 @@
         ]
       },
       {
-        id: 24,
+        id: 25,
         coords: [41.3882, 2.1874],
         wiki: "https://pt.wikipedia.org/wiki/Parque_da_Cidadela",
         pt: {
@@ -1240,7 +1450,7 @@
         ]
       },
       {
-        id: 25,
+        id: 26,
         coords: [41.3911, 2.1806],
         wiki: "https://pt.wikipedia.org/wiki/Arco_do_Triunfo_(Barcelona)",
         pt: {
@@ -1283,7 +1493,7 @@
         ]
       },
       {
-        id: 26,
+        id: 27,
         coords: [41.399763, 2.180718],
         wiki: "",
         pt: {
@@ -1313,15 +1523,23 @@
         ]
       },
       {
-        id: 27,
+        id: 28,
         coords: [41.4036, 2.1744],
         wiki: "https://pt.wikipedia.org/wiki/Templo_Expiat%C3%B3rio_da_Sagrada_Fam%C3%ADlia",
         pt: {
+          notes: [
+            {"type": "ticket", "text": "Os ingressos são praticamente só online, com horário marcado – muitas vezes esgotados com dias ou semanas de antecedência, especialmente no ano de Gaudí, 2026. Reserve antes, sem falta. Dica: fim da tarde, quando o sol entra pelos vitrais vermelhos do lado oeste.", "url": "https://sagradafamilia.org", "linkLabel": "sagradafamilia.org"},
+            {"type": "warn", "text": "O código de vestimenta é rigorosamente controlado: ombros e joelhos cobertos, nada de roupa de praia nem chinelos. Quem for barrado não recebe o dinheiro de volta. Um lenço ou casaquinho leve na mochila salva a visita no verão."}
+          ],
           name: "Sagrada Família",
           shortDesc: "O grande encerramento do roteiro.",
           longDesc: "A pedra fundamental foi lançada em 1882; um ano depois, Gaudí assumiu a obra e dedicou a ela o resto da vida. Em 2026, centenário de sua morte, a basílica atingiu a altura máxima e se tornou a igreja mais alta do mundo. Ainda falta a fachada principal, a da Glória."
         },
         de: {
+          notes: [
+            {"type": "ticket", "text": "Tickets gibt es praktisch nur online, mit festem Zeitfenster – oft Tage bis Wochen im Voraus ausgebucht, im Gaudí-Jahr 2026 besonders. Unbedingt vorher buchen. Tipp: später Nachmittag, wenn die Abendsonne durch die roten Westfenster fällt.", "url": "https://sagradafamilia.org", "linkLabel": "sagradafamilia.org"},
+            {"type": "warn", "text": "Die Kleiderordnung wird streng kontrolliert: Schultern und Knie bedeckt, keine Strandkleidung, keine Flip-Flops. Wer abgewiesen wird, bekommt das Geld nicht zurück. Ein Tuch oder eine leichte Jacke im Rucksack rettet im Sommer den Besuch."}
+          ],
           name: "Sagrada Família",
           shortDesc: "Das krönende Highlight der Tour.",
           longDesc: "Der Grundstein wurde 1882 gelegt, ein Jahr später übernahm Gaudí den Bau und widmete ihm den Rest seines Lebens. 2026, zu seinem 100. Todestag, hat die Basilika ihre volle Höhe erreicht und ist nun die höchste Kirche der Welt. Noch fehlt die Hauptfassade, die Glorienfassade."
@@ -1451,17 +1669,23 @@
 
     // ---------- App state ----------
     let currentLang = loadStored('bcn_tour_lang_v2', 'pt');
-    // v2: a new stop 3 (Passeig de Gràcia) was inserted, so old ids >= 3 move up by one
-    let completedStops = loadStored('bcn_tour_completed_v2', null);
+    // Saved progress migrations when stops were inserted:
+    // v2: new stop 3 (Passeig de Gràcia)  -> old ids >= 3 move up by one
+    // v3: new stop 13 (Temple d'August)   -> v2 ids >= 13 move up by one
+    let completedStops = loadStored('bcn_tour_completed_v3', null);
     if (completedStops === null) {
-      completedStops = loadStored('bcn_tour_completed', []).map(id => id >= 3 ? id + 1 : id);
-      saveStored('bcn_tour_completed_v2', completedStops);
+      let v2 = loadStored('bcn_tour_completed_v2', null);
+      if (v2 === null) v2 = loadStored('bcn_tour_completed', []).map(id => id >= 3 ? id + 1 : id);
+      completedStops = v2.map(id => id >= 13 ? id + 1 : id);
+      saveStored('bcn_tour_completed_v3', completedStops);
     }
     let showWC = true;
     let userMarker = null;
     let watchId = null;
     const openDetails = new Set();     // stop ids with expanded details
-    let lightboxState = null;           // { stopId, index }
+    let lightboxState = null;           // { stopId, index }  index = 'main' or highlight index
+    let nearStopId = null;              // stop the GPS says you are standing at
+    let dismissedNearId = null;         // banner closed for this stop
 
     const map = L.map('map').setView([41.385, 2.175], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1490,6 +1714,75 @@
 
     function getStop(id) { return stops.find(s => s.id === id); }
 
+    // Straight-line distance in metres
+    function distanceMeters(a, b) {
+      const R = 6371000, rad = x => x * Math.PI / 180;
+      const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
+    // Rough walking estimate: streets are ~30 % longer than the straight line, 80 m per minute
+    function walkEstimate(a, b) {
+      const meters = distanceMeters(a, b) * 1.3;
+      const shown = meters < 1000 ? `${Math.max(50, Math.round(meters / 50) * 50)} m` : `${(meters / 1000).toFixed(1).replace('.', currentLang === 'pt' || currentLang === 'de' ? ',' : '.')} km`;
+      return { label: shown, minutes: Math.max(1, Math.round(meters / 80)) };
+    }
+
+    function mapsUrl(coords) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}&travelmode=walking`;
+    }
+
+    const NOTE_STYLES = {
+      warn:   { icon: '⚠️', cls: 'bg-red-50 border-red-200 text-red-900' },
+      ticket: { icon: '🎟️', cls: 'bg-indigo-50 border-indigo-200 text-indigo-900' },
+      info:   { icon: 'ℹ️', cls: 'bg-sky-50 border-sky-200 text-sky-900' }
+    };
+    function notesHtml(notes) {
+      if (!notes || !notes.length) return '';
+      return notes.map(n => {
+        const st = NOTE_STYLES[n.type] || NOTE_STYLES.info;
+        const link = n.url ? ` <a href="${n.url}" target="_blank" rel="noopener noreferrer" class="underline font-semibold whitespace-nowrap">${escapeHtml(n.linkLabel || n.url)} ↗</a>` : '';
+        return `<div class="p-2.5 border rounded-lg font-medium flex items-start gap-1.5 ${st.cls}"><span class="shrink-0">${st.icon}</span><div>${escapeHtml(n.text)}${link}</div></div>`;
+      }).join('');
+    }
+
+    function stopPhotoHtml(stop, txt) {
+      if (!stop.img) return '';
+      const name = escapeHtml(stop[currentLang].name);
+      return `
+        <figure class="space-y-1">
+          <button onclick="openLightbox(${stop.id}, 'main')" class="hl-img-wrap block w-full aspect-[16/9] overflow-hidden rounded-lg" aria-label="${name}">
+            <img src="${commonsImg(stop.img, 500)}" alt="${name}" loading="lazy" decoding="async" class="w-full h-full object-cover"
+                 onerror="this.closest('figure').style.display='none'">
+          </button>
+          <figcaption class="text-[10px] text-slate-400">${creditHtml(stop, txt)}</figcaption>
+        </figure>`;
+    }
+
+    function navHtml(stop, txt) {
+      const i = stops.findIndex(s => s.id === stop.id);
+      const next = stops[i + 1];
+      if (!next) {
+        return `<div class="mt-3 px-3 py-2 rounded-lg bg-green-50 border border-green-200 text-green-800 text-xs font-semibold text-center">${txt.endOfTour}</div>`;
+      }
+      const nextName = escapeHtml(next[currentLang].name);
+      if (stop.nextByBoat) {
+        return `
+          <div class="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-cyan-50 border border-cyan-200 text-cyan-900 text-xs font-semibold">
+            <span class="flex items-center gap-2"><i data-lucide="ship" class="w-4 h-4 shrink-0"></i> ${next.id}. ${nextName}</span>
+            <span class="shrink-0 text-cyan-700">${txt.boatLeg}</span>
+          </div>`;
+      }
+      const w = walkEstimate(stop.coords, next.coords);
+      return `
+        <a href="${mapsUrl(next.coords)}" target="_blank" rel="noopener noreferrer"
+           class="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs font-semibold hover:bg-indigo-100 transition">
+          <span class="flex items-center gap-2 min-w-0"><i data-lucide="footprints" class="w-4 h-4 shrink-0"></i><span class="truncate">${txt.nextStop} ${next.id}: ${nextName}</span></span>
+          <span class="shrink-0 text-indigo-500 flex items-center gap-1">${w.label} · ≈ ${w.minutes} ${txt.walkMin} <i data-lucide="external-link" class="w-3 h-3"></i></span>
+        </a>`;
+    }
+
     // ---------- Render ----------
     function updateUI() {
       const txt = uiTranslations[currentLang];
@@ -1515,6 +1808,7 @@
 
       renderStops();
       renderToilets();
+      updateNearBanner();
     }
 
     function setLanguage(lang) {
@@ -1627,7 +1921,7 @@
         }
 
         // Popup: show first highlight photo as a teaser if available
-        const firstImg = hasDetails ? stop.highlights.find(h => h.img) : null;
+        const firstImg = stop.img ? stop : (hasDetails ? stop.highlights.find(h => h.img) : null);
         const popupImg = firstImg
           ? `<img src="${commonsImg(firstImg.img, 330)}" alt="" style="width:200px;height:120px;object-fit:cover;border-radius:6px;margin-top:6px" loading="lazy" onerror="this.remove()">`
           : '';
@@ -1635,7 +1929,8 @@
 
         const card = document.createElement('div');
         card.id = `stop-card-${stop.id}`;
-        card.className = `p-4 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/30' : 'border-slate-200'} transition-all hover:shadow-md`;
+        card.className = `p-4 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/30' : 'border-slate-200'} transition-all hover:shadow-md ${stop.id === nearStopId ? 'is-near' : ''}`;
+        card.dataset.nearLabel = `📍 ${txt.hereNow}`;
 
         card.innerHTML = `
           <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="focusStop(${stop.id})">
@@ -1654,6 +1949,7 @@
           </div>
 
           <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-2">
+            ${stopPhotoHtml(stop, txt)}
             <p class="leading-relaxed">${escapeHtml(data.longDesc)}</p>
 
             ${data.gastro ? `
@@ -1663,6 +1959,8 @@
               </div>
             ` : ''}
 
+            ${notesHtml(data.notes)}
+
             ${stop.wiki ? `
               <a href="${stop.wiki}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-indigo-600 hover:underline font-semibold pt-1">
                 ${txt.readMoreWiki} <i data-lucide="external-link" class="w-3 h-3"></i>
@@ -1670,6 +1968,7 @@
             ` : ''}
 
             ${highlightsHtml(stop, txt)}
+            ${navHtml(stop, txt)}
           </div>
         `;
 
@@ -1722,7 +2021,7 @@
       } else {
         completedStops.push(id);
       }
-      saveStored('bcn_tour_completed_v2', completedStops);
+      saveStored('bcn_tour_completed_v3', completedStops);
       updateUI();
     };
 
@@ -1783,26 +2082,30 @@
     };
 
     // ---------- Lightbox ----------
+    // All photos of a stop: the stop photo ('main') first, then highlight photos (by index)
     function lightboxList(stopId) {
-      return getStop(stopId).highlights
-        .map((h, idx) => ({ h, idx }))
-        .filter(item => item.h.img);
+      const stop = getStop(stopId);
+      const list = [];
+      if (stop.img) list.push({ key: 'main', src: stop, title: stop[currentLang].name, text: stop[currentLang].shortDesc });
+      (stop.highlights || []).forEach((h, idx) => {
+        if (h.img) list.push({ key: idx, src: h, title: h[currentLang].title, text: h[currentLang].text });
+      });
+      return list;
     }
 
     function renderLightbox() {
       const { stopId, index } = lightboxState;
       const txt = uiTranslations[currentLang];
       const list = lightboxList(stopId);
-      const pos = list.findIndex(item => item.idx === index);
-      const h = list[pos].h;
-      const t = h[currentLang];
+      const pos = Math.max(0, list.findIndex(item => item.key === index));
+      const item = list[pos];
 
       const img = document.getElementById('lb-img');
-      img.src = commonsImg(h.img, 1280);
-      img.alt = t.title;
-      document.getElementById('lb-title').innerText = t.title;
-      document.getElementById('lb-text').innerText = t.text;
-      document.getElementById('lb-credit').innerHTML = creditHtml(h, txt);
+      img.src = commonsImg(item.src.img, 1280);
+      img.alt = item.title;
+      document.getElementById('lb-title').innerText = item.title;
+      document.getElementById('lb-text').innerText = item.text;
+      document.getElementById('lb-credit').innerHTML = creditHtml(item.src, txt);
       document.getElementById('lb-counter').innerText = `${pos + 1} / ${list.length}`;
       document.getElementById('lb-prev').style.visibility = list.length > 1 ? 'visible' : 'hidden';
       document.getElementById('lb-next').style.visibility = list.length > 1 ? 'visible' : 'hidden';
@@ -1826,9 +2129,9 @@
     window.stepLightbox = function(dir) {
       if (!lightboxState) return;
       const list = lightboxList(lightboxState.stopId);
-      const pos = list.findIndex(item => item.idx === lightboxState.index);
+      const pos = list.findIndex(item => item.key === lightboxState.index);
       const next = (pos + dir + list.length) % list.length;
-      lightboxState.index = list[next].idx;
+      lightboxState.index = list[next].key;
       renderLightbox();
     };
 
@@ -1867,6 +2170,7 @@
         btn.classList.remove('bg-indigo-600', 'text-white');
         btn.classList.add('bg-slate-100');
         label.innerText = txt.gpsLabel;
+        setNearStop(null);
         return;
       }
 
@@ -1888,6 +2192,7 @@
               userMarker.setLatLng(userCoords);
             }
             label.innerText = uiTranslations[currentLang].gpsActive;
+            checkProximity(userCoords, pos.coords.accuracy);
           },
           () => {
             alert(uiTranslations[currentLang].gpsError);
@@ -1898,6 +2203,64 @@
       } else {
         alert(txt.noGps);
       }
+    };
+
+    // ---------- "You are here": detect when the GPS position reaches a stop ----------
+    const NEAR_ENTER_M = 60;   // closer than this -> you are at the stop
+    const NEAR_LEAVE_M = 110;  // farther than this -> you left it (gap avoids flickering)
+
+    function checkProximity(coords, accuracy) {
+      if (nearStopId !== null && distanceMeters(coords, getStop(nearStopId).coords) > NEAR_LEAVE_M) {
+        setNearStop(null);
+      }
+      let best = null, bestD = Infinity;
+      stops.forEach(s => {
+        const d = distanceMeters(coords, s.coords);
+        if (d < bestD) { bestD = d; best = s; }
+      });
+      const tolerance = Math.min(accuracy || 0, 40);   // be a bit lenient with a fuzzy fix
+      if (best && bestD <= NEAR_ENTER_M + tolerance && best.id !== nearStopId) {
+        setNearStop(best.id);
+      }
+    }
+
+    function setNearStop(id) {
+      if (id === nearStopId) return;
+      document.querySelectorAll('.is-near').forEach(el => el.classList.remove('is-near'));
+      nearStopId = id;
+      if (id !== null) {
+        const card = document.getElementById(`stop-card-${id}`);
+        if (card) card.classList.add('is-near');
+        if (navigator.vibrate) { try { navigator.vibrate(120); } catch (e) {} }
+      }
+      updateNearBanner();
+    }
+
+    function updateNearBanner() {
+      const banner = document.getElementById('near-banner');
+      if (!banner) return;
+      if (nearStopId === null || nearStopId === dismissedNearId) {
+        banner.classList.add('hidden');
+        return;
+      }
+      const txt = uiTranslations[currentLang];
+      const stop = getStop(nearStopId);
+      document.getElementById('near-text').innerText = `📍 ${txt.hereNow}: ${stop.id}. ${stop[currentLang].name}`;
+      document.getElementById('near-show').innerText = txt.show;
+      document.getElementById('near-listen').innerText = `🔊 ${txt.listen}`;
+      const visitBtn = document.getElementById('near-visit');
+      visitBtn.innerText = txt.markVisitedShort;
+      visitBtn.style.display = completedStops.includes(stop.id) ? 'none' : '';
+      document.getElementById('near-close').setAttribute('aria-label', txt.close);
+      banner.classList.remove('hidden');
+    }
+
+    window.nearAction = function(action) {
+      if (nearStopId === null) return;
+      if (action === 'show') scrollToCard(nearStopId);
+      if (action === 'listen') speakStop(nearStopId, false);
+      if (action === 'visit' && !completedStops.includes(nearStopId)) toggleStop(nearStopId);
+      if (action === 'close') { dismissedNearId = nearStopId; updateNearBanner(); }
     };
 
     // ---------- Init ----------
