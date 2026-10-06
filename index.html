@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guia Interativo de Barcelona & Audioguia</title>
+  <title>Barcelona Walking Tour & Audioguide</title>
   
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -29,8 +29,14 @@
       line-height: 26px;
       border: 2px solid white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
     }
-    .custom-div-icon.completed { background: #22c55e; }
+    .custom-div-icon:hover {
+      transform: scale(1.15);
+    }
+    .custom-div-icon.completed { 
+      background: #22c55e; 
+    }
 
     /* WC Marker */
     .wc-icon {
@@ -59,57 +65,67 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans">
 
-  <!-- Header -->
   <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto flex justify-between items-center">
-      <div>
-        <h1 class="text-xl font-bold flex items-center gap-2">
-          <i data-lucide="map-pin"></i> Tour Barcelona
-        </h1>
-        <p class="text-xs text-indigo-200">Diagonal → Sagrada Família</p>
-      </div>
+    <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-3">
       <div class="flex items-center gap-2">
-        <span id="progress-text" class="text-xs bg-indigo-700 px-3 py-1.5 rounded-full font-semibold">0 / 26</span>
+        <i data-lucide="map-pin" class="w-6 h-6 text-amber-300"></i>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold leading-tight" id="app-title">Tour Barcelona</h1>
+          <p class="text-xs text-indigo-200" id="app-subtitle">Diagonal → Sagrada Família</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- Progress Badge -->
+        <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 26</span>
+        
+        <!-- Language Switcher Buttons -->
+        <div class="flex items-center bg-indigo-800 p-1 rounded-lg border border-indigo-500/50">
+          <button id="lang-pt-btn" onclick="setLanguage('pt')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm" title="Português (Brasil)">
+            <span class="text-sm">🇧🇷</span> <span class="hidden sm:inline font-bold">PT</span>
+          </button>
+          <button id="lang-de-btn" onclick="setLanguage('de')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white" title="Deutsch">
+            <span class="text-sm">🇩🇪</span> <span class="hidden sm:inline font-bold">DE</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Controls Bar -->
   <div class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
-    <div class="max-w-5xl mx-auto flex flex-wrap gap-2 justify-between items-center">
+    <div class="max-w-5xl mx-auto flex flex-wrap gap-2 justify-between items-center text-xs">
       <!-- GPS Toggle Button -->
-      <button id="gps-btn" onclick="toggleGPS()" class="px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-        <i data-lucide="navigation" class="w-4 h-4"></i> Localização GPS
+      <button id="gps-btn" onclick="toggleGPS()" class="px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
+        <i data-lucide="navigation" class="w-4 h-4"></i> <span id="label-gps">Localização GPS</span>
       </button>
 
       <!-- Filter Toggles -->
       <div class="flex items-center gap-2">
-        <button id="wc-toggle" onclick="toggleWC()" class="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-          <i data-lucide="bath" class="w-4 h-4"></i> 🚻 Mostrar Banheiros
+        <button id="wc-toggle" onclick="toggleWC()" class="px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
+          <i data-lucide="bath" class="w-4 h-4"></i> <span id="label-wc">🚻 Mostrar Banheiros</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-4">
     
     <!-- Left Column: Map -->
     <div class="w-full md:w-1/2 flex flex-col gap-4">
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[120px]">
+      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[130px]">
         <div id="map"></div>
-        <div class="p-3 bg-slate-100 border-t border-slate-200 text-xs text-slate-600 flex justify-between items-center">
-          <span><i data-lucide="footprints" class="inline w-3.5 h-3.5"></i> ~12-14 km</span>
-          <span><i data-lucide="clock" class="inline w-3.5 h-3.5"></i> ~7-9 horas</span>
+        <div class="p-3 bg-slate-100 border-t border-slate-200 text-xs text-slate-600 flex justify-between items-center font-medium">
+          <span class="flex items-center gap-1"><i data-lucide="footprints" class="w-4 h-4 text-indigo-500"></i> ~12-14 km</span>
+          <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> ~7-9 h</span>
         </div>
       </div>
     </div>
 
     <!-- Right Column: Interactive List -->
     <div class="w-full md:w-1/2 flex flex-col gap-3" id="stops-container">
-      <!-- Cards são renderizados aqui via JavaScript -->
+      <!-- Cards rendered via JS -->
     </div>
 
   </main>
@@ -118,37 +134,449 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // Dados da Rota
+    // System UI Translations
+    const uiTranslations = {
+      pt: {
+        appTitle: "Tour Barcelona",
+        appSubtitle: "Diagonal → Sagrada Família",
+        gpsLabel: "Localização GPS",
+        gpsSearching: "Buscando sinal...",
+        gpsActive: "GPS Ativo",
+        wcShow: "🚻 Mostrar Banheiros",
+        wcHide: "🚻 Ocultar Banheiros",
+        wcPopupTitle: "Banheiro Público",
+        readMoreWiki: "Ler mais na Wikipedia",
+        audioTooltip: "Ouvir audioguia",
+        userLocation: "Sua localização atual",
+        visitedLabel: "visitados",
+        ttsUnsupported: "O seu navegador não suporta a função de áudio síntese.",
+        gpsError: "Não foi possível obter a sua localização GPS.",
+        noGps: "O seu navegador não suporta geolocalização."
+      },
+      de: {
+        appTitle: "Barcelona Rundgang",
+        appSubtitle: "Diagonal → Sagrada Família",
+        gpsLabel: "GPS Standort",
+        gpsSearching: "Ortung läuft...",
+        gpsActive: "GPS Aktiviert",
+        wcShow: "🚻 WCs anzeigen",
+        wcHide: "🚻 WCs ausblenden",
+        wcPopupTitle: "Öffentliches WC",
+        readMoreWiki: "Mehr auf Wikipedia lesen",
+        audioTooltip: "Audioguide anhören",
+        userLocation: "Dein aktueller Standort",
+        visitedLabel: "besucht",
+        ttsUnsupported: "Ihr Browser unterstützt leider keine Sprachausgabe.",
+        gpsError: "GPS-Standort konnte nicht ermittelt werden.",
+        noGps: "Ihr Browser unterstützt keine Ortung."
+      }
+    };
+
+    // Complete Multilingual Dataset (26 Stops)
     const stops = [
-      { id: 1, name: "Estação de Metrô Diagonal", coords: [41.3965, 2.1588], shortDesc: "Ponto de partida no topo do Passeig de Gràcia.", longDesc: "Aqui começa o seu roteiro a pé. O Passeig de Gràcia é a avenida mais famosa de Barcelona para admirar a arquitetura do Modernismo Catalão.", wiki: "https://pt.wikipedia.org/wiki/Passeig_de_Gr%C3%A0cia" },
-      { id: 2, name: "Casa Milà (La Pedrera)", coords: [41.3954, 2.1612], shortDesc: "Famoso edifício residencial de Gaudí.", longDesc: "Devido à sua fachada de pedra ondulada, é conhecida como 'La Pedrera' (A Pedreira). A estrutura não possui paredes mestras e apoia-se inteiramente em colunas e arcos.", wiki: "https://pt.wikipedia.org/wiki/Casa_Mil%C3%A0", gastro: "☕ Café de la Pedrera – Café histórico no térreo para um café expresso rápido." },
-      { id: 3, name: "Casa Batlló", coords: [41.3917, 2.1649], shortDesc: "O castelo de fadas de Antoni Gaudí.", longDesc: "A fachada colorida representa o mosaico da lenda de São Jorge. O teto escamosado lembra o lombo de um dragão.", wiki: "https://pt.wikipedia.org/wiki/Casa_Batll%C3%B3" },
-      { id: 4, name: "El Nacional", coords: [41.390248, 2.167854], shortDesc: "Espaço gastronômico icônico.", longDesc: "Antigo edifício industrial do século XIX restaurado, reunindo quatro restaurantes e bares sob um teto de vidro e ferro.", gastro: "🍷 Tapas & Cava Bar – Perfeito para um aperitivo ou taça de Cava no meio da manhã." },
-      { id: 5, name: "Plaça de Catalunya", coords: [41.3870, 2.1700], shortDesc: "A praça principal no centro da cidade.", longDesc: "Ponto de encontro central que conecta o centro histórico ao moderno bairro de Eixample.", wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_da_Catalunha" },
-      { id: 6, name: "El món neix en cada bes", coords: [41.3847, 2.1751], shortDesc: "Mosaico 'O Beijo' na Plaça d'Isidre Nonell.", longDesc: "Criado pelo artista Joan Fontcuberta com 4.000 fotos enviadas por moradores locais sob o tema 'Momentos de Liberdade'.", wiki: "https://es.wikipedia.org/wiki/El_mundo_nace_en_cada_beso" },
-      { id: 7, name: "Catedral de Barcelona", coords: [41.3839, 2.1762], shortDesc: "Catedral gótica principal.", longDesc: "No belo claustro ajardinado vivem há séculos exatamente 13 gansos brancos, representando a idade de Santa Eulália.", wiki: "https://pt.wikipedia.org/wiki/Catedral_de_Barcelona" },
-      { id: 8, name: "Casa de l'Ardiaca", coords: [41.3837, 2.1756], shortDesc: "Antiga casa do Arquidiácono.", longDesc: "Entre para ver o encantador pátio interno. Na porta fica a famosa caixa de correio em mármore decorada com uma tartaruga e andorinhas.", wiki: "https://ca.wikipedia.org/wiki/Casa_de_l%27Ardiaca" },
-      { id: 9, name: "Plaça de Sant Felip Neri", coords: [41.383413, 2.175122], shortDesc: "Praça histórica escondida no Bairro Gótico.", longDesc: "Um local calmo com história marcante: as marcas nas paredes da igreja são resultantes de um bombardeio em 1938 durante a Guerra Civil Espanhola." },
-      { id: 10, name: "Pont del Bisbe", coords: [41.383301, 2.176431], shortDesc: "Ponte neogótica fotogênica.", longDesc: "Conecta os edifícios governamentais na ruela Carrer del Bisbe. Há uma caveira esculpida de forma misteriosa na parte inferior da ponte." },
-      { id: 11, name: "Plaça de Sant Jaume", coords: [41.3828, 2.1768], shortDesc: "O centro político da Catalunha.", longDesc: "Aqui ficam frente a frente a Prefeitura de Barcelona (Ajuntament) e o Palácio da Generalitat de Catalunya." },
-      { id: 12, name: "Plaça Reial", coords: [41.3798, 2.1752], shortDesc: "Praça com palmeiras e arcadas.", longDesc: "Observe os dois grandes postes de iluminação na praça: estão entre os primeiros trabalhos projetados pelo jovem Antoni Gaudí.", wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_Real" },
-      { id: 13, name: "Mercat de la Boqueria / La Rambla", coords: [41.3817, 2.1715], shortDesc: "O mercado público mais famoso da Europa.", longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico serrano, frutos do mar e tapas.", wiki: "https://pt.wikipedia.org/wiki/Mercado_da_Boqueria", gastro: "🍍 Dica de Suco: Experimente um suco fresco de pitaia ou manga por 2–3 € nas bancas!" },
-      { id: 14, name: "Monumento a Colombo", coords: [41.3758, 2.1778], shortDesc: "Coluna de 60 metros com mirante.", longDesc: "Construído para a Exposição Universal de 1888. A estátua de Cristóvão Colombo aponta em direção ao mar.", wiki: "https://pt.wikipedia.org/wiki/Monumento_a_Colombo" },
-      { id: 15, name: "Rambla de Mar", coords: [41.3768, 2.1802], shortDesc: "Passarela de madeira ondulada sobre a água.", longDesc: "Conecta até o shopping Maremagnum e se abre para a passagem de grandes veleiros no porto." },
-      { id: 16, name: "Embarque Bus Nàutic", coords: [41.375283, 2.178901], shortDesc: "Barco solar até a área do Hotel W.", longDesc: "Uma travessia rápida e relaxante pelo porto por cerca de 1,90 €, economizando caminhada e oferecendo uma vista linda da cidade." },
-      { id: 17, name: "Honest Greens Barceloneta", coords: [41.3689, 2.1901], shortDesc: "Excelente opção para o almoço.", longDesc: "Restaurante muito popular com bowls saudáveis, pratos frescos e limonadas artesanais à beira-mar.", gastro: "🥗 Dica: Experimente o 'Latin Grill' ou uma das bowls sazonais com abacate." },
-      { id: 18, name: "Praia da Barceloneta", coords: [41.375101, 2.190063], shortDesc: "A praia urbana mais famosa.", longDesc: "Caminhada agradável pelo calçadão observando o mar e o marcante Hotel W em formato de vela." },
-      { id: 19, name: "Museu d'Història de Catalunya", coords: [41.3810, 2.1862], shortDesc: "Armazém histórico do porto (Palau de Mar).", longDesc: "No último andar do prédio há um bar no terraço com vista panorâmica espetacular da marina." },
-      { id: 20, name: "Santa Maria del Mar", coords: [41.3836, 2.1821], shortDesc: "A 'Catedral do Mar'.", longDesc: "Uma obra-prima do gótico catalão, construída pelos marinheiros e trabalhadores do bairro no século XIV.", wiki: "https://pt.wikipedia.org/wiki/Bas%C3%ADlica_de_Santa_Maria_do_Mar" },
-      { id: 21, name: "Ruas de El Born", coords: [41.3849, 2.1835], shortDesc: "Bairro charmoso e criativo.", longDesc: "Passeie pelas ruelas históricas perto da Carrer de Montcada (Museu Picasso) e do Passeig del Born.", gastro: "🍸 Dica Speakeasy: 'Paradiso' (Carrer de Rera Palau 4) – Drinks premiados escondidos atrás de uma lanchonete de pastrami!" },
-      { id: 22, name: "El Born Centre de Cultura i Memòria", coords: [41.3855, 2.1849], shortDesc: "Ruínas sob o antigo mercado de ferro.", longDesc: "É possível visualizar gratuitamente as ruínas arqueológicas das casas destruídas em 1714." },
-      { id: 23, name: "Parc de la Ciutadella", coords: [41.3882, 2.1874], shortDesc: "O grande parque urbano da cidade.", longDesc: "Conta com lago para pedalinhos, palmeiras e a imponente fonte 'Cascada Monumental', que teve participação do jovem Gaudí.", wiki: "https://pt.wikipedia.org/wiki/Parque_da_Cidadela" },
-      { id: 24, name: "Arc de Triomf", coords: [41.3911, 2.1806], shortDesc: "Arco do triunfo em tijolos vermelhos.", longDesc: "Construído como portão de entrada principal para a Exposição Universal de 1888.", wiki: "https://pt.wikipedia.org/wiki/Arco_do_Triunfo_(Barcelona)" },
-      { id: 25, name: "La Monumental", coords: [41.4005, 2.1798], shortDesc: "Antiga arena de touros.", longDesc: "Construída em estilo neo-mourisco. Hoje é utilizada para eventos culturais e concertos musicais." },
-      { id: 26, name: "Sagrada Família", coords: [41.4036, 2.1744], shortDesc: "O grande encerramento do roteiro.", longDesc: "A grande obra da vida de Gaudí e o símbolo máximo de Barcelona. Combina formas da natureza com arquitetura monumental.", wiki: "https://pt.wikipedia.org/wiki/Templo_Expiat%C3%B3rio_da_Sagrada_Fam%C3%ADlia" }
+      {
+        id: 1,
+        coords: [41.3965, 2.1588],
+        wiki: "https://pt.wikipedia.org/wiki/Passeig_de_Gr%C3%A0cia",
+        pt: {
+          name: "Estação de Metrô Diagonal",
+          shortDesc: "Ponto de partida no topo do Passeig de Gràcia.",
+          longDesc: "Aqui começa o seu roteiro a pé. O Passeig de Gràcia é a avenida mais famosa de Barcelona para admirar a arquitetura do Modernismo Catalão."
+        },
+        de: {
+          name: "U-Bahn Station Diagonal",
+          shortDesc: "Startpunkt am oberen Passeig de Gràcia.",
+          longDesc: "Hier startet die Route. Der Passeig de Gràcia ist die Prachtstraße Barcelonas mit beeindruckender Jugendstil-Architektur."
+        }
+      },
+      {
+        id: 2,
+        coords: [41.3954, 2.1612],
+        wiki: "https://pt.wikipedia.org/wiki/Casa_Mil%C3%A0",
+        pt: {
+          name: "Casa Milà (La Pedrera)",
+          shortDesc: "Famoso edifício residencial de Gaudí.",
+          longDesc: "Devido à sua fachada de pedra ondulada, é conhecida como 'La Pedrera' (A Pedreira). A estrutura não possui paredes mestras e apoia-se inteiramente em colunas e arcos.",
+          gastro: "☕ Café de la Pedrera – Café histórico no térreo para um café expresso rápido."
+        },
+        de: {
+          name: "Casa Milà (La Pedrera)",
+          shortDesc: "Gaudís berühmtes Wohngebäude.",
+          longDesc: "Wegen der wellenförmigen Stein-Fassade auch 'Der Steinbruch' genannt. Das Dach mit den skulpturalen Schornsteinen ist weltberühmt.",
+          gastro: "☕ Café de la Pedrera – Historisches Café im Erdgeschoss für einen schnellen Espresso."
+        }
+      },
+      {
+        id: 3,
+        coords: [41.3917, 2.1649],
+        wiki: "https://pt.wikipedia.org/wiki/Casa_Batll%C3%B3",
+        pt: {
+          name: "Casa Batlló",
+          shortDesc: "O castelo de fadas de Antoni Gaudí.",
+          longDesc: "A fachada colorida representa o mosaico da lenda de São Jorge. O teto escamosado lembra o lombo de um dragão."
+        },
+        de: {
+          name: "Casa Batlló",
+          shortDesc: "Gaudís farbenfrohes Märchenhaus.",
+          longDesc: "Die bunte Mosaikfassade stellt die Legende des Drachentöters St. Georg dar. Das schuppige Dach erinnert an einen Drachenrücken."
+        }
+      },
+      {
+        id: 4,
+        coords: [41.390248, 2.167854],
+        wiki: "",
+        pt: {
+          name: "El Nacional",
+          shortDesc: "Espaço gastronômico icônico.",
+          longDesc: "Antigo edifício industrial do século XIX restaurado, reunindo quatro restaurantes e bares sob um teto de vidro e ferro.",
+          gastro: "🍷 Tapas & Cava Bar – Perfeito para um aperitivo ou taça de Cava no meio da manhã."
+        },
+        de: {
+          name: "El Nacional",
+          shortDesc: "Spektakuläre Food-Hall im Industrie-Design.",
+          longDesc: "Ehemalige Fabrikhalle aus dem 19. Jahrhundert, die heute 4 Restaurants und 4 Spezialitätenbars unter einem Glasdach vereint.",
+          gastro: "🍷 Cava Bar – Perfekt für ein Glas gekühlten Katalanischen Schaumwein zwischendurch."
+        }
+      },
+      {
+        id: 5,
+        coords: [41.3870, 2.1700],
+        wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_da_Catalunha",
+        pt: {
+          name: "Plaça de Catalunya",
+          shortDesc: "A praça principal no centro da cidade.",
+          longDesc: "Ponto de encontro central que conecta o centro histórico ao moderno bairro de Eixample."
+        },
+        de: {
+          name: "Plaça de Catalunya",
+          shortDesc: "Der zentrale Hauptplatz Barcelonas.",
+          longDesc: "Großer Platz und Knotenpunkt, der die altspanische Altstadt mit dem modernistischen Viertel Eixample verbindet."
+        }
+      },
+      {
+        id: 6,
+        coords: [41.3847, 2.1751],
+        wiki: "https://es.wikipedia.org/wiki/El_mundo_nace_en_cada_beso",
+        pt: {
+          name: "El món neix en cada bes",
+          shortDesc: "Mosaico 'O Beijo' na Plaça d'Isidre Nonell.",
+          longDesc: "Criado pelo artista Joan Fontcuberta com 4.000 fotos enviadas por moradores locais sob o tema 'Momentos de Liberdade'."
+        },
+        de: {
+          name: "Fotomosaik 'Der Kuss' (El món neix en cada bes)",
+          shortDesc: "Riesiges Mosaik auf der Plaça d'Isidre Nonell.",
+          longDesc: "Von Joan Fontcuberta aus 4.000 Einzelfotos lokaler Bürger zum Thema 'Freiheit' zusammengestellt."
+        }
+      },
+      {
+        id: 7,
+        coords: [41.3839, 2.1762],
+        wiki: "https://pt.wikipedia.org/wiki/Catedral_de_Barcelona",
+        pt: {
+          name: "Catedral de Barcelona",
+          shortDesc: "Catedral gótica principal.",
+          longDesc: "No belo claustro ajardinado vivem há séculos exatamente 13 gansos brancos, representando a idade de Santa Eulália."
+        },
+        de: {
+          name: "Kathedrale von Barcelona",
+          shortDesc: "Gotische Hauptkathedrale (La Seu).",
+          longDesc: "Im grünen Kreuzgang leben seit Jahrhunderten genau 13 weiße Gänse, die das Alter der Heiligen Eulalia symbolisieren."
+        }
+      },
+      {
+        id: 8,
+        coords: [41.3837, 2.1756],
+        wiki: "https://ca.wikipedia.org/wiki/Casa_de_l%27Ardiaca",
+        pt: {
+          name: "Casa de l'Ardiaca",
+          shortDesc: "Antiga casa do Arquidiácono.",
+          longDesc: "Entre para ver o encantador pátio interno. Na porta fica a famosa caixa de correio em mármore decorada com uma tartaruga e andorinhas."
+        },
+        de: {
+          name: "Casa de l'Ardiaca",
+          shortDesc: "Ehemaliges Haus des Archdiakons.",
+          longDesc: "Versteckter Innenhof mit Palmen. Am Eingang befindet sich der berühmte Marmor-Briefkasten mit Schildkröte und Schwalben."
+        }
+      },
+      {
+        id: 9,
+        coords: [41.383413, 2.175122],
+        wiki: "",
+        pt: {
+          name: "Plaça de Sant Felip Neri",
+          shortDesc: "Praça histórica escondida no Bairro Gótico.",
+          longDesc: "Um local calmo com história marcante: as marcas nas paredes da igreja são resultantes de um bombardeio em 1938 durante a Guerra Civil Espanhola."
+        },
+        de: {
+          name: "Plaça de Sant Felip Neri",
+          shortDesc: "Mysteröser historischer Platz im Gotischen Viertel.",
+          longDesc: "Idyllischer Platz mit tragischer Geschichte: Die Einschusslöcher an der Kirche stammen von einer Bombe aus dem Spanischen Bürgerkrieg (1938)."
+        }
+      },
+      {
+        id: 10,
+        coords: [41.383301, 2.176431],
+        wiki: "",
+        pt: {
+          name: "Pont del Bisbe",
+          shortDesc: "Ponte neogótica fotogênica.",
+          longDesc: "Conecta os edifícios governamentais na ruela Carrer del Bisbe. Há uma caveira esculpida de forma misteriosa na parte inferior da ponte."
+        },
+        de: {
+          name: "Pont del Bisbe",
+          shortDesc: "Photogene neogotische Seufzerbrücke.",
+          longDesc: "Verbindet zwei Regierungsgebäude in der Gasse Carrer del Bisbe. Auf der Unterseite ist ein geheimnisvoller Totenkopf eingraviert."
+        }
+      },
+      {
+        id: 11,
+        coords: [41.3828, 2.1768],
+        wiki: "",
+        pt: {
+          name: "Plaça de Sant Jaume",
+          shortDesc: "O centro político da Catalunha.",
+          longDesc: "Aqui ficam frente a frente a Prefeitura de Barcelona (Ajuntament) e o Palácio da Generalitat de Catalunya."
+        },
+        de: {
+          name: "Plaça de Sant Jaume",
+          shortDesc: "Politisches Zentrum Kataloniens.",
+          longDesc: "Hier stehen sich das Rathaus von Barcelona (Ajuntament) und o Palau de la Generalitat direkt gegenüber."
+        }
+      },
+      {
+        id: 12,
+        coords: [41.3798, 2.1752],
+        wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_Real",
+        pt: {
+          name: "Plaça Reial",
+          shortDesc: "Praça com palmeiras e arcadas.",
+          longDesc: "Observe os dois grandes postes de iluminação na praça: estão entre os primeiros trabalhos projetados pelo jovem Antoni Gaudí."
+        },
+        de: {
+          name: "Plaça Reial",
+          shortDesc: "Mittelmeer-Platz mit Palmen und Arkaden.",
+          longDesc: "Achten Sie auf die beiden Straßenlaternen in der Mitte: Sie gehören zu den allerersten Werken des jungen Gaudí."
+        }
+      },
+      {
+        id: 13,
+        coords: [41.3817, 2.1715],
+        wiki: "https://pt.wikipedia.org/wiki/Mercado_da_Boqueria",
+        pt: {
+          name: "Mercat de la Boqueria / La Rambla",
+          shortDesc: "O mercado público mais famoso da Europa.",
+          longDesc: "Um espetáculo de cores e aromas com frutas frescas, presunto ibérico serrano, frutos do mar e tapas.",
+          gastro: "🍍 Dica de Suco: Experimente um suco fresco de pitaia ou manga por 2–3 € nas bancas!"
+        },
+        de: {
+          name: "Mercat de la Boqueria / La Rambla",
+          shortDesc: "Europas bekannteste Markthalle.",
+          longDesc: "Ein Rausch der Düfte und Farben mit frischem Obst, Jamón Ibérico, Meeresfrüchten und Tapas-Bars.",
+          gastro: "🍍 Saft-Tipp: Bei den Marktständen gibt es frische Drachenfrucht- oder Mangosäfte für 2–3 €!"
+        }
+      },
+      {
+        id: 14,
+        coords: [41.3758, 2.1778],
+        wiki: "https://pt.wikipedia.org/wiki/Monumento_a_Colombo",
+        pt: {
+          name: "Monumento a Colombo",
+          shortDesc: "Coluna de 60 metros com mirante.",
+          longDesc: "Construído para a Exposição Universal de 1888. A estátua de Cristóvão Colombo aponta em direção ao mar."
+        },
+        de: {
+          name: "Kolumbus-Denkmal (Mirador de Colom)",
+          shortDesc: "60 Meter hohe Säule am Hafen.",
+          longDesc: "Erbaut zur Weltausstellung 1888. Die Statue von Christoph Kolumbus zeigt symbolisch auf das Meer hinaus."
+        }
+      },
+      {
+        id: 15,
+        coords: [41.3768, 2.1802],
+        wiki: "",
+        pt: {
+          name: "Rambla de Mar",
+          shortDesc: "Passarela de madeira ondulada sobre a água.",
+          longDesc: "Conecta até o shopping Maremagnum e se abre para a passagem de grandes veleiros no porto."
+        },
+        de: {
+          name: "Rambla de Mar",
+          shortDesc: "Geschwungene Holzbrücke über dem Hafenbecken.",
+          longDesc: "Führt direkt zum Einkaufszentrum Maremagnum und öffnet sich regelmäßig für große Segelschiffe."
+        }
+      },
+      {
+        id: 16,
+        coords: [41.375283, 2.178901],
+        wiki: "",
+        pt: {
+          name: "Embarque Bus Nàutic",
+          shortDesc: "Barco solar até a área do Hotel W.",
+          longDesc: "Uma travessia rápida e relaxante pelo porto por cerca de 1,90 €, economizando caminhada e oferecendo uma vista linda da cidade."
+        },
+        de: {
+          name: "Bus Nàutic Haltestelle",
+          shortDesc: "Solarfähre zur Barceloneta / Hotel W.",
+          longDesc: "Sehr günstige Hafenüberfahrt (~1,90 €), die Fußweg spart und wunderschöne Panoramablicke bietet."
+        }
+      },
+      {
+        id: 17,
+        coords: [41.3689, 2.1901],
+        wiki: "",
+        pt: {
+          name: "Honest Greens Barceloneta",
+          shortDesc: "Excelente opção para o almoço.",
+          longDesc: "Restaurante muito popular com bowls saudáveis, pratos frescos e limonadas artesanais à beira-mar.",
+          gastro: "🥗 Dica: Experimente o 'Latin Grill' ou uma das bowls sazonais com abacate."
+        },
+        de: {
+          name: "Honest Greens Barceloneta",
+          shortDesc: "Perfekter Mittagsstopp am Strand.",
+          longDesc: "Sehr beliebtes Restaurant für gesunde Bowls, Gegrilltes und hausgemachte Inhouse-Limonaden.",
+          gastro: "🥗 Tipp: 'Latin Grill' oder eine der saisonalen Avocado-Bowls probieren."
+        }
+      },
+      {
+        id: 18,
+        coords: [41.375101, 2.190063],
+        wiki: "",
+        pt: {
+          name: "Praia da Barceloneta",
+          shortDesc: "A praia urbana mais famosa.",
+          longDesc: "Caminhada agradável pelo calçadão observando o mar e o marcante Hotel W em formato de vela."
+        },
+        de: {
+          name: "Barceloneta Strand",
+          shortDesc: "Barcelonas berühmter Stadtstrand.",
+          longDesc: "Entspannte Promenade entlang des Meeres mit Blick auf das segelförmige W-Hotel."
+        }
+      },
+      {
+        id: 19,
+        coords: [41.3810, 2.1862],
+        wiki: "",
+        pt: {
+          name: "Museu d'Història de Catalunya",
+          shortDesc: "Armazém histórico do porto (Palau de Mar).",
+          longDesc: "No último andar do prédio há um bar no terraço com vista panorâmica espetacular da marina."
+        },
+        de: {
+          name: "Museu d'Història de Catalunya",
+          shortDesc: "Historischer Hafenspeicher (Palau de Mar).",
+          longDesc: "Im obersten Stockwerk befindet sich eine Dachterrassen-Bar mit fantastischem Blick über den Yachthafen."
+        }
+      },
+      {
+        id: 20,
+        coords: [41.3836, 2.1821],
+        wiki: "https://pt.wikipedia.org/wiki/Bas%C3%ADlica_de_Santa_Maria_do_Mar",
+        pt: {
+          name: "Santa Maria del Mar",
+          shortDesc: "A 'Catedral do Mar'.",
+          longDesc: "Uma obra-prima do gótico catalão, construída pelos marinheiros e trabalhadores do bairro no século XIV."
+        },
+        de: {
+          name: "Santa Maria del Mar",
+          shortDesc: "Die berühmte 'Kathedrale des Meeres'.",
+          longDesc: "Meisterwerk der katalanischen Gotik, im 14. Jahrhundert von den Seefahrern und Hafenarbeitern des Viertels erbaut."
+        }
+      },
+      {
+        id: 21,
+        coords: [41.3849, 2.1835],
+        wiki: "",
+        pt: {
+          name: "Ruas de El Born",
+          shortDesc: "Bairro charmoso e criativo.",
+          longDesc: "Passeie pelas ruelas históricas perto da Carrer de Montcada (Museu Picasso) e do Passeig del Born.",
+          gastro: "🍸 Dica Speakeasy: 'Paradiso' (Carrer de Rera Palau 4) – Drinks premiados escondidos atrás de uma lanchonete de pastrami!"
+        },
+        de: {
+          name: "Gassen von El Born",
+          shortDesc: "Trendy Szeneviertel mit Boutiquen.",
+          longDesc: "Schlendern Sie durch die malerischen Altstadtgassen rund um das Picasso-Museum und den Passeig del Born.",
+          gastro: "🍸 Speakeasy-Tipp: 'Paradiso' (Carrer de Rera Palau 4) – Weltberühmte Cocktailbar, versteckt hinter einem Pastrami-Imbiss!"
+        }
+      },
+      {
+        id: 22,
+        coords: [41.3855, 2.1849],
+        wiki: "",
+        pt: {
+          name: "El Born Centre de Cultura i Memòria",
+          shortDesc: "Ruínas sob o antigo mercado de ferro.",
+          longDesc: "É possível visualizar gratuitamente as ruínas arqueológicas das casas destruídas em 1714."
+        },
+        de: {
+          name: "El Born Kulturzentrum",
+          shortDesc: "Historische Markthalle über Ausgrabungen.",
+          longDesc: "Unter der Gusseisenkonstruktion liegen freigelegte Ruinen der Stadt aus dem Jahr 1714, die man kostenlos besichtigen kann."
+        }
+      },
+      {
+        id: 23,
+        coords: [41.3882, 2.1874],
+        wiki: "https://pt.wikipedia.org/wiki/Parque_da_Cidadela",
+        pt: {
+          name: "Parc de la Ciutadella",
+          shortDesc: "O grande parque urbano da cidade.",
+          longDesc: "Conta com lago para pedalinhos, palmeiras e a imponente fonte 'Cascada Monumental', que teve participação do jovem Gaudí."
+        },
+        de: {
+          name: "Parc de la Ciutadella",
+          shortDesc: "Grüne Oase im Stadtzentrum.",
+          longDesc: "Mit Ruderboot-Teich, Palmen und dem imposanten Barockbrunnen 'Cascada Monumental', an dem der junge Gaudí mitwirkte."
+        }
+      },
+      {
+        id: 24,
+        coords: [41.3911, 2.1806],
+        wiki: "https://pt.wikipedia.org/wiki/Arco_do_Triunfo_(Barcelona)",
+        pt: {
+          name: "Arc de Triomf",
+          shortDesc: "Arco do triunfo em tijolos vermelhos.",
+          longDesc: "Construído como portão de entrada principal para a Exposição Universal de 1888."
+        },
+        de: {
+          name: "Arc de Triomf",
+          shortDesc: "Triumphbogen aus roten Backsteinen.",
+          longDesc: "Erbaut als imposable Haupteingangstor zur Weltausstellung von 1888 im Mudejar-Stil."
+        }
+      },
+      {
+        id: 25,
+        coords: [41.4005, 2.1798],
+        wiki: "",
+        pt: {
+          name: "La Monumental",
+          shortDesc: "Antiga arena de touros.",
+          longDesc: "Construída em estilo neo-mourisco. Hoje é utilizada para eventos culturais e concertos musicais."
+        },
+        de: {
+          name: "La Monumental",
+          shortDesc: "Historische Stierkampfarena.",
+          longDesc: "Erbaut im Neomudéjar-Stil. Heute geschützte Event-Location für Konzerte und Märkte."
+        }
+      },
+      {
+        id: 26,
+        coords: [41.4036, 2.1744],
+        wiki: "https://pt.wikipedia.org/wiki/Templo_Expiat%C3%B3rio_da_Sagrada_Fam%C3%ADlia",
+        pt: {
+          name: "Sagrada Família",
+          shortDesc: "O grande encerramento do roteiro.",
+          longDesc: "A grande obra da vida de Gaudí e o símbolo máximo de Barcelona. Combina formas da natureza com arquitetura monumental."
+        },
+        de: {
+          name: "Sagrada Família",
+          shortDesc: "Das krönende Highlight der Tour.",
+          longDesc: "Gaudís unvollendetes Meisterwerk und Wahrzeichen Barcelonas. Verbindet gotische Kathedralbaukunst mit organischen Formen der Natur."
+        }
+      }
     ];
 
-    // Banheiros Públicos na Rota
+    // Public Toilets Data
     const publicToilets = [
       { name: "WC Metrô Diagonal", coords: [41.3966, 2.1585] },
       { name: "WC El Nacional / Passeig de Gràcia", coords: [41.3901, 2.1680] },
@@ -160,12 +588,13 @@
       { name: "WC Sagrada Família (Praça)", coords: [41.4032, 2.1740] }
     ];
 
+    // App State Variables
+    let currentLang = localStorage.getItem('bcn_tour_lang') || 'pt';
     let completedStops = JSON.parse(localStorage.getItem('bcn_tour_completed') || '[]');
     let showWC = true;
     let userMarker = null;
     let watchId = null;
 
-    // Inicializar Mapa
     const map = L.map('map').setView([41.385, 2.175], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -175,12 +604,59 @@
     const latLngs = stops.map(s => s.coords);
     L.polyline(latLngs, { color: '#4f46e5', weight: 4, opacity: 0.7, dashArray: '6, 8' }).addTo(map);
 
-    const markers = {};
+    const stopMarkers = {};
     const wcMarkersGroup = L.layerGroup().addTo(map);
 
-    // Renderizar Banheiros
+    function updateUI() {
+      const txt = uiTranslations[currentLang];
+
+      // Update Titles & Buttons
+      document.getElementById('app-title').innerText = txt.appTitle;
+      document.getElementById('app-subtitle').innerText = txt.appSubtitle;
+      document.getElementById('label-wc').innerText = showWC ? txt.wcShow : txt.wcHide;
+      
+      if (!watchId) {
+        document.getElementById('label-gps').innerText = txt.gpsLabel;
+      }
+
+      // Language Buttons Style
+      const ptBtn = document.getElementById('lang-pt-btn');
+      const deBtn = document.getElementById('lang-de-btn');
+
+      if (currentLang === 'pt') {
+        ptBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm font-bold";
+        deBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white";
+      } else {
+        deBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm font-bold";
+        ptBtn.className = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white";
+      }
+
+      // Update Progress
+      document.getElementById('progress-text').innerText = `${completedStops.length} / ${stops.length} ${txt.visitedLabel}`;
+
+      // Render Cards & Markers
+      renderStops();
+      renderToilets();
+    }
+
+    function setLanguage(lang) {
+      if (currentLang !== lang) {
+        currentLang = lang;
+        localStorage.setItem('bcn_tour_lang', lang);
+        
+        // Stop active audio when switching language
+        if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+
+        updateUI();
+      }
+    }
+
     function renderToilets() {
       wcMarkersGroup.clearLayers();
+      const txt = uiTranslations[currentLang];
+
       if (showWC) {
         publicToilets.forEach(wc => {
           const wcIcon = L.divIcon({
@@ -190,83 +666,100 @@
             iconAnchor: [12, 12]
           });
           L.marker(wc.coords, { icon: wcIcon })
-            .bindPopup(`<b>Banheiro Público</b><br>${wc.name}`)
+            .bindPopup(`<b>${txt.wcPopupTitle}</b><br>${wc.name}`)
             .addTo(wcMarkersGroup);
         });
       }
     }
-    renderToilets();
 
-    // Renderizar Lista e Marcadores
-    const container = document.getElementById('stops-container');
+    function renderStops() {
+      const container = document.getElementById('stops-container');
+      container.innerHTML = '';
+      const txt = uiTranslations[currentLang];
 
-    stops.forEach((stop) => {
-      const isCompleted = completedStops.includes(stop.id);
+      stops.forEach((stop) => {
+        const isCompleted = completedStops.includes(stop.id);
+        const data = stop[currentLang];
 
-      const customIcon = L.divIcon({
-        className: `custom-div-icon ${isCompleted ? 'completed' : ''}`,
-        html: `${stop.id}`,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13]
+        // Update or create map marker
+        if (!stopMarkers[stop.id]) {
+          const customIcon = L.divIcon({
+            className: `custom-div-icon ${isCompleted ? 'completed' : ''}`,
+            html: `${stop.id}`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+          });
+
+          const marker = L.marker(stop.coords, { icon: customIcon }).addTo(map);
+          stopMarkers[stop.id] = marker;
+        } else {
+          // Refresh marker icon state
+          const customIcon = L.divIcon({
+            className: `custom-div-icon ${isCompleted ? 'completed' : ''}`,
+            html: `${stop.id}`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13]
+          });
+          stopMarkers[stop.id].setIcon(customIcon);
+        }
+
+        // Refresh Popup content
+        stopMarkers[stop.id].bindPopup(`<b>${stop.id}. ${data.name}</b><br>${data.shortDesc}`);
+
+        // Create Card HTML
+        const card = document.createElement('div');
+        card.className = `p-4 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/30' : 'border-slate-200'} transition-all hover:shadow-md`;
+
+        const escapedSpeechText = `${data.name}. ${data.longDesc}`.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="focusStop(${stop.id})">
+            <div class="flex items-start gap-3">
+              <button onclick="event.stopPropagation(); toggleStop(${stop.id})" class="mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${isCompleted ? 'bg-green-500 text-white border-green-500' : 'border-slate-300 text-slate-500 hover:border-indigo-500'}" title="Marcar como visitado">
+                ${isCompleted ? '✓' : stop.id}
+              </button>
+              <div>
+                <h3 class="font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}">${data.name}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">${data.shortDesc}</p>
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); toggleSpeech('${escapedSpeechText}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg shrink-0 transition" title="${txt.audioTooltip}">
+              <i data-lucide="volume-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-2">
+            <p class="leading-relaxed">${data.longDesc}</p>
+            
+            ${data.gastro ? `
+              <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 font-medium flex items-start gap-1.5">
+                <span class="shrink-0">💡</span>
+                <div>${data.gastro}</div>
+              </div>
+            ` : ''}
+
+            ${stop.wiki ? `
+              <a href="${stop.wiki}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-indigo-600 hover:underline font-semibold pt-1">
+                ${txt.readMoreWiki} <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            ` : ''}
+          </div>
+        `;
+
+        container.appendChild(card);
       });
 
-      const marker = L.marker(stop.coords, { icon: customIcon })
-        .addTo(map)
-        .bindPopup(`<b>${stop.id}. ${stop.name}</b><br>${stop.shortDesc}`);
-      
-      markers[stop.id] = marker;
+      lucide.createIcons();
+    }
 
-      const card = document.createElement('div');
-      card.className = `p-4 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/30' : 'border-slate-200'} transition-all hover:shadow-md`;
-
-      card.innerHTML = `
-        <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="focusStop(${stop.id})">
-          <div class="flex items-start gap-3">
-            <button onclick="event.stopPropagation(); toggleStop(${stop.id})" class="mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${isCompleted ? 'bg-green-500 text-white border-green-500' : 'border-slate-300 text-slate-500 hover:border-indigo-500'}">
-              ${isCompleted ? '✓' : stop.id}
-            </button>
-            <div>
-              <h3 class="font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}">${stop.name}</h3>
-              <p class="text-xs text-slate-500 mt-0.5">${stop.shortDesc}</p>
-            </div>
-          </div>
-          <button onclick="event.stopPropagation(); toggleSpeech('${stop.name}. ${stop.longDesc.replace(/'/g, "\\'")}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg shrink-0 transition" title="Ouvir audioguia">
-            <i data-lucide="volume-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-
-        <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-2">
-          <p class="leading-relaxed">${stop.longDesc}</p>
-          
-          ${stop.gastro ? `
-            <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 font-medium">
-              ${stop.gastro}
-            </div>
-          ` : ''}
-
-          ${stop.wiki ? `
-            <a href="${stop.wiki}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-indigo-600 hover:underline font-semibold pt-1">
-              Ler mais na Wikipedia <i data-lucide="external-link" class="w-3 h-3"></i>
-            </a>
-          ` : ''}
-        </div>
-      `;
-
-      container.appendChild(card);
-    });
-
-    map.fitBounds(L.latLngBounds(latLngs), { padding: [25, 25] });
-
-    // Focar no Ponto no Mapa
     window.focusStop = function(id) {
       const stop = stops.find(s => s.id === id);
       if (stop) {
         map.setView(stop.coords, 16);
-        markers[id].openPopup();
+        stopMarkers[id].openPopup();
       }
     };
 
-    // Alternar Concluído
     window.toggleStop = function(id) {
       if (completedStops.includes(id)) {
         completedStops = completedStops.filter(i => i !== id);
@@ -274,20 +767,22 @@
         completedStops.push(id);
       }
       localStorage.setItem('bcn_tour_completed', JSON.stringify(completedStops));
-      location.reload();
+      updateUI();
     };
 
-    // Alternar Camada de Banheiros
     window.toggleWC = function() {
       showWC = !showWC;
       renderToilets();
+      const txt = uiTranslations[currentLang];
       const btn = document.getElementById('wc-toggle');
+      document.getElementById('label-wc').innerText = showWC ? txt.wcShow : txt.wcHide;
+
       btn.className = showWC 
-        ? "px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
-        : "px-3 py-1.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition opacity-60";
+        ? "px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95"
+        : "px-3 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg font-semibold flex items-center gap-2 transition opacity-60 active:scale-95";
     };
 
-    // Audioguia (Text-to-Speech)
+    // Text-to-Speech Audio Engine
     window.toggleSpeech = function(text) {
       if ('speechSynthesis' in window) {
         if (window.speechSynthesis.speaking) {
@@ -295,33 +790,36 @@
           return;
         }
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'pt-BR';
+        utterance.lang = currentLang === 'pt' ? 'pt-BR' : 'de-DE';
         utterance.rate = 0.95;
         window.speechSynthesis.speak(utterance);
       } else {
-        alert("O seu navegador não suporta a função de áudio.");
+        alert(uiTranslations[currentLang].ttsUnsupported);
       }
     };
 
-    // Rastreamento GPS ao vivo
+    // Live GPS Location Tracking
     window.toggleGPS = function() {
       const btn = document.getElementById('gps-btn');
+      const label = document.getElementById('label-gps');
+      const txt = uiTranslations[currentLang];
+
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
         if (userMarker) map.removeLayer(userMarker);
+        userMarker = null;
+
         btn.classList.remove('bg-indigo-600', 'text-white');
         btn.classList.add('bg-slate-100');
-        btn.innerHTML = '<i data-lucide="navigation" class="w-4 h-4"></i> Localização GPS';
-        lucide.createIcons();
+        label.innerText = txt.gpsLabel;
         return;
       }
 
       if ('geolocation' in navigator) {
         btn.classList.add('bg-indigo-600', 'text-white');
         btn.classList.remove('bg-slate-100');
-        btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Buscando sinal...';
-        lucide.createIcons();
+        label.innerText = txt.gpsSearching;
 
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
@@ -333,30 +831,30 @@
                 iconSize: [16, 16],
                 iconAnchor: [8, 8]
               });
-              userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map).bindPopup("<b>Sua localização atual</b>");
+              userMarker = L.marker(userCoords, { icon: userIcon })
+                .addTo(map)
+                .bindPopup(`<b>${txt.userLocation}</b>`);
+              
               map.setView(userCoords, 16);
             } else {
               userMarker.setLatLng(userCoords);
             }
-            btn.innerHTML = '<i data-lucide="navigation-2" class="w-4 h-4"></i> GPS Ativo';
-            lucide.createIcons();
+            label.innerText = txt.gpsActive;
           },
           (err) => {
-            alert("Não foi possível obter a sua localização GPS.");
+            alert(txt.gpsError);
             toggleGPS();
           },
           { enableHighAccuracy: true }
         );
       } else {
-        alert("O seu navegador não suporta geolocalização.");
+        alert(txt.noGps);
       }
     };
 
-    // Contador de Progresso
-    document.getElementById('progress-text').innerText = `${completedStops.length} / ${stops.length} visitados`;
-
-    // Renderizar Ícones
-    lucide.createIcons();
+    // Initialize Viewport and App Render
+    map.fitBounds(L.latLngBounds(latLngs), { padding: [25, 25] });
+    updateUI();
   </script>
 </body>
 </html>
