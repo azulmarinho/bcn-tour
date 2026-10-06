@@ -128,6 +128,11 @@
 
   <div id="toolbar" class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
     <div class="max-w-5xl mx-auto flex flex-wrap gap-2 justify-between items-center text-xs">
+      <label class="flex items-center gap-2 px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 font-semibold min-w-0 flex-1 sm:flex-none">
+        <i data-lucide="route" class="w-4 h-4 shrink-0"></i>
+        <span id="label-route" class="sr-only">Rota</span>
+        <select id="route-select" onchange="setRoute(this.value)" class="bg-transparent font-semibold focus:outline-none min-w-0 w-full sm:w-auto cursor-pointer"></select>
+      </label>
       <button id="gps-btn" onclick="toggleGPS()" class="px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
         <i data-lucide="navigation" class="w-4 h-4"></i> <span id="label-gps">Localização GPS</span>
       </button>
@@ -146,8 +151,8 @@
       <div id="map-card" class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[130px]">
         <div id="map"></div>
         <div class="p-3 bg-slate-100 border-t border-slate-200 text-xs text-slate-600 flex justify-between items-center font-medium">
-          <span class="flex items-center gap-1"><i data-lucide="footprints" class="w-4 h-4 text-indigo-500"></i> ~12-14 km</span>
-          <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> ~7-9 h</span>
+          <span class="flex items-center gap-1"><i data-lucide="footprints" class="w-4 h-4 text-indigo-500"></i> <span id="route-distance">~12–14 km</span></span>
+          <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> <span id="route-duration">~7–9 h</span></span>
         </div>
       </div>
     </div>
@@ -238,7 +243,9 @@
         hereNow: "Você está aqui",
         show: "Mostrar",
         listen: "Ouvir",
-        markVisitedShort: "Visitado ✓"
+        markVisitedShort: "Visitado ✓",
+        routeLabel: "Rota",
+        cableLeg: "De teleférico"
       },
       de: {
         appTitle: "Barcelona Rundgang",
@@ -271,14 +278,17 @@
         hereNow: "Du bist hier",
         show: "Anzeigen",
         listen: "Anhören",
-        markVisitedShort: "Besucht ✓"
+        markVisitedShort: "Besucht ✓",
+        routeLabel: "Route",
+        cableLeg: "Mit der Seilbahn"
       }
     };
 
     // ---------- Tour data (26 stops) ----------
     // Optional "highlights": { img, author, license, de:{title,text}, pt:{title,text} }
     // "img" is a Wikimedia Commons file name. Leave it out for a text-only highlight.
-    const stops = [
+    // ===== Route 1: Diagonal -> Sagrada Família =====
+    const eixampleStops = [
       {
         id: 1,
         coords: [41.3965, 2.1588],
@@ -1644,8 +1654,7 @@
       }
     ];
 
-    // Public Toilets Data
-    const publicToilets = [
+    const eixampleToilets = [
       { name: "WC Metrô Diagonal", coords: [41.3966, 2.1585] },
       { name: "WC El Nacional / Passeig de Gràcia", coords: [41.3901, 2.1680] },
       { name: "WC Público Plaça Catalunya", coords: [41.3868, 2.1702] },
@@ -1654,6 +1663,594 @@
       { name: "WC Praia da Barceloneta", coords: [41.3762, 2.1915] },
       { name: "WC Parc de la Ciutadella", coords: [41.3875, 2.1865] },
       { name: "WC Sagrada Família (Praça)", coords: [41.4032, 2.1740] }
+    ];
+
+    // ===== Route 2: Plaça d'Espanya -> Montjuïc -> port cable car =====
+    const montjuicStops = [
+      {
+        id: 1,
+        coords: [41.37505, 2.14916],
+        wiki: "https://ca.wikipedia.org/wiki/Pla%C3%A7a_d%27Espanya_(Barcelona)",
+        img: "Plaça d'Espanya (Barcelona) 03.jpg",
+        author: "Nicholas Gemini",
+        pt: {
+          notes: [
+            {"type":"info","text":"Dica: esta rota é mais curta, mas é subida. Entre a Font Màgica e o Palau Nacional há escadas rolantes ao ar livre. Leve água e protetor solar."}
+          ],
+          name: "Plaça d'Espanya",
+          shortDesc: "O portal da Exposição de 1929.",
+          longDesc: "Aqui começa a subida ao Montjuïc. A praça foi o grande portal de entrada da Exposição Internacional de 1929 – quase tudo o que você vê daqui até o Palau Nacional foi construído para ela. O nome Montjuïc provavelmente significa 'monte dos judeus': na Idade Média, o cemitério judaico da cidade ficava na colina."
+        },
+        de: {
+          notes: [
+            {"type":"info","text":"Tipp: Diese Route ist kürzer, aber es geht bergauf. Zwischen Font Màgica und Palau Nacional helfen Rolltreppen im Freien. Wasser und Sonnenschutz einpacken."}
+          ],
+          name: "Plaça d'Espanya",
+          shortDesc: "Das Eingangstor der Weltausstellung 1929.",
+          longDesc: "Hier beginnt der Aufstieg auf den Montjuïc. Der Platz war das große Eingangstor der Weltausstellung von 1929 – fast alles, was du von hier bis zum Palau Nacional siehst, wurde dafür gebaut. Der Name Montjuïc bedeutet wahrscheinlich »Berg der Juden«: Im Mittelalter lag hier der jüdische Friedhof der Stadt."
+        },
+        highlights: [
+          {
+            img: "Barcelona (Plaça Espanya). Venetian towers built for the 1929 International Exposittion. 1929. Ramon Reventós, architect (27323048072).jpg",
+            author: "Josep Bracons",
+            license: "CC BY-SA 2.0",
+            de: {
+              title: "Die venezianischen Türme",
+              text: "Die beiden 47 Meter hohen Türme am Beginn der Avinguda de la Reina Maria Cristina entwarf Ramon Reventós nach dem Vorbild des Campanile am Markusplatz in Venedig. Sie bildeten das Tor zur Weltausstellung – dahinter führt die Achse schnurgerade über Brunnen und Treppen bis hinauf zum Palau Nacional."
+            },
+            pt: {
+              title: "As torres venezianas",
+              text: "As duas torres de 47 metros no início da Avinguda de la Reina Maria Cristina foram projetadas por Ramon Reventós inspiradas no campanário da Praça de São Marcos, em Veneza. Eram o portal da Exposição – atrás delas, o eixo segue em linha reta por fontes e escadarias até o Palau Nacional."
+            }
+          },
+          {
+            img: "080 La plaça d'Espanya i l'avinguda de Maria Cristina (Barcelona) des del CC Les Arenes.jpg",
+            de: {
+              title: "Rundblick von der Stierkampfarena",
+              text: "Das runde Backsteingebäude an der Nordseite ist die ehemalige Stierkampfarena Las Arenas von 1900. Seit 2011 ist sie ein Einkaufszentrum, umgebaut nach Plänen von Richard Rogers – die alte Fassade blieb erhalten. Fahr hinauf auf die runde Dachterrasse: Von dort hast du den besten Blick auf den Platz, die Türme und den Weg, der vor dir liegt (siehe Foto)."
+            },
+            pt: {
+              title: "Vista panorâmica da antiga arena",
+              text: "O prédio redondo de tijolos no lado norte é a antiga arena de touros Las Arenas, de 1900. Desde 2011 é um shopping, reformado segundo projeto de Richard Rogers – a fachada antiga foi preservada. Suba até o terraço circular: de lá se tem a melhor vista da praça, das torres e do caminho que está à sua frente (veja a foto)."
+            }
+          },
+          {
+            de: {
+              title: "Ein Brunnen von Jujol",
+              text: "Den monumentalen Brunnen in der Platzmitte entwarf Josep Maria Jujol – derselbe Architekt, von dem die Seetang-Balkone der Casa Milà stammen. Die Skulpturen von Miquel Blay stehen für die Flüsse, die in Spaniens Meere münden."
+            },
+            pt: {
+              title: "Uma fonte de Jujol",
+              text: "A fonte monumental no centro da praça foi projetada por Josep Maria Jujol – o mesmo arquiteto das varandas em forma de algas da Casa Milà. As esculturas de Miquel Blay representam os rios que deságuam nos mares da Espanha."
+            }
+          }
+        ]
+      },
+      {
+        id: 2,
+        coords: [41.37115, 2.15155],
+        wiki: "https://ca.wikipedia.org/wiki/Font_M%C3%A0gica_de_Montju%C3%AFc",
+        pt: {
+          notes: [
+            {"type":"info","text":"Os espetáculos são gratuitos e acontecem à noite, geralmente de quinta a sábado. Os horários mudam conforme a estação – confira antes no site da prefeitura."}
+          ],
+          name: "Font Màgica (Fonte Mágica)",
+          shortDesc: "Água, luz e música desde 1929.",
+          longDesc: "A fonte foi projetada para a Exposição de 1929 pelo engenheiro Carles Buïgas e construída em tempo recorde. À noite ela se transforma num espetáculo de jatos d'água, luz colorida e música – do clássico ao pop."
+        },
+        de: {
+          notes: [
+            {"type":"info","text":"Die Shows sind kostenlos und finden abends statt, meist donnerstags bis samstags. Die Zeiten ändern sich mit der Jahreszeit – vorher auf der Website der Stadt prüfen."}
+          ],
+          name: "Font Màgica (Zauberbrunnen)",
+          shortDesc: "Wasser, Licht und Musik seit 1929.",
+          longDesc: "Der Brunnen wurde für die Weltausstellung 1929 vom Ingenieur Carles Buïgas entworfen und in Rekordzeit gebaut. Abends verwandelt er sich in eine Show aus Wasserfontänen, farbigem Licht und Musik von Klassik bis Pop."
+        },
+        highlights: [
+          {
+            img: "Font Màgica de Montjuïc 14 (2009-05-24).JPG",
+            author: "Iván Melenchón Serrano",
+            de: {
+              title: "Licht aus rotierenden Prismen",
+              text: "Die typischen Farben entstehen nicht einfach durch bunte Lampen: Im Inneren drehen sich Glasfilter und Prismen vor den Scheinwerfern. Genau dieses Originalprinzip von Buïgas wurde bei der jüngsten Sanierung bewahrt."
+            },
+            pt: {
+              title: "Luz de prismas giratórios",
+              text: "As cores características não vêm simplesmente de lâmpadas coloridas: lá dentro giram filtros de vidro e prismas diante dos refletores. Esse princípio original de Buïgas foi preservado na reforma mais recente."
+            }
+          },
+          {
+            de: {
+              title: "Drei Jahre trocken",
+              text: "Wegen der schweren Dürre in Katalonien stand der Brunnen ab Ende 2022 fast drei Jahre still. Zur Mercè am 24. September 2025 sprudelte er wieder – frisch saniert: Statt 4.760 Glühlampen leuchten jetzt 680 LED-Scheinwerfer, mit gleichem Lichteffekt und deutlich weniger Strom."
+            },
+            pt: {
+              title: "Três anos seca",
+              text: "Por causa da grave seca na Catalunha, a fonte ficou parada por quase três anos a partir do fim de 2022. Na Mercè, em 24 de setembro de 2025, voltou a jorrar – recém-reformada: no lugar de 4.760 lâmpadas incandescentes, agora brilham 680 refletores LED, com o mesmo efeito e muito menos energia."
+            }
+          }
+        ]
+      },
+      {
+        id: 3,
+        coords: [41.37050, 2.15000],
+        wiki: "https://ca.wikipedia.org/wiki/Pavell%C3%B3_Mies_van_der_Rohe",
+        pt: {
+          notes: [
+            {"type":"ticket","text":"Entrada paga – mas a vista de fora, sobre os espelhos d'água, já vale a pena."}
+          ],
+          name: "Pavelló Mies van der Rohe",
+          shortDesc: "Ícone da arquitetura moderna.",
+          longDesc: "Em 1929, este pavilhão representou a Alemanha na Exposição. Ludwig Mies van der Rohe criou, com vidro, aço, travertino e ônix, um espaço sem cômodos fechados, onde dentro e fora se misturam. Depois da Exposição ele foi desmontado – o que você vê hoje é uma reconstrução fiel de 1986."
+        },
+        de: {
+          notes: [
+            {"type":"ticket","text":"Eintritt kostenpflichtig – aber schon der Blick von außen über die Wasserbecken lohnt sich."}
+          ],
+          name: "Pavelló Mies van der Rohe",
+          shortDesc: "Ikone der modernen Architektur.",
+          longDesc: "Der Pavillon vertrat 1929 Deutschland auf der Weltausstellung. Ludwig Mies van der Rohe schuf mit Glas, Stahl, Travertin und Onyx einen Raum ohne geschlossene Zimmer, in dem Innen und Außen ineinanderfließen. Nach der Ausstellung wurde er abgebaut – was du heute siehst, ist eine originalgetreue Rekonstruktion von 1986."
+        },
+        highlights: [
+          {
+            img: "Pabellón Mies van der Rohe.jpg",
+            author: "Victoriano Javier Tornel García",
+            license: "CC BY-SA 2.0",
+            de: {
+              title: "Weniger ist mehr",
+              text: "Mies' berühmtes Motto lässt sich hier erleben: freistehende Wände, ein schwebendes Flachdach auf schlanken verchromten Stützen, zwei Wasserbecken. Für den Pavillon entwarf er auch den »Barcelona-Sessel« – der Legende nach als Thron für das spanische Königspaar. Der Stuhl wird bis heute produziert."
+            },
+            pt: {
+              title: "Menos é mais",
+              text: "O famoso lema de Mies se vive aqui: paredes soltas, uma laje que parece flutuar sobre finos pilares cromados, dois espelhos d'água. Para o pavilhão ele também desenhou a 'cadeira Barcelona' – segundo a lenda, como trono para os reis da Espanha. A cadeira é fabricada até hoje."
+            }
+          },
+          {
+            img: "Pavelló Mies 04.JPG",
+            license: "CC BY-SA 2.5",
+            de: {
+              title: "Der Morgen",
+              text: "Im kleinen Wasserbecken steht die Bronzefigur »Der Morgen« von Georg Kolbe. Spiegelt sich das Licht im Wasser, scheint sie fast zu schweben – die einzige Figur in einem Raum, der sonst ganz aus Linien und Flächen besteht."
+            },
+            pt: {
+              title: "A manhã",
+              text: "No espelho d'água menor fica a figura de bronze 'Der Morgen' (A manhã), de Georg Kolbe. Quando a luz se reflete na água, ela parece flutuar – a única figura num espaço feito só de linhas e planos."
+            }
+          },
+          {
+            de: {
+              title: "Gegenüber: eine Fabrik von Puig i Cadafalch",
+              text: "Auf der anderen Straßenseite steht das CaixaForum, eine ehemalige Textilfabrik (Casaramona) im Modernisme-Stil von Josep Puig i Cadafalch – dem Architekten der Casa Amatller am Passeig de Gràcia. Den gläsernen Eingangsbereich fügte später Arata Isozaki hinzu, der auch den Palau Sant Jordi gebaut hat (Station 5)."
+            },
+            pt: {
+              title: "Em frente: uma fábrica de Puig i Cadafalch",
+              text: "Do outro lado da rua fica o CaixaForum, uma antiga fábrica têxtil (Casaramona) em estilo modernista de Josep Puig i Cadafalch – o arquiteto da Casa Amatller no Passeig de Gràcia. A entrada de vidro foi acrescentada depois por Arata Isozaki, que também construiu o Palau Sant Jordi (parada 5)."
+            }
+          }
+        ]
+      },
+      {
+        id: 4,
+        coords: [41.36880, 2.15340],
+        wiki: "https://ca.wikipedia.org/wiki/Museu_Nacional_d%27Art_de_Catalunya",
+        img: "Palau Nacional - Montjuic.JPG",
+        author: "Fdmarsa",
+        pt: {
+          name: "Palau Nacional (MNAC)",
+          shortDesc: "O palácio acima da cidade.",
+          longDesc: "O Palau Nacional foi o edifício principal da Exposição de 1929. Hoje abriga o Museu Nacional d'Art de Catalunya, com arte catalã do românico ao século XX. Para a vista você não precisa entrar: o terraço em frente à entrada é de acesso livre."
+        },
+        de: {
+          name: "Palau Nacional (MNAC)",
+          shortDesc: "Der Palast über der Stadt.",
+          longDesc: "Der Palau Nacional war das Hauptgebäude der Weltausstellung 1929. Heute beherbergt er das Museu Nacional d'Art de Catalunya mit katalanischer Kunst von der Romanik bis ins 20. Jahrhundert. Für den Ausblick musst du nicht hinein: Die Terrasse vor dem Eingang ist frei zugänglich."
+        },
+        highlights: [
+          {
+            img: "Font Magica de Montjuic BCN 04 2016 7242.jpg",
+            author: "Mariordo (Mario Roberto Durán Ortiz)",
+            de: {
+              title: "Der beste Gratis-Ausblick",
+              text: "Dreh dich auf der Terrasse um: Unter dir liegen die Font Màgica, die Achse zur Plaça d'Espanya mit den venezianischen Türmen und dahinter die ganze Stadt bis zum Tibidabo. Bei klarem Wetter erkennst du sogar die Türme der Sagrada Família."
+            },
+            pt: {
+              title: "A melhor vista de graça",
+              text: "Vire-se no terraço: lá embaixo estão a Font Màgica, o eixo até a Plaça d'Espanya com as torres venezianas e, ao fundo, a cidade inteira até o Tibidabo. Com tempo limpo dá para ver até as torres da Sagrada Família."
+            }
+          },
+          {
+            de: {
+              title: "Romanik aus den Pyrenäen",
+              text: "Das Museum besitzt eine der bedeutendsten Sammlungen romanischer Wandmalereien der Welt. Anfang des 20. Jahrhunderts wurden die Fresken in abgelegenen Pyrenäenkirchen mit einer besonderen Technik von den Wänden gelöst und nach Barcelona gebracht – auch, um zu verhindern, dass Kunsthändler sie ins Ausland verkauften."
+            },
+            pt: {
+              title: "Românico dos Pireneus",
+              text: "O museu tem uma das coleções de pinturas murais românicas mais importantes do mundo. No início do século XX, os afrescos de igrejas isoladas dos Pireneus foram retirados das paredes com uma técnica especial e levados a Barcelona – também para evitar que comerciantes de arte os vendessem para o exterior."
+            }
+          }
+        ]
+      },
+      {
+        id: 5,
+        coords: [41.36618, 2.15306],
+        wiki: "https://ca.wikipedia.org/wiki/Anella_Ol%C3%ADmpica_de_Montju%C3%AFc",
+        pt: {
+          name: "Anella Olímpica (Parque Olímpico)",
+          shortDesc: "Palco dos Jogos de 1992.",
+          longDesc: "Aqui bateu em 1992 o coração dos Jogos Olímpicos que mudaram Barcelona para sempre: praias, porto e bairros novos surgiram por causa deles. Em volta da Plaça d'Europa ficam o Estádio Olímpico, o ginásio Palau Sant Jordi e a torre branca de telecomunicações."
+        },
+        de: {
+          name: "Anella Olímpica (Olympiapark)",
+          shortDesc: "Schauplatz der Spiele von 1992.",
+          longDesc: "Hier schlug 1992 das Herz der Olympischen Spiele, die Barcelona für immer verändert haben: Strände, Hafen und neue Viertel entstanden für dieses Ereignis. Rund um die Plaça d'Europa stehen das Olympiastadion, die Halle Palau Sant Jordi und der weiße Fernmeldeturm."
+        },
+        highlights: [
+          {
+            img: "Barcelona - Montjuïc - Anella Olímpica - Estadi Olímpic Lluís Companys 1929 by Pere Domènech i Roura (refurbished in 1989 for the 1992 Games) - View East.jpg",
+            de: {
+              title: "Ein Stadion mit langer Vorgeschichte",
+              text: "Das Stadion wurde schon 1929 für die Weltausstellung gebaut. Barcelona bewarb sich damit um die Spiele 1936 – und verlor gegen Berlin. Eine geplante Gegenveranstaltung, die »Volksolympiade«, fiel wegen des Bürgerkriegs aus. Erst 1992 kam Olympia: Bei der Eröffnung entzündete ein Bogenschütze das Feuer mit einem brennenden Pfeil. Von 2023 bis 2025 spielte hier der FC Barcelona, während das Camp Nou umgebaut wurde."
+            },
+            pt: {
+              title: "Um estádio com longa história",
+              text: "O estádio foi construído já em 1929, para a Exposição. Com ele, Barcelona se candidatou aos Jogos de 1936 – e perdeu para Berlim. Um evento alternativo, a 'Olimpíada Popular', foi cancelado por causa da Guerra Civil. Só em 1992 vieram as Olimpíadas: na abertura, um arqueiro acendeu a pira com uma flecha em chamas. De 2023 a 2025 o FC Barcelona jogou aqui, enquanto o Camp Nou era reformado."
+            }
+          },
+          {
+            img: "Torre Calatrava i Palau Sant Jordi.JPG",
+            de: {
+              title: "Ein Turm wie ein Fackelträger",
+              text: "Den 136 Meter hohen Fernmeldeturm entwarf Santiago Calatrava. Er soll an einen Athleten erinnern, der die olympische Fackel hält, und dient zugleich als riesige Sonnenuhr: Sein Schatten wandert über die Plaça d'Europa. Daneben liegt der Palau Sant Jordi des japanischen Architekten Arata Isozaki."
+            },
+            pt: {
+              title: "Uma torre como um portador da tocha",
+              text: "A torre de telecomunicações de 136 metros foi projetada por Santiago Calatrava. Ela lembra um atleta segurando a tocha olímpica e funciona também como um enorme relógio de sol: sua sombra percorre a Plaça d'Europa. Ao lado fica o Palau Sant Jordi, do arquiteto japonês Arata Isozaki."
+            }
+          }
+        ]
+      },
+      {
+        id: 6,
+        coords: [41.36861, 2.16000],
+        wiki: "https://ca.wikipedia.org/wiki/Fundaci%C3%B3_Joan_Mir%C3%B3",
+        img: "Fundació Joan Miró.JPG",
+        pt: {
+          notes: [
+            {"type":"ticket","text":"Museu com entrada paga."}
+          ],
+          name: "Fundació Joan Miró",
+          shortDesc: "O museu do próprio Miró.",
+          longDesc: "O próprio Joan Miró fundou o museu, junto com seu amigo Joan Prats. O prédio branco e luminoso, projetado por outro amigo, Josep Lluís Sert, foi inaugurado em 1975. Aqui está a maior coleção de suas obras – mais de 10.000 peças, dos primeiros desenhos às grandes telas tardias."
+        },
+        de: {
+          notes: [
+            {"type":"ticket","text":"Museum mit Eintritt."}
+          ],
+          name: "Fundació Joan Miró",
+          shortDesc: "Mirós eigenes Museum.",
+          longDesc: "Joan Miró gründete das Museum selbst, zusammen mit seinem Freund Joan Prats. Das weiße, lichtdurchflutete Gebäude seines Freundes Josep Lluís Sert eröffnete 1975. Hier liegt die größte Sammlung seiner Werke – über 10.000 Stücke, von frühen Zeichnungen bis zu den großen späten Bildern."
+        },
+        highlights: [
+          {
+            de: {
+              title: "Calders Quecksilberbrunnen",
+              text: "Im Museum steht ein Kunstwerk, das man kaum glauben mag: der Quecksilberbrunnen von Alexander Calder. Er entstand 1937 für den Pavillon der Spanischen Republik auf der Pariser Weltausstellung – gleich neben Picassos »Guernica« – und erinnert an die umkämpften Quecksilberminen von Almadén. Heute steht er sicher hinter Glas."
+            },
+            pt: {
+              title: "A fonte de mercúrio de Calder",
+              text: "No museu há uma obra difícil de acreditar: a fonte de mercúrio de Alexander Calder. Ela foi criada em 1937 para o pavilhão da República Espanhola na Exposição de Paris – ao lado da 'Guernica' de Picasso – e lembra as disputadas minas de mercúrio de Almadén. Hoje fica protegida atrás de vidro."
+            }
+          },
+          {
+            img: "Terrassa de la Fundació Joan Miró.JPG",
+            de: {
+              title: "Skulpturen auf dem Dach",
+              text: "Auf den Dachterrassen stehen zwischen den gewölbten Oberlichtern bunte Miró-Skulpturen, dahinter liegt die Stadt. Wer die andere Route gelaufen ist, kennt Miró schon: sein rundes Bodenmosaik mitten auf der Rambla."
+            },
+            pt: {
+              title: "Esculturas no terraço",
+              text: "Nos terraços, entre as claraboias curvas, ficam esculturas coloridas de Miró, com a cidade ao fundo. Quem fez a outra rota já conhece Miró: o mosaico redondo no chão, no meio da Rambla."
+            }
+          }
+        ]
+      },
+      {
+        id: 7,
+        coords: [41.36945, 2.16504],
+        wiki: "https://ca.wikipedia.org/wiki/Piscina_Municipal_de_Montju%C3%AFc",
+        img: "Piscina Municipal de Montjuïc - vista general.JPG",
+        author: "Jordiferrer",
+        nextBy: "cablecar",
+        pt: {
+          notes: [
+            {"type":"info","text":"Aberto todos os dias, aprox. das 10h30/11h até a meia-noite, com cozinha contínua. Lindo especialmente ao pôr do sol. Horários podem mudar."},
+            {"type":"ticket","text":"O teleférico de cabines (Telefèric de Montjuïc) precisa de bilhete próprio – não vale o bilhete normal de transporte público. Há bilhetes de ida e de ida e volta."}
+          ],
+          name: "Salts – Terrassa Bar Montjuïc",
+          shortDesc: "Pausa com vista na piscina olímpica.",
+          longDesc: "Hora de descansar: o bar Salts fica no alto das arquibancadas da Piscina Municipal de Montjuïc, onde aconteceram os saltos ornamentais dos Jogos de 1992. Dá para sentar no balcão, nas mesas do terraço ou direto na arquibancada – com a cidade inteira aos seus pés. Bem em frente fica a estação Parc de Montjuïc, de onde o teleférico sobe ao castelo.",
+          nextHint: "Teleférico em frente, aprox. 8 min até o castelo",
+          gastro: "🍺 Peça uma 'clara' (cerveja com refrigerante de limão) e patatas bravas – o lanche perfeito antes de subir ao castelo."
+        },
+        de: {
+          notes: [
+            {"type":"info","text":"Täglich etwa ab 10:30/11 Uhr bis Mitternacht geöffnet, Küche durchgehend. Besonders schön zum Sonnenuntergang. Zeiten können sich ändern."},
+            {"type":"ticket","text":"Die Gondel (Telefèric de Montjuïc) braucht ein eigenes Ticket – der normale Nahverkehrsfahrschein gilt nicht. Es gibt Einzel- und Hin-und-Rückfahrt-Tickets."}
+          ],
+          name: "Salts – Terrassa Bar Montjuïc",
+          shortDesc: "Pause mit Blick am Olympia-Becken.",
+          longDesc: "Zeit für eine Pause: Die Bar Salts liegt oben auf den Tribünen der Piscina Municipal de Montjuïc, wo 1992 die olympischen Wasserspringer antraten. Du kannst an der Theke, an den Tischen auf der Terrasse oder direkt auf der Tribüne sitzen – die ganze Stadt liegt dir zu Füßen. Direkt gegenüber liegt die Talstation Parc de Montjuïc, von der die Gondel hinauf zur Festung schwebt.",
+          nextHint: "Gondel gegenüber, ca. 8 Min. hoch zur Festung",
+          gastro: "🍺 Tipp: Eine »Clara« (Bier mit Zitronenlimo) und Patatas bravas – der perfekte Snack, bevor es hoch zur Festung geht."
+        },
+        highlights: [
+          {
+            img: "Barcelona - Montjuïc - Avinguda de Miramar - View North towards the Sagrada Família.jpg",
+            de: {
+              title: "Springen mit Blick auf die Sagrada Família",
+              text: "Die Fotos der Olympia-Turmspringer von 1992, die scheinbar direkt über der Stadt in die Tiefe fliegen, gingen um die Welt. Das Becken selbst ist älter: Es wurde 1929 eröffnet und für die Spiele umgebaut. Auch die Wasserspring-Wettbewerbe der Schwimm-Weltmeisterschaften 2003 und 2013 fanden hier statt."
+            },
+            pt: {
+              title: "Saltos com vista para a Sagrada Família",
+              text: "As fotos dos saltadores olímpicos de 1992, que parecem mergulhar direto sobre a cidade, rodaram o mundo. A piscina em si é mais antiga: foi inaugurada em 1929 e reformada para os Jogos. As provas de saltos dos Mundiais de Natação de 2003 e 2013 também aconteceram aqui."
+            }
+          },
+          {
+            de: {
+              title: "Kulisse für Popstars",
+              text: "Kylie Minogue drehte hier 2003 das Video zu »Slow«, Dua Lipa 2024 das zu »Illusion«. Im Sommer kannst du im Becken auch selbst schwimmen – mit einem der spektakulärsten Ausblicke der Stadt."
+            },
+            pt: {
+              title: "Cenário para estrelas pop",
+              text: "Kylie Minogue gravou aqui em 2003 o clipe de 'Slow', e Dua Lipa, em 2024, o de 'Illusion'. No verão dá para nadar na piscina – com uma das vistas mais espetaculares da cidade."
+            }
+          },
+          {
+            de: {
+              title: "Mit der Gondel zur Festung",
+              text: "Die Telefèric de Montjuïc überwindet auf rund 750 Metern etwa 85 Höhenmeter – genau das steilste Stück bis zur Festung. Die erste Seilbahn fuhr hier schon 1970, die heutige Gondelbahn mit Kabinen für acht Personen ist seit 2007 in Betrieb und gehört zu den Verkehrsbetrieben TMB. Bergauf fährt sie ohne Halt bis zur Festung, bergab kannst du an der Zwischenstation Mirador aussteigen."
+            },
+            pt: {
+              title: "De teleférico até a fortaleza",
+              text: "O Telefèric de Montjuïc vence cerca de 85 metros de desnível em uns 750 metros – justamente o trecho mais íngreme até a fortaleza. O primeiro teleférico já funcionava aqui em 1970; o atual, com cabines para oito pessoas, opera desde 2007 e pertence à empresa de transportes TMB. Na subida vai direto até o castelo; na descida dá para descer na estação intermediária Mirador."
+            }
+          }
+        ]
+      },
+      {
+        id: 8,
+        coords: [41.36340, 2.16580],
+        wiki: "https://ca.wikipedia.org/wiki/Castell_de_Montju%C3%AFc",
+        img: "Castell de Montjuic - Fossat entrada - Barcelona (Catalonia).jpg",
+        author: "Puigalder",
+        nextBy: "cablecar",
+        pt: {
+          notes: [
+            {"type":"ticket","text":"A entrada na fortaleza é paga."},
+            {"type":"info","text":"Para descer: pegue de novo o teleférico e desça na estação intermediária Mirador. De lá são uns 6 minutos a pé, passando pelo Mirador de l'Alcalde, até o Mirador de Miramar."}
+          ],
+          name: "Castell de Montjuïc",
+          shortDesc: "A fortaleza no topo.",
+          longDesc: "Lá no alto do morro fica a fortaleza em forma de estrela dos séculos XVII e XVIII. Seus canhões protegiam o porto – e também apontavam para a própria cidade. Desde 2007 a fortaleza pertence à cidade de Barcelona; das muralhas se tem uma vista de 360 graus sobre porto, mar e cidade.",
+          nextHint: "Teleférico até Mirador, depois aprox. 6 min a pé"
+        },
+        de: {
+          notes: [
+            {"type":"ticket","text":"Der Eintritt in die Festung ist kostenpflichtig."},
+            {"type":"info","text":"Zurück nach unten: Nimm wieder die Gondel und steig an der Zwischenstation Mirador aus. Von dort sind es etwa 6 Minuten zu Fuß, vorbei am Mirador de l'Alcalde, zum Mirador de Miramar."}
+          ],
+          name: "Castell de Montjuïc",
+          shortDesc: "Die Festung auf dem Gipfel.",
+          longDesc: "Ganz oben auf dem Berg thront die sternförmige Festung aus dem 17. und 18. Jahrhundert. Ihre Kanonen schützten den Hafen – und waren ebenso auf die eigene Stadt gerichtet. Seit 2007 gehört die Festung der Stadt Barcelona; von den Mauern hast du einen Rundblick über Hafen, Meer und Stadt.",
+          nextHint: "Gondel bis Station Mirador, dann ca. 6 Min. zu Fuß"
+        },
+        highlights: [
+          {
+            img: "Castell Montjuic, Barcelona (P1170651).jpg",
+            license: "CC BY-SA 4.0",
+            de: {
+              title: "Kanonen gegen die eigene Stadt",
+              text: "Die Festung sollte Barcelona nicht nur schützen, sondern auch kontrollieren. 1842 ließ General Espartero die aufständische Stadt von hier oben bombardieren. Für viele Barcelonesen war der Castell deshalb lange ein Symbol der Unterdrückung."
+            },
+            pt: {
+              title: "Canhões contra a própria cidade",
+              text: "A fortaleza não servia só para proteger Barcelona, mas também para controlá-la. Em 1842, o general Espartero mandou bombardear daqui a cidade rebelada. Por isso, para muitos barceloneses, o castelo foi por muito tempo um símbolo de opressão."
+            }
+          },
+          {
+            de: {
+              title: "Lluís Companys",
+              text: "Im Burggraben wurde am 15. Oktober 1940 Lluís Companys erschossen, der Präsident der katalanischen Regierung. Er war nach Frankreich geflohen, wurde dort von der Gestapo verhaftet und an das Franco-Regime ausgeliefert. Ein Gedenkort im Graben erinnert an ihn – und das Olympiastadion trägt seinen Namen."
+            },
+            pt: {
+              title: "Lluís Companys",
+              text: "No fosso do castelo foi fuzilado, em 15 de outubro de 1940, Lluís Companys, presidente do governo catalão. Ele havia fugido para a França, foi preso lá pela Gestapo e entregue ao regime de Franco. Um memorial no fosso o lembra – e o Estádio Olímpico leva o seu nome."
+            }
+          },
+          {
+            de: {
+              title: "Hier wurde der Meter vermessen",
+              text: "In den 1790er-Jahren vermaßen französische Astronomen den Meridian zwischen Dünkirchen und Barcelona, um daraus die Länge des neuen Meters festzulegen. Pierre Méchain, zuständig für den südlichen Abschnitt, machte seine Messungen auch hier auf dem Montjuïc."
+            },
+            pt: {
+              title: "Aqui se mediu o metro",
+              text: "Na década de 1790, astrônomos franceses mediram o meridiano entre Dunquerque e Barcelona para definir o comprimento do novo metro. Pierre Méchain, responsável pelo trecho sul, fez suas medições também aqui no Montjuïc."
+            }
+          }
+        ]
+      },
+      {
+        id: 9,
+        coords: [41.36991, 2.17216],
+        wiki: "https://ca.wikipedia.org/wiki/Jardins_de_Miramar",
+        img: "Jardins de Miramar - panoramio.jpg",
+        author: "Jorge Franganillo",
+        license: "CC BY 3.0",
+        pt: {
+          name: "Mirador de Miramar",
+          shortDesc: "O porto ao alcance da mão.",
+          longDesc: "Da estação Mirador do teleférico você passa pelo Mirador de l'Alcalde e pelo monumento à Sardana até aqui. Antes de entrar no teleférico do porto: do mirante dos Jardins de Miramar, a uns 60 metros acima do mar, o porto fica quase aos seus pés. Como o mirante é mais baixo que a fortaleza, aqui você vê a cidade bem de perto – a coluna de Colombo, o centro antigo, a Barceloneta e as cabines do teleférico flutuando sobre a água à sua frente."
+        },
+        de: {
+          name: "Mirador de Miramar",
+          shortDesc: "Der Hafen zum Greifen nah.",
+          longDesc: "Von der Gondelstation Mirador kommst du am Mirador de l'Alcalde und am Sardana-Denkmal vorbei hierher. Bevor du in die Hafenseilbahn steigst: Vom Aussichtsbalkon der Gärten von Miramar, rund 60 Meter über dem Meer, liegt dir der Hafen fast zu Füßen. Weil der Mirador tiefer liegt als die Festung, siehst du die Stadt hier besonders nah – Kolumbussäule, Altstadt, Barceloneta und die Seilbahnkabinen, die vor dir über das Wasser schweben."
+        },
+        highlights: [
+          {
+            img: "341 Jardins de Miramar (Barcelona), amb la font i l'Hotel Miramar.jpg",
+            de: {
+              title: "Gärten für die Weltausstellung",
+              text: "Die Terrassengärten wurden 1919–1923 für die Weltausstellung angelegt, entworfen vom französischen Gartenarchitekten Jean-Claude Nicolas Forestier und von Nicolau Maria Rubió i Tudurí. Das Palais dahinter ist heute das Hotel Miramar; früher hatte hier das spanische Fernsehen seine Studios in Barcelona."
+            },
+            pt: {
+              title: "Jardins para a Exposição",
+              text: "Os jardins em terraços foram criados entre 1919 e 1923 para a Exposição, projetados pelo paisagista francês Jean-Claude Nicolas Forestier e por Nicolau Maria Rubió i Tudurí. O palacete atrás deles é hoje o Hotel Miramar; antigamente a televisão espanhola tinha aqui seus estúdios em Barcelona."
+            }
+          },
+          {
+            de: {
+              title: "Was siehst du da unten?",
+              text: "Von links nach rechts: die Kolumbussäule am Ende der Rambla, das Hafenbecken Port Vell mit der Holzbrücke Rambla de Mar, der Seilbahnturm Jaume I vor dem World Trade Center, die Barceloneta und ganz rechts das segelförmige W-Hotel. Bei guter Sicht erkennst du links in der Ferne sogar die Sagrada Família – das Ziel der anderen Route."
+            },
+            pt: {
+              title: "O que você vê lá embaixo?",
+              text: "Da esquerda para a direita: a coluna de Colombo no fim da Rambla, a doca do Port Vell com a passarela de madeira Rambla de Mar, a torre Jaume I do teleférico em frente ao World Trade Center, a Barceloneta e, bem à direita, o Hotel W em forma de vela. Com boa visibilidade dá para ver, à esquerda ao longe, até a Sagrada Família – o destino da outra rota."
+            }
+          }
+        ]
+      },
+      {
+        id: 10,
+        coords: [41.36890, 2.17233],
+        wiki: "https://ca.wikipedia.org/wiki/Jardins_de_Moss%C3%A8n_Costa_i_Llobera",
+        img: "Jardins Mossèn Costa i Llobera.jpg",
+        author: "Enfo",
+        license: "CC BY-SA 3.0",
+        pt: {
+          notes: [
+            {"type":"info","text":"Entrada gratuita, aberto durante o dia – no verão até cerca das 21h, no inverno até cerca das 19h. Atenção: o caminho desce bastante, e depois é preciso subir de novo até a estação do teleférico."}
+          ],
+          name: "Jardins de Mossèn Costa i Llobera",
+          shortDesc: "O jardim de cactos sobre o porto.",
+          longDesc: "Um pequeno desvio que vale a pena: logo abaixo de Miramar, a encosta virada para o mar se transforma num deserto em miniatura. O Jardim de Cactos de Barcelona foi inaugurado em 1970 e é considerado uma das coleções de suculentas mais importantes da Europa. Depois, volte subindo até a estação do teleférico do porto."
+        },
+        de: {
+          notes: [
+            {"type":"info","text":"Eintritt frei, tagsüber geöffnet – im Sommer bis etwa 21 Uhr, im Winter bis etwa 19 Uhr. Achtung: Es geht ein Stück steil bergab, danach wieder hoch zur Seilbahnstation."}
+          ],
+          name: "Jardins de Mossèn Costa i Llobera",
+          shortDesc: "Der Kakteengarten über dem Hafen.",
+          longDesc: "Ein kurzer Abstecher, der sich lohnt: Gleich unterhalb von Miramar verwandelt sich der Hang zum Meer in eine Mini-Wüste. Barcelonas Kakteengarten wurde 1970 eröffnet und gilt als eine der bedeutendsten Sukkulenten-Sammlungen Europas. Danach geht es wieder hinauf zur Station der Hafenseilbahn."
+        },
+        highlights: [
+          {
+            img: "Barcelona Jardins de Mossèn Costa i Llobera (16724451902).jpg",
+            author: "Jorge Franganillo",
+            license: "CC BY 2.0",
+            de: {
+              title: "800 Arten aus den Wüsten der Welt",
+              text: "Rund 800 Arten von Kakteen und anderen Sukkulenten wachsen hier, vor allem aus Afrika, Amerika und Australien. Der windgeschützte Hang zum Meer ist im Schnitt zwei bis drei Grad wärmer als der Rest der Stadt – ideal für Wüstenpflanzen. Such den kugeligen Goldkugelkaktus: Auf Spanisch heißt er »Schwiegermutterstuhl«."
+            },
+            pt: {
+              title: "800 espécies dos desertos do mundo",
+              text: "Crescem aqui cerca de 800 espécies de cactos e outras suculentas, sobretudo da África, das Américas e da Austrália. A encosta abrigada do vento, virada para o mar, é em média dois a três graus mais quente que o resto da cidade – ideal para plantas do deserto. Procure o cacto redondo e dourado: em espanhol ele se chama 'assento da sogra'."
+            }
+          },
+          {
+            img: "Estatua del Pi de Formentor als Jardins Mossen Costa i Llobera.jpg",
+            de: {
+              title: "Ein Garten für einen Dichter",
+              text: "Der Garten trägt den Namen des mallorquinischen Priesters und Dichters Miquel Costa i Llobera. Die Skulptur erinnert an sein berühmtestes Gedicht, »El pi de Formentor« – die Kiefer, die sich am Kap Formentor gegen den Wind stemmt. Angelegt haben den Garten der Architekt Joaquim Maria Casamor und der Sukkulenten-Experte Joan Pañella. 1987 zählte ihn ein Journalist der New York Times zu den zehn schönsten Gärten der Welt."
+            },
+            pt: {
+              title: "Um jardim para um poeta",
+              text: "O jardim leva o nome do padre e poeta maiorquino Miquel Costa i Llobera. A escultura lembra seu poema mais famoso, 'El pi de Formentor' – o pinheiro que resiste ao vento no Cabo Formentor. O jardim foi criado pelo arquiteto Joaquim Maria Casamor e pelo especialista em suculentas Joan Pañella. Em 1987, um jornalista do New York Times o incluiu entre os dez jardins mais bonitos do mundo."
+            }
+          }
+        ]
+      },
+      {
+        id: 11,
+        coords: [41.37088, 2.17234],
+        wiki: "https://ca.wikipedia.org/wiki/Telef%C3%A8ric_del_Port_de_Barcelona",
+        img: "Telefèric del Port (vist des de Miramar).JPG",
+        nextBy: "cablecar",
+        pt: {
+          notes: [
+            {"type":"ticket","text":"Precisa de bilhete próprio e não é barato (só ida custa mais de 10 €). Só há duas cabines – na alta temporada costuma haver fila. Com vento forte o teleférico para. Funciona mais ou menos das 11h até 17h30–20h, conforme a estação. Não é acessível para cadeira de rodas."}
+          ],
+          name: "Miramar – Teleférico do Porto",
+          shortDesc: "De teleférico sobre o porto.",
+          longDesc: "Do mirante de Miramar você atravessa o porto a cerca de 70 metros de altura no Transbordador Aeri del Port até a Barceloneta. As cabines vermelhas funcionam desde 1931 – a travessia de pouco mais de 1,3 km leva poucos minutos, mas a vista da coluna de Colombo, do centro antigo e do mar é inesquecível.",
+          nextHint: "De teleférico sobre o porto, aprox. 10 min"
+        },
+        de: {
+          notes: [
+            {"type":"ticket","text":"Eigenes Ticket nötig und nicht billig (einfache Fahrt über 10 €). Nur zwei Kabinen – in der Hochsaison oft Wartezeit. Bei starkem Wind steht die Bahn still. Betrieb etwa ab 11 Uhr bis 17:30–20 Uhr, je nach Jahreszeit. Nicht barrierefrei."}
+          ],
+          name: "Miramar – Hafenseilbahn",
+          shortDesc: "Mit der Seilbahn über den Hafen.",
+          longDesc: "Vom Aussichtspunkt Miramar schwebst du mit dem Transbordador Aeri del Port in rund 70 Metern Höhe quer über den Hafen bis zur Barceloneta. Die roten Kabinen fahren seit 1931 – die gut 1,3 Kilometer lange Fahrt dauert nur wenige Minuten, aber der Blick auf Kolumbussäule, Altstadt und Meer ist unvergesslich.",
+          nextHint: "Mit der Hafenseilbahn, ca. 10 Min."
+        },
+        highlights: [
+          {
+            img: "Telefèric del Port, cabina i WTC.jpg",
+            de: {
+              title: "Noch ein Werk von Buïgas",
+              text: "Die Idee zur Hafenseilbahn hatte 1926 Carles Buïgas – derselbe Ingenieur wie bei der Font Màgica. Eröffnet wurde sie aber erst 1931, nach der Weltausstellung. Ursprünglich musste man am 107 Meter hohen Turm Jaume I in der Hafenmitte umsteigen; heute hält dort niemand mehr, die Kabinen schweben einfach vorbei."
+            },
+            pt: {
+              title: "Mais uma obra de Buïgas",
+              text: "A ideia do teleférico do porto foi de Carles Buïgas, em 1926 – o mesmo engenheiro da Font Màgica. Mas ele só foi inaugurado em 1931, depois da Exposição. Originalmente era preciso trocar de cabine na torre Jaume I, de 107 metros, no meio do porto; hoje ninguém mais para lá, as cabines simplesmente passam."
+            }
+          }
+        ]
+      },
+      {
+        id: 12,
+        coords: [41.37140, 2.18760],
+        wiki: "",
+        img: "002 Torre de Sant Sebastià, Torre del Rellotge i Hotel W (Barcelona), des del moll d'Espanya.jpg",
+        author: "Enric",
+        pt: {
+          name: "Torre de Sant Sebastià",
+          shortDesc: "Chegada à Barceloneta.",
+          longDesc: "A cabine chega ao alto da torre de aço de Sant Sebastià, e um elevador leva você até embaixo. Agora você está na praia de Sant Sebastià, a poucos passos do Hotel W. Daqui dá para emendar com a outra rota: a praia da Barceloneta, o bairro dos pescadores e o Palau de Mar estão logo ali."
+        },
+        de: {
+          name: "Torre de Sant Sebastià",
+          shortDesc: "Ankunft in der Barceloneta.",
+          longDesc: "Die Kabine landet oben im Stahlturm von Sant Sebastià, ein Aufzug bringt dich hinunter. Du stehst jetzt am Strand von Sant Sebastià, wenige Schritte vom W-Hotel entfernt. Von hier kannst du direkt in die andere Route einsteigen: Barceloneta-Strand, Fischerviertel und Palau de Mar liegen gleich um die Ecke."
+        }
+      }
+    ];
+
+    // ===== Route registry =====
+    // To add a route: create a stops array like the ones above and add an entry here.
+    // storageKey keeps each route's "visited" progress separate.
+    const routes = [
+      {
+        id: 'eixample',
+        storageKey: 'bcn_tour_completed_v3',
+        distance: '~12–14 km',
+        duration: '~7–9 h',
+        pt: { title: 'Diagonal → Sagrada Família' },
+        de: { title: 'Diagonal → Sagrada Família' },
+        stops: eixampleStops,
+        toilets: eixampleToilets
+      },
+      {
+        id: 'montjuic',
+        storageKey: 'bcn_tour_completed_montjuic',
+        distance: '~4–5 km',
+        duration: '~5 h',
+        pt: { title: "Plaça d'Espanya → Montjuïc → teleférico" },
+        de: { title: "Plaça d'Espanya → Montjuïc → Seilbahn" },
+        stops: montjuicStops,
+        toilets: []
+      }
     ];
 
     // ---------- Storage (wrapped so the page still works if storage is blocked) ----------
@@ -1669,16 +2266,26 @@
 
     // ---------- App state ----------
     let currentLang = loadStored('bcn_tour_lang_v2', 'pt');
-    // Saved progress migrations when stops were inserted:
-    // v2: new stop 3 (Passeig de Gràcia)  -> old ids >= 3 move up by one
-    // v3: new stop 13 (Temple d'August)   -> v2 ids >= 13 move up by one
-    let completedStops = loadStored('bcn_tour_completed_v3', null);
-    if (completedStops === null) {
-      let v2 = loadStored('bcn_tour_completed_v2', null);
-      if (v2 === null) v2 = loadStored('bcn_tour_completed', []).map(id => id >= 3 ? id + 1 : id);
-      completedStops = v2.map(id => id >= 13 ? id + 1 : id);
-      saveStored('bcn_tour_completed_v3', completedStops);
+
+    function loadProgress(route) {
+      if (route.id !== 'eixample') return loadStored(route.storageKey, []);
+      // Saved progress migrations for the first route (stops were inserted over time):
+      // v2: new stop 3 (Passeig de Gràcia)  -> old ids >= 3 move up by one
+      // v3: new stop 13 (Temple d'August)   -> v2 ids >= 13 move up by one
+      let done = loadStored('bcn_tour_completed_v3', null);
+      if (done === null) {
+        let v2 = loadStored('bcn_tour_completed_v2', null);
+        if (v2 === null) v2 = loadStored('bcn_tour_completed', []).map(id => id >= 3 ? id + 1 : id);
+        done = v2.map(id => id >= 13 ? id + 1 : id);
+        saveStored('bcn_tour_completed_v3', done);
+      }
+      return done;
     }
+
+    let currentRoute = routes.find(r => r.id === loadStored('bcn_tour_route', 'eixample')) || routes[0];
+    let stops = currentRoute.stops;
+    let publicToilets = currentRoute.toilets;
+    let completedStops = loadProgress(currentRoute);
     let showWC = true;
     let userMarker = null;
     let watchId = null;
@@ -1692,10 +2299,28 @@
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    const latLngs = stops.map(s => s.coords);
-    L.polyline(latLngs, { color: '#4f46e5', weight: 4, opacity: 0.7, dashArray: '6, 8' }).addTo(map);
-
+    // Everything route-specific on the map (line + numbered markers) lives in this layer
+    const routeLayer = L.layerGroup().addTo(map);
     const stopMarkers = {};
+
+    // How a leg is travelled decides how its line looks on the map
+    const LEG_STYLES = {
+      walk:     { color: '#4f46e5', weight: 4, opacity: 0.7, dashArray: '6, 8' },
+      boat:     { color: '#0891b2', weight: 4, opacity: 0.8, dashArray: '2, 8' },
+      cablecar: { color: '#dc2626', weight: 3, opacity: 0.85, dashArray: '12, 6' }
+    };
+    function legMode(stop) { return stop.nextBy || (stop.nextByBoat ? 'boat' : 'walk'); }
+
+    function drawRoute() {
+      routeLayer.clearLayers();
+      Object.keys(stopMarkers).forEach(k => delete stopMarkers[k]);
+      for (let i = 0; i < stops.length - 1; i++) {
+        L.polyline([stops[i].coords, stops[i + 1].coords], LEG_STYLES[legMode(stops[i])] || LEG_STYLES.walk).addTo(routeLayer);
+      }
+    }
+    function fitRoute() {
+      map.fitBounds(L.latLngBounds(stops.map(s => s.coords)), { padding: [25, 25] });
+    }
     const wcMarkersGroup = L.layerGroup().addTo(map);
 
     // ---------- Helpers ----------
@@ -1767,11 +2392,16 @@
         return `<div class="mt-3 px-3 py-2 rounded-lg bg-green-50 border border-green-200 text-green-800 text-xs font-semibold text-center">${txt.endOfTour}</div>`;
       }
       const nextName = escapeHtml(next[currentLang].name);
-      if (stop.nextByBoat) {
+      const mode = legMode(stop);
+      if (mode !== 'walk') {
+        const look = mode === 'cablecar'
+          ? { icon: 'cable-car', cls: 'bg-red-50 border-red-200 text-red-900', sub: 'text-red-700', label: txt.cableLeg }
+          : { icon: 'ship', cls: 'bg-cyan-50 border-cyan-200 text-cyan-900', sub: 'text-cyan-700', label: txt.boatLeg };
+        const hint = stop[currentLang].nextHint || look.label;
         return `
-          <div class="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-cyan-50 border border-cyan-200 text-cyan-900 text-xs font-semibold">
-            <span class="flex items-center gap-2"><i data-lucide="ship" class="w-4 h-4 shrink-0"></i> ${next.id}. ${nextName}</span>
-            <span class="shrink-0 text-cyan-700">${txt.boatLeg}</span>
+          <div class="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-xs font-semibold ${look.cls}">
+            <span class="flex items-center gap-2 min-w-0"><i data-lucide="${look.icon}" class="w-4 h-4 shrink-0"></i><span class="truncate">${next.id}. ${nextName}</span></span>
+            <span class="shrink-0 ${look.sub}">${escapeHtml(hint)}</span>
           </div>`;
       }
       const w = walkEstimate(stop.coords, next.coords);
@@ -1789,7 +2419,15 @@
       document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'de';
 
       document.getElementById('app-title').innerText = txt.appTitle;
-      document.getElementById('app-subtitle').innerText = txt.appSubtitle;
+      document.getElementById('app-subtitle').innerText = currentRoute[currentLang].title;
+      document.getElementById('route-distance').innerText = currentRoute.distance;
+      document.getElementById('route-duration').innerText = currentRoute.duration;
+      document.getElementById('label-route').innerText = txt.routeLabel;
+      const sel = document.getElementById('route-select');
+      sel.setAttribute('aria-label', txt.routeLabel);
+      sel.innerHTML = routes.map(r => `<option value="${r.id}" ${r.id === currentRoute.id ? 'selected' : ''}>${escapeHtml(r[currentLang].title)}</option>`).join('');
+      // Toilet toggle only makes sense if the route has toilet data
+      document.getElementById('wc-toggle').style.display = publicToilets.length ? '' : 'none';
       document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
 
       if (watchId === null) {
@@ -1810,6 +2448,26 @@
       renderToilets();
       updateNearBanner();
     }
+
+    window.setRoute = function(id) {
+      const route = routes.find(r => r.id === id);
+      if (!route || route.id === currentRoute.id) return;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (lightboxState) closeLightbox();
+      currentRoute = route;
+      stops = route.stops;
+      publicToilets = route.toilets;
+      completedStops = loadProgress(route);
+      saveStored('bcn_tour_route', route.id);
+      openDetails.clear();
+      nearStopId = null;
+      dismissedNearId = null;
+      drawRoute();
+      fitRoute();
+      document.getElementById('stops-container').innerHTML = ''; // no scroll anchoring across routes
+      updateUI();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    };
 
     function setLanguage(lang) {
       if (currentLang !== lang) {
@@ -1914,7 +2572,7 @@
           iconAnchor: [13, 13]
         });
         if (!stopMarkers[stop.id]) {
-          stopMarkers[stop.id] = L.marker(stop.coords, { icon: customIcon }).addTo(map);
+          stopMarkers[stop.id] = L.marker(stop.coords, { icon: customIcon }).addTo(routeLayer);
           stopMarkers[stop.id].on('click', () => scrollToCard(stop.id));
         } else {
           stopMarkers[stop.id].setIcon(customIcon);
@@ -2021,7 +2679,7 @@
       } else {
         completedStops.push(id);
       }
-      saveStored('bcn_tour_completed_v3', completedStops);
+      saveStored(currentRoute.storageKey, completedStops);
       updateUI();
     };
 
@@ -2264,7 +2922,8 @@
     };
 
     // ---------- Init ----------
-    map.fitBounds(L.latLngBounds(latLngs), { padding: [25, 25] });
+    drawRoute();
+    fitRoute();
     updateUI();
   </script>
 </body>
