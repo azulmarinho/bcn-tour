@@ -1,969 +1,186 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guia Rota Barcelona | 26 Atrações Gratuitas</title>
+  <title>Guia de Caminhada em Barcelona</title>
   
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   
-  <!-- Leaflet CSS & JS (100% Grátis, Sem API Key) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            terracotta: {
-              50: '#fff7f5',
-              100: '#ffedea',
-              500: '#e05a47',
-              600: '#ca4330',
-              700: '#a83322',
-            },
-            mediterranean: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0284c7',
-              600: '#0369a1',
-              800: '#075985',
-            },
-            sand: {
-              50: '#fdfbf7',
-              100: '#f7f3e9',
-              200: '#ede4d3',
-              800: '#52493a'
-            }
-          },
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-            display: ['Outfit', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #fdfbf7;
+    #map { height: 350px; width: 100%; z-index: 10; }
+    @media (min-width: 768px) {
+      #map { height: 100%; min-height: 500px; }
     }
-    
-    .font-display {
-      font-family: 'Outfit', sans-serif;
-    }
-
-    #map {
-      height: 100%;
-      width: 100%;
-      z-index: 1;
-    }
-
-    /* Custom Marker Design */
-    .custom-pin {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
+    .custom-div-icon {
+      background: #ef4444;
       color: white;
-      font-weight: 700;
+      border-radius: 50%;
+      text-align: center;
+      font-weight: bold;
       font-size: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      line-height: 24px;
       border: 2px solid white;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
-
-    .custom-pin.completed {
-      background-color: #10b981 !important;
-    }
-
-    .custom-pin:hover {
-      transform: scale(1.2);
-      z-index: 1000 !important;
-    }
-
-    .leaflet-popup-content-wrapper {
-      border-radius: 1rem;
-      padding: 0.25rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-    }
-
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .custom-div-icon.completed {
+      background: #22c55e;
     }
   </style>
 </head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
 
-<body class="h-full text-slate-800 flex flex-col md:flex-row overflow-hidden bg-sand-50">
-
-  <header class="md:hidden bg-white border-b border-sand-200 px-4 py-3 flex items-center justify-between z-30 shrink-0 shadow-xs">
-    <div class="flex items-center gap-2.5">
-      <div class="w-9 h-9 rounded-xl bg-terracotta-500 text-white flex items-center justify-center font-display font-bold text-sm shadow-sm">
-        BCN
-      </div>
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
       <div>
-        <h1 class="font-display font-bold text-base leading-tight text-slate-900">Roteiro Barcelona</h1>
-        <p class="text-[11px] text-slate-500">26 Paradas • ~13 KM de Caminhada</p>
+        <h1 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="map-pin"></i> Tour Barcelona
+        </h1>
+        <p class="text-xs text-indigo-200">Diagonal → Sagrada Família</p>
       </div>
-    </div>
-
-    <!-- Toggle Map/List View on Mobile -->
-    <div class="flex bg-sand-100 p-1 rounded-xl border border-sand-200">
-      <button id="showListBtn" onclick="toggleMobileView('list')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white shadow-xs text-terracotta-600 transition">
-        <i class="fa-solid fa-list mr-1"></i> Lista
-      </button>
-      <button id="showMapBtn" onclick="toggleMobileView('map')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition">
-        <i class="fa-solid fa-map-location-dot mr-1"></i> Mapa
-      </button>
+      <div class="text-right">
+        <span id="progress-text" class="text-xs bg-indigo-700 px-2.5 py-1 rounded-full font-semibold">0 / 26 concluídos</span>
+      </div>
     </div>
   </header>
 
-  <aside id="sidebarPanel" class="w-full md:w-[480px] lg:w-[520px] h-full flex flex-col bg-white border-r border-sand-200 z-20 shrink-0">
+  <!-- Main Layout -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-4">
     
-    <!-- Sidebar Header Banner -->
-    <div class="p-5 border-b border-sand-200 bg-sand-50/70 hidden md:block">
-      <div class="flex items-center justify-between mb-2">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-terracotta-100 text-terracotta-700">
-          <i class="fa-solid fa-person-walking"></i> Tour Completo a Pé
-        </span>
-        <span id="progressBadge" class="text-xs font-semibold text-slate-600 bg-white border border-sand-200 px-2.5 py-1 rounded-full shadow-2xs">
-          0 / 26 Visitados (0%)
-        </span>
-      </div>
-      <h1 class="font-display font-extrabold text-2xl text-slate-900 tracking-tight">Barcelona Tour Guide</h1>
-      <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-        Do Passeig de Gràcia ao Bairro Gótico, praia do W Hotel, El Born e encerramento na Sagrada Família.
-      </p>
-
-      <!-- Overall Tour Progress Bar -->
-      <div class="w-full bg-sand-200 h-2.5 rounded-full mt-3 overflow-hidden">
-        <div id="progressBar" class="bg-gradient-to-r from-terracotta-500 via-mediterranean-500 to-emerald-500 h-full w-0 transition-all duration-300"></div>
-      </div>
-    </div>
-
-    <!-- API Key Notice Banner (Answering user question directly) -->
-    <div class="bg-mediterranean-50 border-b border-mediterranean-100 p-3 px-4 flex items-start gap-3">
-      <i class="fa-solid fa-shield-halved text-mediterranean-600 text-sm mt-0.5 shrink-0"></i>
-      <div class="text-[11px] text-mediterranean-800 leading-snug">
-        <strong>100% Grátis & Sem Chave API:</strong> Este aplicativo usa o mapa aberto <i>OpenStreetMap</i> via <i>Leaflet</i>. Não exige chave ou cadastro!
-      </div>
-    </div>
-
-    <!-- Mobile Progress Tracker -->
-    <div class="p-3 border-b border-sand-200 bg-sand-50 md:hidden flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-flag-checkered text-terracotta-500"></i>
-        <span id="mobileProgressText" class="text-xs font-bold text-slate-700">0 de 26 locais visitados</span>
-      </div>
-      <button onclick="resetProgress()" class="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 font-medium">
-        <i class="fa-solid fa-rotate-right"></i> Reiniciar
-      </button>
-    </div>
-
-    <!-- Search & Category Filters -->
-    <div class="p-3 border-b border-sand-200 bg-white space-y-2">
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-        <input type="text" id="searchInput" onkeyup="filterStops()" placeholder="Buscar atração (ex: Gaudí, Praia, Tapas, Mosaico)..." 
-               class="w-full pl-9 pr-8 py-2 bg-sand-50 border border-sand-200 rounded-xl text-xs focus:outline-none focus:border-terracotta-500 focus:bg-white transition">
-        <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <!-- Stage Filter Pills -->
-      <div class="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
-        <button onclick="setStageFilter('all')" class="stage-btn active px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-slate-900 text-white transition">
-          Todas (26)
-        </button>
-        <button onclick="setStageFilter(1)" class="stage-btn px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-sand-100 text-slate-600 hover:bg-sand-200 transition">
-          1. Gótico & Modernismo
-        </button>
-        <button onclick="setStageFilter(2)" class="stage-btn px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-sand-100 text-slate-600 hover:bg-sand-200 transition">
-          2. Porto & Praia
-        </button>
-        <button onclick="setStageFilter(3)" class="stage-btn px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-sand-100 text-slate-600 hover:bg-sand-200 transition">
-          3. El Born & Parque
-        </button>
-        <button onclick="setStageFilter(4)" class="stage-btn px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-sand-100 text-slate-600 hover:bg-sand-200 transition">
-          4. Sagrada Família
-        </button>
-      </div>
-    </div>
-
-    <!-- Scrollable Cards Container -->
-    <div id="stopsList" class="flex-1 overflow-y-auto p-3 space-y-2.5 bg-sand-50/50">
-      <!-- Generated dynamically in JS -->
-    </div>
-
-    <!-- Footer Controls -->
-    <div class="p-3 border-t border-sand-200 bg-white flex items-center justify-between text-xs text-slate-500">
-      <button onclick="openGoogleMapsFullRoute()" class="px-3.5 py-2 rounded-xl bg-mediterranean-50 text-mediterranean-700 border border-mediterranean-200 hover:bg-mediterranean-100 font-semibold transition flex items-center gap-2">
-        <i class="fa-solid fa-map-location-dot"></i> Abrir Rota no Google Maps
-      </button>
-      <button onclick="resetProgress()" class="hidden md:block text-slate-400 hover:text-terracotta-600 transition">
-        <i class="fa-solid fa-arrow-rotate-left"></i> Limpar progresso
-      </button>
-    </div>
-  </aside>
-
-  <main id="mapPanel" class="flex-1 h-full relative hidden md:block">
-    <div id="map"></div>
-
-    <!-- Map Control Buttons -->
-    <div class="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-      <button onclick="recenterMap()" class="w-10 h-10 bg-white/90 backdrop-blur-md border border-sand-200 text-slate-700 rounded-xl shadow-md hover:bg-white flex items-center justify-center transition" title="Ver toda a rota">
-        <i class="fa-solid fa-expand text-sm"></i>
-      </button>
-      <button onclick="toggleMapType()" id="mapTypeBtn" class="w-10 h-10 bg-white/90 backdrop-blur-md border border-sand-200 text-slate-700 rounded-xl shadow-md hover:bg-white flex items-center justify-center transition" title="Mudar estilo do mapa">
-        <i class="fa-solid fa-layer-group text-sm"></i>
-      </button>
-    </div>
-
-    <!-- Map Legend -->
-    <div class="absolute bottom-6 left-6 right-6 z-[1000] pointer-events-none hidden lg:flex justify-center">
-      <div class="bg-white/95 backdrop-blur-md border border-sand-200 px-5 py-2.5 rounded-2xl shadow-lg pointer-events-auto flex items-center gap-6 text-xs text-slate-700 font-medium">
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-terracotta-500"></span>
-          <span>Etapa 1: Gótico</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-mediterranean-500"></span>
-          <span>Etapa 2: Praia</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-          <span>Etapa 3: El Born</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-          <span>Etapa 4: Final</span>
+    <!-- Left Column: Map & Controls -->
+    <div class="w-full md:w-1/2 flex flex-col gap-4">
+      <!-- Map Container -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-20">
+        <div id="map"></div>
+        <div class="p-3 bg-slate-100 border-t border-slate-200 text-xs text-slate-600 flex justify-between items-center">
+          <span><i data-lucide="footprints" class="inline w-3 h-3"></i> ~12-14 km</span>
+          <span><i data-lucide="clock" class="inline w-3 h-3"></i> 7-9 horas</span>
         </div>
       </div>
     </div>
+
+    <!-- Right Column: Timeline / List -->
+    <div class="w-full md:w-1/2 flex flex-col gap-3" id="stops-container">
+      <!-- Stops injected by JS -->
+    </div>
+
   </main>
 
-  <div id="detailModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-200">
-    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-sand-200 transform scale-95 transition-all duration-200" id="modalCard">
-      <!-- Modal Header -->
-      <div class="relative bg-sand-100 p-5 border-b border-sand-200 flex items-start justify-between">
-        <div class="flex items-center gap-3">
-          <span id="modalNum" class="w-9 h-9 rounded-full bg-terracotta-500 text-white font-bold flex items-center justify-center text-sm shadow-xs">1</span>
-          <div>
-            <span id="modalStage" class="text-[10px] uppercase tracking-wider font-extrabold text-terracotta-600">Etapa 1</span>
-            <h2 id="modalTitle" class="font-display font-bold text-xl text-slate-900">Nome da Atração</h2>
-          </div>
-        </div>
-        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white text-slate-400 hover:text-slate-700 flex items-center justify-center shadow-xs transition">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      
-      <!-- Modal Content Body -->
-      <div class="p-5 overflow-y-auto space-y-4 text-sm text-slate-600">
-        <p id="modalDesc" class="leading-relaxed text-slate-700"></p>
-
-        <!-- Tip Highlight Box -->
-        <div class="bg-sand-50 border border-sand-200 p-4 rounded-2xl flex items-start gap-3">
-          <i class="fa-solid fa-lightbulb text-amber-500 text-xl shrink-0 mt-0.5"></i>
-          <div>
-            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-1">Dica de Ouro / O que observar</h4>
-            <p id="modalTip" class="text-xs text-slate-600 leading-relaxed"></p>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between pt-2 border-t border-sand-100 text-xs">
-          <span class="text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> Coordenadas: <span id="modalCoords"></span></span>
-          <a id="modalMapsLink" href="#" target="_blank" class="text-mediterranean-600 font-bold hover:underline flex items-center gap-1">
-            Abrir no Google Maps <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Modal Actions -->
-      <div class="p-4 bg-sand-50 border-t border-sand-200 flex items-center justify-between">
-        <button id="modalToggleDone" onclick="" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-terracotta-500 text-white hover:bg-terracotta-600 transition flex items-center gap-2">
-          <i class="fa-solid fa-check"></i> Marcar como visitado
-        </button>
-        <button onclick="closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-white border border-sand-200 text-slate-600 hover:bg-sand-100 transition">
-          Fechar
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    const stopsData = [
-      {
-        id: 1,
-        stage: 1,
-        title: "Estação de Metrô Diagonal",
-        category: "Ponto de Partida",
-        lat: 41.3965,
-        lng: 2.1585,
-        desc: "Ponto de partida no topo do glamoroso boulevard Passeig de Gràcia. Fácil acesso pelas linhas L3 e L5 do metrô.",
-        tip: "Aproveite para comprar água fresca em uma lojinha perto da estação antes de iniciar a caminhada.",
-        mapsQuery: "Estacio+de+Diagonal+Barcelona"
-      },
-      {
-        id: 2,
-        stage: 1,
-        title: "Casa Milà (La Pedrera)",
-        category: "Arquitetura do Gaudí",
-        lat: 41.3954,
-        lng: 2.1619,
-        desc: "Obra-prima residencial de Antoni Gaudí com fachada de pedra ondulada que lembra ondas do mar e chaminés surrealistas.",
-        tip: "Observe da calçada os sacadas de ferro forjado esculpidos à mão — nenhum é igual ao outro!",
-        mapsQuery: "Casa+Mila+Barcelona"
-      },
-      {
-        id: 3,
-        stage: 1,
-        title: "Casa Batlló",
-        category: "Arquitetura do Gaudí",
-        lat: 41.3917,
-        lng: 2.1649,
-        desc: "O castelo colorido de Gaudí em homenagem à lenda de São Jorge. O telhado lembra as escamas do dragão.",
-        tip: "Para a melhor foto sem reflexos, atravesse a rua e tire do canteiro central do Passeig de Gràcia.",
-        mapsQuery: "Casa+Batllo+Barcelona"
-      },
-      {
-        id: 4,
-        stage: 1,
-        title: "El Nacional",
-        category: "Gastronomia & Estilo",
-        lat: 41.3892,
-        lng: 2.1683,
-        desc: "Um pátio gastronômico histórico espetacular sob um teto de vidro e aço restaurado do século XIX.",
-        tip: "Excelente parada estratégica para o primeiro café da manhã ou café com leite em ambiente sofisticado.",
-        mapsQuery: "El+Nacional+Barcelona"
-      },
-      {
-        id: 5,
-        stage: 1,
-        title: "Plaça de Catalunya",
-        category: "Centro da Cidade",
-        lat: 41.3870,
-        lng: 2.1700,
-        desc: "A praça central mais movimentada de Barcelona, que conecta o bairro moderno Eixample ao centro histórico.",
-        tip: "Ponto de transição perfeito. Fique atento aos seus pertences ao redor das fontes.",
-        mapsQuery: "Placa+de+Catalunya+Barcelona"
-      },
-      {
-        id: 6,
-        stage: 1,
-        title: "El món neix en cada bes (Mural do Beijo)",
-        category: "Arte Urbana & Foto",
-        lat: 41.3855,
-        lng: 2.1753,
-        desc: "O famoso mosaico fotográfico de Joan Fontcuberta na Plaça d'Isidre Nonell. De perto, é feito de 4.000 fotos de moradores sobre a 'liberdade'.",
-        tip: "Parada obrigatória para fotos! Chegue bem perto para ver as fotos individuais que formam o beijo.",
-        mapsQuery: "El+mon+neix+en+cada+bes"
-      },
-      {
-        id: 7,
-        stage: 1,
-        title: "Catedral de Barcelona",
-        category: "Gótico & História",
-        lat: 41.3839,
-        lng: 2.1762,
-        desc: "A catedral gótica principal da cidade, com uma fachada imponente e um claustro ajardinado de palmeiras.",
-        tip: "No claustro interno vivem exatamente 13 gansas brancas, representando a idade da padroeira Santa Eulália.",
-        mapsQuery: "Catedral+de+Barcelona"
-      },
-      {
-        id: 8,
-        stage: 1,
-        title: "Casa de l'Ardiaca",
-        category: "Palácio Histórico",
-        lat: 41.3836,
-        lng: 2.1755,
-        icon: "fa-envelope-open-text",
-        desc: "Antiga residência do arquidiácono com um pátio encantador, fonte de água e palmeiras.",
-        tip: "Procure a caixa de correio de mármore na entrada: as andorinhas mostram a velocidade da justiça e a tartaruga a lentidão da burocracia!",
-        mapsQuery: "Casa+de+l+Ardiaca+Barcelona"
-      },
-      {
-        id: 9,
-        stage: 1,
-        title: "Plaça de Sant Felip Neri",
-        category: "Recanto Histórico",
-        lat: 41.3832,
-        lng: 2.1750,
-        desc: "Uma praça tranquila e poética escondida em meio às ruelas estreitas do Bairro Gótico.",
-        tip: "Nas paredes da igreja ainda são visíveis as marcas de estilhaços da Guerra Civil Espanhola.",
-        mapsQuery: "Placa+de+Sant+Felip+Neri"
-      },
-      {
-        id: 10,
-        stage: 1,
-        title: "Pont del Bisbe (Ponte do Bispo)",
-        category: "Fotospot Emblemático",
-        lat: 41.3835,
-        lng: 2.1768,
-        desc: "A famosa ponte neo-gótica suspensa que conecta os dois palácios do governo na estreita Carrer del Bisbe.",
-        tip: "Procure a caveira com uma adaga cravada na parte inferior da ponte — a lenda diz que traz sorte fazer um pedido ao olhar para ela.",
-        mapsQuery: "Pont+del+Bisbe+Barcelona"
-      },
-      {
-        id: 11,
-        stage: 1,
-        title: "Plaça de Sant Jaume",
-        category: "Centro Político",
-        lat: 41.3828,
-        lng: 2.1774,
-        desc: "Coração político da Catalunha, onde ficam frente a frente a Prefeitura e o Palácio da Generalitat.",
-        tip: "Frequentemente sedia eventos culturais tradicionais, como os Castellers (torres humanas).",
-        mapsQuery: "Placa+de+Sant+Jaume"
-      },
-      {
-        id: 12,
-        stage: 1,
-        title: "Plaça Reial",
-        category: "Praça & Arquitetura",
-        lat: 41.3800,
-        lng: 2.1752,
-        desc: "Praça monumental rodeada por palmeiras e galerias. Os postes de iluminação foram desenhados pelo jovem Gaudí.",
-        tip: "Lugar agradável para sentar ao redor da fonte central e observar os artistas de rua.",
-        mapsQuery: "Placa+Reial+Barcelona"
-      },
-      {
-        id: 13,
-        stage: 1,
-        title: "Mercat de la Boqueria / La Rambla",
-        category: "Mercado & Tapas",
-        lat: 41.3817,
-        lng: 2.1715,
-        desc: "O mercado gastronômico mais famoso da Europa, situado bem no meio da avenida La Rambla.",
-        tip: "Compre um suco natural fresco de frutas tropicais por cerca de 2€ nas barracas da entrada.",
-        mapsQuery: "Mercat+de+la+Boqueria"
-      },
-      {
-        id: 14,
-        stage: 2,
-        title: "Monumento a Colombo (Mirador de Colom)",
-        category: "Monumento & Vista",
-        lat: 41.3758,
-        lng: 2.1778,
-        desc: "Coluna de 60 metros no final das Ramblas apontando em direção ao mar em homenagem a Cristóvão Colombo.",
-        tip: "Existe um pequeno elevador dentro da coluna que leva a um mirante 360º no topo!",
-        mapsQuery: "Mirador+de+Colom+Barcelona"
-      },
-      {
-        id: 15,
-        stage: 2,
-        title: "Rambla de Mar",
-        category: "Ponte sobre o Mar",
-        lat: 41.3750,
-        lng: 2.1803,
-        desc: "Ponte de madeira articulada e ondulada que cruza a marina em direção ao shopping Maremagnum.",
-        tip: "A ponte se abre girando horizontalmente quando grandes veleiros entram no porto.",
-        mapsQuery: "Rambla+de+Mar+Barcelona"
-      },
-      {
-        id: 16,
-        stage: 2,
-        title: "Travessia de Bus Nàutic (Balsa Solar)",
-        category: "Transporte Marítimo",
-        lat: 41.3740,
-        lng: 2.1830,
-        desc: "Balsa solar ecológica que cruza o porto ligando a marina ao molhe perto do Hotel W.",
-        tip: "Custa apenas aprox. 1,90€ e economiza mais de 25 minutos de caminhada ao redor da baía!",
-        mapsQuery: "Bus+Nautic+Barcelona"
-      },
-      {
-        id: 17,
-        stage: 2,
-        title: "Honest Greens Barceloneta (Almoço)",
-        category: "Gastronomia na Praia",
-        lat: 41.3695,
-        lng: 2.1902,
-        desc: "Restaurante moderno e descontraído em frente à praia, famoso por bowls saudáveis, proteínas e sucos.",
-        tip: "O ponto perfeito para recarregar as energias com almoço fresco olhando o Mar Mediterrâneo.",
-        mapsQuery: "Honest+Greens+Barceloneta"
-      },
-      {
-        id: 18,
-        stage: 3,
-        title: "Passeio Marítimo da Barceloneta",
-        category: "Praia & Calçadão",
-        lat: 41.3780,
-        lng: 2.1890,
-        desc: "Caminhada relaxante pelo calçadão da praia histórica de pescadores em direção ao centro.",
-        tip: "Aproveite a brisa marinha e admire as esculturas públicas à beira-mar.",
-        mapsQuery: "Platja+de+la+Barceloneta"
-      },
-      {
-        id: 19,
-        stage: 3,
-        title: "Museu d'Història de Catalunya",
-        category: "História & Panorama",
-        lat: 41.3810,
-        lng: 2.1855,
-        desc: "Localizado nos antigos armazéns do porto Palau de Mar do século XIX.",
-        tip: "Suba de elevador até o terraço no último andar (Bar 1881) para ter uma das melhores vistas do porto sem pagar entrada do museu!",
-        mapsQuery: "Museu+d+Historia+de+Catalunya"
-      },
-      {
-        id: 20,
-        stage: 3,
-        title: "Basílica de Santa Maria del Mar",
-        category: "Gótico Catalão",
-        lat: 41.3836,
-        lng: 2.1821,
-        desc: "Obra-prima do gótico puro, imortalizada no romance 'A Catedral do Mar'.",
-        tip: "Conhecida por sua acústica perfeita e elegância interior sem excesso de decorações.",
-        mapsQuery: "Santa+Maria+del+Mar+Barcelona"
-      },
-      {
-        id: 21,
-        stage: 3,
-        title: "Ruelas Charmosas do El Born",
-        category: "Bairro & Compras",
-        lat: 41.3848,
-        lng: 2.1810,
-        desc: "Passeio pelas vielas medievais (Passeig del Born, Carrer de Montcada) repletas de oficinas de artesãos e palácios.",
-        tip: "Aproveite para explorar lojinhas independentes e sorveterias artesanais.",
-        mapsQuery: "Passeig+del+Born+Barcelona"
-      },
-      {
-        id: 22,
-        stage: 3,
-        title: "El Born Centre de Cultura i Memòria",
-        category: "Cultura & Arqueologia",
-        lat: 41.3855,
-        lng: 2.1840,
-        desc: "Antigo mercado de ferro fundido que abriga escavações arqueológicas da Barcelona do século XVIII.",
-        tip: "A entrada para caminhar pela estrutura e ver as ruínas de cima é totalmente gratuita!",
-        mapsQuery: "El+Born+Centre+de+Cultura+i+Memoria"
-      },
-      {
-        id: 23,
-        stage: 3,
-        title: "Parc de la Ciutadella",
-        category: "Parque & Natureza",
-        lat: 41.3880,
-        lng: 2.1872,
-        desc: "O maior parque urbano do centro, com lago para barcos a remo e a monumental fonte Cascada.",
-        tip: "A grande fonte de água teve a colaboração do jovem Gaudí ainda como estudante de arquitetura.",
-        mapsQuery: "Parc+de+la+Ciutadella"
-      },
-      {
-        id: 24,
-        stage: 3,
-        title: "Arc de Triomf",
-        category: "Monumento de Tijolos",
-        lat: 41.3911,
-        lng: 2.1806,
-        desc: "Arco do triunfo em tijolo vermelho neomudéjar que serviu de porta de entrada para a Exposição Universal de 1888.",
-        tip: "O passeio de palmeiras Passeig de Lluís Companys é um dos melhores cenários para fotos.",
-        mapsQuery: "Arc+de+Triomf+Barcelona"
-      },
-      {
-        id: 25,
-        stage: 4,
-        title: "La Monumental",
-        category: "Arena Histórica",
-        lat: 41.4000,
-        lng: 2.1790,
-        desc: "Antiga praça de touros de estilo bizantino-mudéjar inaugurada em 1914.",
-        tip: "Hoje é usada para eventos culturais, shows e feiras de gastronomia.",
-        mapsQuery: "La+Monumental+Barcelona"
-      },
-      {
-        id: 26,
-        stage: 4,
-        title: "Basílica da Sagrada Família",
-        category: "Gran Finale do Gaudí",
-        lat: 41.4036,
-        lng: 2.1744,
-        desc: "A magnífica e inacabada basílica de Antoni Gaudí, símbolo supremo de Barcelona.",
-        tip: "O grande encerramento do tour! No final da tarde, a Fachada da Natividade fica iluminada com uma linda luz dourada.",
-        mapsQuery: "Sagrada+Familia+Barcelona"
-      }
+    // Rotas & Pontos corrigidos com as coordenadas exatas enviadas
+    const stops = [
+      { id: 1, name: "Estação de Metrô Diagonal", coords: [41.3965, 2.1588], desc: "Ponto de partida no topo do Passeig de Gràcia." },
+      { id: 2, name: "Casa Milà (La Pedrera)", coords: [41.3954, 2.1612], desc: "Obra-prima de Gaudí com fachada de pedra ondulada." },
+      { id: 3, name: "Casa Batlló", coords: [41.3917, 2.1649], desc: "Fachada colorida inspirada na lenda de São Jorge." },
+      { id: 4, name: "El Nacional", coords: [41.390248, 2.167854], desc: "Espaço gastronômico espetacular sob arquitetura industrial." },
+      { id: 5, name: "Plaça de Catalunya", coords: [41.3870, 2.1700], desc: "A praça central conectando o centro histórico ao Eixample." },
+      { id: 6, name: "El món neix en cada bes", coords: [41.3847, 2.1751], desc: "O famoso mosaico 'O Beijo' feito de 4.000 fotos locais." },
+      { id: 7, name: "Catedral de Barcelona", coords: [41.3839, 2.1762], desc: "Catedral gótica com claustro habitado por 13 gansos brancos." },
+      { id: 8, name: "Casa de l'Ardiaca", coords: [41.3837, 2.1756], desc: "Pátio encantador com a famosa caixa de correio da tartaruga." },
+      { id: 9, name: "Plaça de Sant Felip Neri", coords: [41.383413, 2.175122], desc: "Praça tranquila com marcas históricas da Guerra Civil nas paredes." },
+      { id: 10, name: "Pont del Bisbe", coords: [41.383301, 2.176431], desc: "A icônica ponte neogótica no Bairro Gótico." },
+      { id: 11, name: "Plaça de Sant Jaume", coords: [41.3828, 2.1768], desc: "O centro político da Catalunha com a Prefeitura e a Generalitat." },
+      { id: 12, name: "Plaça Reial", coords: [41.3798, 2.1752], desc: "Praça com palmeiras e postes projetados por Gaudí." },
+      { id: 13, name: "Mercat de la Boqueria / La Rambla", coords: [41.3817, 2.1715], desc: "Mercado de produtos frescos e snacks na famosa avenida." },
+      { id: 14, name: "Monumento a Colombo", coords: [41.3758, 2.1778], desc: "Mirante e estátua ao final das Ramblas." },
+      { id: 15, name: "Rambla de Mar", coords: [41.3768, 2.1802], desc: "Passarela de madeira sobre as águas do porto." },
+      { id: 16, name: "Embarque Bus Nàutic", coords: [41.375283, 2.178901], desc: "Travessia de barco solar até a área do Hotel W." },
+      { id: 17, name: "Honest Greens Barceloneta", coords: [41.3689, 2.1901], desc: "Parada perfeita para almoço saudável à beira-mar." },
+      { id: 18, name: "Praia da Barceloneta", coords: [41.375101, 2.190063], desc: "Caminhada relaxante pela orla da praia." },
+      { id: 19, name: "Museu d'Història de Catalunya", coords: [41.3810, 2.1862], desc: "Localizado no prédio histórico Palau de Mar." },
+      { id: 20, name: "Basílica de Santa Maria del Mar", coords: [41.3836, 2.1821], desc: "A célebre 'Catedral do Mar' em estilo gótico catalão." },
+      { id: 21, name: "Ruas de El Born (Passeig del Born)", coords: [41.3849, 2.1835], desc: "Bairro charmoso com cafés, boutiques e o Museu Picasso." },
+      { id: 22, name: "El Born Centre de Cultura i Memòria", coords: [41.3855, 2.1849], desc: "Mercado antigo de ferro com ruínas do século XVIII." },
+      { id: 23, name: "Parc de la Ciutadella", coords: [41.3882, 2.1874], desc: "Parque verde com lago e a monumental fonte Cascada." },
+      { id: 24, name: "Arc de Triomf", coords: [41.3911, 2.1806], desc: "Arco do triunfo em tijolos vermelhos de 1888." },
+      { id: 25, name: "La Monumental", coords: [41.4005, 2.1798], desc: "Antiga arena de touros em estilo neo-mourisco." },
+      { id: 26, name: "Sagrada Família", coords: [41.4036, 2.1744], desc: "O grande encerramento no templo inacabado de Gaudí." }
     ];
 
-    let visitedStops = new Set(JSON.parse(localStorage.getItem('bcn_pt_visited') || '[]'));
-    let currentStageFilter = 'all';
-    let map = null;
-    let markersMap = {};
-    let polyline = null;
-    let isSatellite = false;
-    let tileLayer = null;
+    let completedStops = JSON.parse(localStorage.getItem('bcn_completed') || '[]');
 
-    const stageColors = {
-      1: '#e05a47', // Terracotta
-      2: '#0284c7', // Mediterranean Blue
-      3: '#10b981', // Emerald Green
-      4: '#f59e0b'  // Amber Gold
-    };
+    // Initialize Map
+    const map = L.map('map').setView([41.385, 2.175], 13);
 
-    window.addEventListener('DOMContentLoaded', () => {
-      initMap();
-      renderStopsList();
-      updateProgressUI();
-      
-      window.addEventListener('resize', () => {
-        if (map) map.invalidateSize();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = {};
+    const latLngs = stops.map(s => s.coords);
+
+    // Draw Route Polyline
+    L.polyline(latLngs, { color: '#4f46e5', weight: 4, opacity: 0.7, dashArray: '8, 8' }).addTo(map);
+
+    // Render Markers & List Items
+    const container = document.getElementById('stops-container');
+
+    stops.forEach((stop) => {
+      const isCompleted = completedStops.includes(stop.id);
+
+      // Create Custom Marker Icon
+      const customIcon = L.divIcon({
+        className: `custom-div-icon ${isCompleted ? 'completed' : ''}`,
+        html: `${stop.id}`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
       });
+
+      const marker = L.marker(stop.coords, { icon: customIcon })
+        .addTo(map)
+        .bindPopup(`<b>${stop.id}. ${stop.name}</b><br>${stop.desc}`);
+      
+      markers[stop.id] = marker;
+
+      // Create Card UI
+      const card = document.createElement('div');
+      card.className = `p-3.5 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/40' : 'border-slate-200'} flex items-start gap-3 transition-all hover:shadow-md cursor-pointer`;
+      card.onclick = () => {
+        map.setView(stop.coords, 16);
+        marker.openPopup();
+      };
+
+      card.innerHTML = `
+        <button onclick="event.stopPropagation(); toggleStop(${stop.id})" class="mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${isCompleted ? 'bg-green-500 text-white border-green-500' : 'border-slate-300 text-slate-500 hover:border-indigo-500'}">
+          ${isCompleted ? '✓' : stop.id}
+        </button>
+        <div class="flex-1">
+          <h3 class="font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}">${stop.name}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">${stop.desc}</p>
+        </div>
+      `;
+
+      container.appendChild(card);
     });
 
-    // Initialize Leaflet Map (Free OpenStreetMap Tiles)
-    function initMap() {
-      map = L.map('map', {
-        zoomControl: false
-      }).setView([41.3875, 2.1750], 14);
+    // Fit map bounds to markers
+    map.fitBounds(L.latLngBounds(latLngs), { padding: [20, 20] });
 
-      L.control.zoom({ position: 'topleft' }).addTo(map);
-
-      // OpenStreetMap Free Tile Layer
-      tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
-      }).addTo(map);
-
-      // Draw dashed route line
-      const latLngs = stopsData.map(s => [s.lat, s.lng]);
-      polyline = L.polyline(latLngs, {
-        color: '#ca4330',
-        weight: 3.5,
-        opacity: 0.7,
-        dashArray: '6, 8',
-        lineCap: 'round'
-      }).addTo(map);
-
-      // Render custom map markers
-      stopsData.forEach(stop => {
-        const isVisited = visitedStops.has(stop.id);
-        const bgColor = isVisited ? '#10b981' : stageColors[stop.stage];
-
-        const customIcon = L.divIcon({
-          className: 'custom-pin-wrapper',
-          html: `<div id="marker-${stop.id}" class="custom-pin ${isVisited ? 'completed' : ''}" style="background-color: ${bgColor}; width: 28px; height: 28px;">${stop.id}</div>`,
-          iconSize: [28, 28],
-          iconAnchor: [14, 14]
-        });
-
-        const marker = L.marker([stop.lat, stop.lng], { icon: customIcon }).addTo(map);
-        
-        const popupContent = `
-          <div class="p-1 text-xs max-w-[210px]">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-terracotta-600">Parada ${stop.id} de 26</span>
-            <h3 class="font-bold text-slate-900 text-sm mt-0.5 leading-snug">${stop.title}</h3>
-            <p class="text-slate-500 text-[11px] mt-1 line-clamp-2">${stop.desc}</p>
-            <button onclick="openModal(${stop.id})" class="mt-2 text-xs font-bold text-terracotta-600 hover:underline flex items-center gap-1">
-              Ver Detalhes e Dica &rarr;
-            </button>
-          </div>
-        `;
-        
-        marker.bindPopup(popupContent);
-        markersMap[stop.id] = marker;
-      });
-
-      map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
-    }
-
-    function renderStopsList() {
-      const container = document.getElementById('stopsList');
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      
-      container.innerHTML = '';
-
-      const filtered = stopsData.filter(stop => {
-        const matchesStage = currentStageFilter === 'all' || stop.stage === parseInt(currentStageFilter);
-        const matchesSearch = stop.title.toLowerCase().includes(searchTerm) || 
-                              stop.desc.toLowerCase().includes(searchTerm) ||
-                              stop.category.toLowerCase().includes(searchTerm);
-        return matchesStage && matchesSearch;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 px-4 text-slate-400">
-            <i class="fa-solid fa-compass text-3xl mb-2 text-sand-200"></i>
-            <p class="text-xs font-medium">Nenhum local encontrado para a sua busca.</p>
-          </div>
-        `;
-        return;
-      }
-
-      filtered.forEach(stop => {
-        const isVisited = visitedStops.has(stop.id);
-        const card = document.createElement('div');
-        
-        card.id = `stop-card-${stop.id}`;
-        card.className = `p-3.5 rounded-2xl bg-white border transition-all duration-200 hover:shadow-md cursor-pointer flex flex-col gap-2 relative ${
-          isVisited ? 'border-emerald-200 bg-emerald-50/20' : 'border-sand-200'
-        }`;
-
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-              <span class="w-7 h-7 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs" 
-                    style="background-color: ${isVisited ? '#10b981' : stageColors[stop.stage]}">
-                ${stop.id}
-              </span>
-              <div>
-                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">${stop.category}</span>
-                <h3 class="font-display font-bold text-sm text-slate-800 leading-snug ${isVisited ? 'line-through text-slate-400' : ''}">
-                  ${stop.title}
-                </h3>
-              </div>
-            </div>
-
-            <!-- Checkbox Toggle Button -->
-            <button onclick="event.stopPropagation(); toggleVisited(${stop.id})" 
-                    class="w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${
-                      isVisited ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 text-transparent hover:border-slate-400'
-                    }" title="Marcar como concluído">
-              <i class="fa-solid fa-check text-xs"></i>
-            </button>
-          </div>
-
-          <p class="text-xs text-slate-600 leading-relaxed pl-9 line-clamp-2">
-            ${stop.desc}
-          </p>
-
-          <div class="pl-9 flex items-center justify-between text-[11px] pt-1">
-            <button onclick="event.stopPropagation(); openModal(${stop.id})" class="text-terracotta-600 font-bold hover:underline flex items-center gap-1">
-              <i class="fa-solid fa-circle-info"></i> Detalhes & Dica
-            </button>
-            <a href="https://www.google.com/maps/search/?api=1&query=${stop.mapsQuery}" target="_blank" onclick="event.stopPropagation();" class="text-slate-400 hover:text-mediterranean-600 flex items-center gap-1">
-              Navegar <i class="fa-solid fa-location-arrow"></i>
-            </a>
-          </div>
-        `;
-
-        card.addEventListener('click', () => {
-          focusStopOnMap(stop.id);
-        });
-
-        container.appendChild(card);
-      });
-    }
-
-    function focusStopOnMap(id) {
-      const stop = stopsData.find(s => s.id === id);
-      if (stop && map) {
-        map.flyTo([stop.lat, stop.lng], 16, { duration: 1.2 });
-        markersMap[id].openPopup();
-        
-        if (window.innerWidth < 768) {
-          toggleMobileView('map');
-        }
-      }
-    }
-
-    function toggleVisited(id) {
-      if (visitedStops.has(id)) {
-        visitedStops.delete(id);
+    // Toggle Completed Status
+    window.toggleStop = function(id) {
+      if (completedStops.includes(id)) {
+        completedStops = completedStops.filter(item => item !== id);
       } else {
-        visitedStops.add(id);
+        completedStops.push(id);
       }
-      
-      localStorage.setItem('bcn_pt_visited', JSON.stringify([...visitedStops]));
-      
-      updateProgressUI();
-      renderStopsList();
-      updateMapMarkerStyle(id);
+      localStorage.setItem('bcn_completed', JSON.stringify(completedStops));
+      location.reload();
+    };
 
-      const modal = document.getElementById('detailModal');
-      if (!modal.classList.contains('pointer-events-none')) {
-        updateModalButton(id);
-      }
-    }
+    // Update Progress Indicator
+    document.getElementById('progress-text').innerText = `${completedStops.length} / ${stops.length} concluídos`;
 
-    function updateMapMarkerStyle(id) {
-      const stop = stopsData.find(s => s.id === id);
-      const isVisited = visitedStops.has(id);
-      const markerEl = document.getElementById(`marker-${id}`);
-      
-      if (markerEl) {
-        if (isVisited) {
-          markerEl.classList.add('completed');
-          markerEl.style.backgroundColor = '#10b981';
-        } else {
-          markerEl.classList.remove('completed');
-          markerEl.style.backgroundColor = stageColors[stop.stage];
-        }
-      }
-    }
-
-    function updateProgressUI() {
-      const total = stopsData.length;
-      const count = visitedStops.size;
-      const percentage = Math.round((count / total) * 100);
-
-      document.getElementById('progressBadge').textContent = `${count} / ${total} Visitados (${percentage}%)`;
-      document.getElementById('mobileProgressText').textContent = `${count} de ${total} atrações visitadas (${percentage}%)`;
-      document.getElementById('progressBar').style.width = `${percentage}%`;
-    }
-
-    function resetProgress() {
-      if (confirm("Tem certeza de que deseja reiniciar o seu progresso de visitas?")) {
-        visitedStops.clear();
-        localStorage.removeItem('bcn_pt_visited');
-        updateProgressUI();
-        renderStopsList();
-        stopsData.forEach(s => updateMapMarkerStyle(s.id));
-      }
-    }
-
-    function setStageFilter(stage) {
-      currentStageFilter = stage;
-      
-      document.querySelectorAll('.stage-btn').forEach(btn => {
-        btn.classList.remove('bg-slate-900', 'text-white', 'active');
-        btn.classList.add('bg-sand-100', 'text-slate-600');
-      });
-
-      event.target.classList.remove('bg-sand-100', 'text-slate-600');
-      event.target.classList.add('bg-slate-900', 'text-white', 'active');
-
-      renderStopsList();
-
-      if (stage !== 'all' && map) {
-        const filteredStops = stopsData.filter(s => s.stage === parseInt(stage));
-        const bounds = L.latLngBounds(filteredStops.map(s => [s.lat, s.lng]));
-        map.fitBounds(bounds, { padding: [40, 40] });
-      } else if (map) {
-        map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
-      }
-    }
-
-    function filterStops() {
-      const input = document.getElementById('searchInput');
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (input.value.length > 0) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
-      renderStopsList();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('clearSearchBtn').classList.add('hidden');
-      renderStopsList();
-    }
-
-    function toggleMobileView(view) {
-      const sidebar = document.getElementById('sidebarPanel');
-      const mapPnl = document.getElementById('mapPanel');
-      const listBtn = document.getElementById('showListBtn');
-      const mapBtn = document.getElementById('showMapBtn');
-
-      if (view === 'list') {
-        sidebar.classList.remove('hidden');
-        mapPnl.classList.add('hidden');
-        listBtn.classList.add('bg-white', 'shadow-xs', 'text-terracotta-600');
-        listBtn.classList.remove('text-slate-600');
-        mapBtn.classList.remove('bg-white', 'shadow-xs', 'text-terracotta-600');
-        mapBtn.classList.add('text-slate-600');
-      } else {
-        sidebar.classList.add('hidden');
-        mapPnl.classList.remove('hidden');
-        mapPnl.classList.add('block');
-        mapBtn.classList.add('bg-white', 'shadow-xs', 'text-terracotta-600');
-        mapBtn.classList.remove('text-slate-600');
-        listBtn.classList.remove('bg-white', 'shadow-xs', 'text-terracotta-600');
-        listBtn.classList.add('text-slate-600');
-        
-        setTimeout(() => { if (map) map.invalidateSize(); }, 100);
-      }
-    }
-
-    function openModal(id) {
-      const stop = stopsData.find(s => s.id === id);
-      if (!stop) return;
-
-      document.getElementById('modalNum').textContent = stop.id;
-      document.getElementById('modalNum').style.backgroundColor = visitedStops.has(stop.id) ? '#10b981' : stageColors[stop.stage];
-      document.getElementById('modalStage').textContent = `Etapa ${stop.stage} • ${stop.category}`;
-      document.getElementById('modalTitle').textContent = stop.title;
-      document.getElementById('modalDesc').textContent = stop.desc;
-      document.getElementById('modalTip').textContent = stop.tip;
-      document.getElementById('modalCoords').textContent = `${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)}`;
-      document.getElementById('modalMapsLink').href = `https://www.google.com/maps/search/?api=1&query=${stop.mapsQuery}`;
-
-      updateModalButton(stop.id);
-
-      const modal = document.getElementById('detailModal');
-      const card = document.getElementById('modalCard');
-
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      card.classList.remove('scale-95');
-      card.classList.add('scale-100');
-    }
-
-    function updateModalButton(id) {
-      const btn = document.getElementById('modalToggleDone');
-      const isVisited = visitedStops.has(id);
-
-      if (isVisited) {
-        btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition flex items-center gap-2";
-        btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Concluído`;
-      } else {
-        btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold bg-terracotta-500 text-white hover:bg-terracotta-600 transition flex items-center gap-2";
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Marcar como visitado`;
-      }
-
-      btn.onclick = () => toggleVisited(id);
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('detailModal');
-      const card = document.getElementById('modalCard');
-
-      modal.classList.add('opacity-0', 'pointer-events-none');
-      card.classList.remove('scale-100');
-      card.classList.add('scale-95');
-    }
-
-    function recenterMap() {
-      if (map && polyline) {
-        map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
-      }
-    }
-
-    function toggleMapType() {
-      if (!map) return;
-      if (isSatellite) {
-        map.removeLayer(tileLayer);
-        tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-        isSatellite = false;
-      } else {
-        map.removeLayer(tileLayer);
-        tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          attribution: 'Tiles &copy; Esri'
-        }).addTo(map);
-        isSatellite = true;
-      }
-    }
-
-    function openGoogleMapsFullRoute() {
-      window.open("https://www.google.com/maps/dir/Metro+Diagonal/Casa+Mila/Casa+Batllo/La+Catedral+de+Barcelona/Mirador+de+Colom/Honest+Greens+Barceloneta/Santa+Maria+del+Mar/Sagrada+Familia", "_blank");
-    }
+    // Initialize Lucide Icons
+    lucide.createIcons();
   </script>
 </body>
 </html>
