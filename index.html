@@ -2495,7 +2495,7 @@
       // Arrival at the beach: walk to Honest Greens; beach warnings from the other route
       reuseStop(fromMontjuic(16), 15, s => {
         swapText(s.de, 'longDesc', 'Von hier kannst du in die Route »Diagonal → Sagrada Família« einsteigen: Barceloneta-Strand, Fischerviertel und Palau de Mar liegen gleich um die Ecke.',
-          'Von hier sind es nur ein paar Schritte am Wasser entlang zum Honest Greens beim W-Hotel – gleich dahinter legt das Boot zurück in die Stadt ab.');
+          'Von hier sind es nur ein paar Schritte am Wasser entlang zum Honest Greens beim W-Hotel – gleich dahinter legt das Boot zurück in die Stadt ab (nächste Stationen).');
         swapText(s.pt, 'longDesc', "Daqui dá para emendar com a rota 'Diagonal → Sagrada Família': a praia da Barceloneta, o bairro dos pescadores e o Palau de Mar estão logo ali.",
           'Daqui são só alguns passos à beira-mar até o Honest Greens, junto ao Hotel W – logo atrás sai o barco de volta à cidade.');
         const beach = fromEixample(20);
@@ -2503,15 +2503,26 @@
         s.pt.notes = beach.pt.notes.slice();
         s.highlights = [beach.highlights[2], beach.highlights[3]];   // how many beaches + beach mojitos
       }),
-      reuseStop(fromEixample(19), 16, s => {
-        s.nextByBoat = true;
-        s.de.nextHint = 'Zum Anleger hinter dem W-Hotel, dann ca. 10 Min. Boot';
-        s.pt.nextHint = 'Até o cais atrás do Hotel W, depois aprox. 10 min de barco';
-        s.de.notes = [{ type: 'info', text: 'Weiter mit dem Boot: Der Bus Nàutic legt hinter dem W-Hotel ab (Moll de Llevant / Rambla de la Nova Bocana) und fährt in etwa 10 Minuten quer durch den Hafen zum Portal de la Pau an der Kolumbussäule. Abfahrt etwa alle 15–30 Minuten, ca. 1,90 € pro Fahrt (Stand 2024).' }];
-        s.pt.notes = [{ type: 'info', text: 'Siga de barco: o Bus Nàutic sai de trás do Hotel W (Moll de Llevant / Rambla de la Nova Bocana) e atravessa o porto em cerca de 10 minutos até o Portal de la Pau, junto à coluna de Colombo. Saídas a cada 15–30 minutos, aprox. 1,90 € por trecho (valores de 2024).' }];
-      }),
-      // The boat stop of route 1, seen from the other direction: here you arrive
+      reuseStop(fromEixample(19), 16),
+      // Departure pier of the boat behind the W hotel
       reuseStop(fromEixample(18), 17, s => {
+        s.coords = [41.368178, 2.187288];
+        s.de = {
+          notes: [{ type: 'ticket', text: 'Das Ticket musst du vorher am Automaten im kleinen Café-Gebäude am Anleger kaufen. Es gibt nur eine Verbindung – direkt hinüber zum Portal de la Pau. Abfahrt etwa alle 15–30 Minuten, ca. 1,90 € pro Fahrt (Stand 2024).' }],
+          name: 'Bus Nàutic – Anleger Moll de Llevant',
+          shortDesc: 'Hier legt das Solarboot ab.',
+          longDesc: 'Gleich hinter dem W-Hotel, an der Rambla de la Nova Bocana, liegt der Anleger des Bus Nàutic. Seit Juli 2024 pendeln hier zwei elektrische Katamarane, die auch über Solarpaneele laden, quer durch den Hafen zum Portal de la Pau an der Kolumbussäule. Die Fahrt dauert etwa 10 Minuten und erspart dir den langen Fußweg um das Hafenbecken – genieß dabei den Blick zurück auf das Segel des W-Hotels.',
+          nextHint: 'Mit dem Bus Nàutic, ca. 10 Min.'
+        };
+        s.pt = {
+          notes: [{ type: 'ticket', text: 'Compre o bilhete antes, na máquina dentro do pequeno prédio do café junto ao cais. Só há uma ligação – direto para o Portal de la Pau. Saídas a cada 15–30 minutos, aprox. 1,90 € por trecho (valores de 2024).' }],
+          name: 'Bus Nàutic – cais Moll de Llevant',
+          shortDesc: 'Daqui sai o barco solar.',
+          longDesc: 'Logo atrás do Hotel W, na Rambla de la Nova Bocana, fica o cais do Bus Nàutic. Desde julho de 2024, dois catamarãs elétricos, carregados também por painéis solares, atravessam o porto até o Portal de la Pau, junto à coluna de Colombo. A travessia leva cerca de 10 minutos e poupa a longa caminhada em volta da doca – aproveite para olhar para trás e ver a vela do Hotel W.',
+          nextHint: 'De Bus Nàutic, aprox. 10 min'
+        };
+      }),
+      reuseStop(fromEixample(18), 18, s => {
         delete s.nextByBoat;
         s.img = 'Monument Christophe Colomb, Barcelone.jpg';
         s.author = 'Bernard Gagnon';
@@ -2527,9 +2538,9 @@
           longDesc: 'Desde julho de 2024, o Bus Nàutic liga o Moll de Llevant, junto ao Hotel W, ao Portal de la Pau. Os dois catamarãs elétricos também são carregados por painéis solares e levam só uns 10 minutos para atravessar o porto – a pé seria uma longa volta em torno de toda a doca. Você desembarca bem ao pé da coluna de Colombo. Aqui começa a Rambla, que você vai subir agora até a Plaça de Catalunya.'
         };
       }),
-      reuseStop(fromEixample(17), 18),
-      reuseStop(fromEixample(16), 19),
-      reuseStop(fromEixample(15), 20, s => {
+      reuseStop(fromEixample(17), 19),
+      reuseStop(fromEixample(16), 20),
+      reuseStop(fromEixample(15), 21, s => {
         swapText(s.highlights[1].de, 'text', 'derselbe, der später den Arc de Triomf baute (Station 26) –', 'derselbe, der später den Arc de Triomf baute –');
         swapText(s.highlights[1].pt, 'text', 'o mesmo que depois construiu o Arc de Triomf (parada 26) –', 'o mesmo que depois construiu o Arc de Triomf –');
         swapText(s.highlights[2].de, 'text', 'Nach dem Drachen der Casa Batlló ist das schon der zweite Drache der Tour.',
@@ -2537,18 +2548,18 @@
         swapText(s.highlights[2].pt, 'text', 'Depois do dragão da Casa Batlló, este já é o segundo dragão do roteiro.',
           'Barcelona adora dragões – o mais famoso está no telhado da Casa Batlló, de Gaudí.');
       }),
-      reuseStop(fromEixample(14), 21, s => {
+      reuseStop(fromEixample(14), 22, s => {
         swapText(s.highlights[0].de, 'text', 'Weitere Gaudí-Laternen stehen am Pla de Palau, an dem du später vorbeikommst.',
           'Weitere Gaudí-Laternen stehen am Pla de Palau beim Born-Viertel.');
         swapText(s.highlights[0].pt, 'text', 'Outros postes de Gaudí estão no Pla de Palau, por onde você passará mais tarde.',
           'Outros postes de Gaudí estão no Pla de Palau, perto do bairro do Born.');
       }),
-      reuseStop(fromEixample(13), 22),
-      reuseStop(fromEixample(12), 23, s => {
+      reuseStop(fromEixample(13), 23),
+      reuseStop(fromEixample(12), 24, s => {
         swapText(s.de, 'longDesc', '(nächste Station)', '(vorige Station)');
         swapText(s.pt, 'longDesc', '(próxima parada)', '(parada anterior)');
       }),
-      ...[11, 10, 9, 8, 7, 6].map((id, i) => reuseStop(fromEixample(id), 24 + i))
+      ...[11, 10, 9, 8, 7, 6].map((id, i) => reuseStop(fromEixample(id), 25 + i))
     ];
     const portToilets = eixampleToilets.filter(t => /Barceloneta|Maremagnum|Boqueria|Catalunya/.test(t.name));
 
