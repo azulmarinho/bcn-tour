@@ -488,7 +488,7 @@
         id: 2,
         key: 'casa-mila',
         cats: ['gaudi'],
-        coords: [41.3954, 2.1612],
+        coords: [41.395313, 2.161837],
         wiki: "https://pt.wikipedia.org/wiki/Casa_Mil%C3%A0",
         pt: {
           notes: [
@@ -2935,7 +2935,7 @@
       {
         key: 'placa-del-diamant',
         cats: ['old', 'culture'],
-        coords: [41.40310, 2.15640],
+        coords: [41.404072, 2.155841],
         wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_del_Diamant',
         pt: {
           notes: [{ type: 'ticket', text: "Visitas guiadas ao abrigo antiaéreo aos domingos às 11h (geralmente em catalão; no segundo domingo do mês em espanhol), 3 € em dinheiro ao guia, inscrição prévia obrigatória." }],
@@ -2959,7 +2959,7 @@
       {
         key: 'placa-virreina',
         cats: ['old'],
-        coords: [41.40330, 2.15985],
+        coords: [41.404918, 2.157284],
         wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_de_la_Virreina',
         pt: {
           name: 'Plaça de la Virreina',
@@ -2976,7 +2976,7 @@
       {
         key: 'mercat-llibertat',
         cats: ['food'],
-        coords: [41.39965, 2.15310],
+        coords: [41.399942, 2.153406],
         wiki: 'https://ca.wikipedia.org/wiki/Mercat_de_la_Llibertat',
         pt: {
           notes: [{ type: 'info', text: 'Como os demais mercados municipais, fecha aos domingos.' }],
@@ -3012,7 +3012,7 @@
       {
         key: 'carrer-verdi',
         cats: ['culture', 'food'],
-        coords: [41.40390, 2.15720],
+        coords: [41.404092, 2.1566],
         wiki: '',
         pt: {
           name: 'Carrer de Verdi',
@@ -3023,6 +3023,23 @@
           name: 'Carrer de Verdi',
           shortDesc: 'Gràcias Straße der Kinos und kleinen Bars.',
           longDesc: 'Eine der schönsten Straßen Gràcias: kleine Läden, Bars und Restaurants und die Verdi-Kinos, die Filme in Originalfassung mit Untertiteln zeigen – bei Barcelonesen und Zugezogenen gleichermaßen beliebt. Am schönsten abends zum Bummeln.'
+        },
+        highlights: []
+      },
+      {
+        key: 'carrer-asturies',
+        cats: ['old'],
+        coords: [41.402945, 2.153607],
+        wiki: '',
+        pt: {
+          name: "Carrer d'Astúries",
+          shortDesc: 'Rua quase sem carros no coração de Gràcia.',
+          longDesc: "Uma das ruas mais bonitas da antiga vila de Gràcia: quase sem carros, com lojinhas, padarias, cafés e varandas cheias de plantas. Ela liga a estação de metrô Fontana, na Gran de Gràcia, à Plaça del Diamant e segue até perto da Plaça de la Virreina – o caminho ideal para conhecer o bairro sem pressa. Na Festa Major de agosto, várias ruas por aqui ganham decorações feitas pelos vizinhos."
+        },
+        de: {
+          name: "Carrer d'Astúries",
+          shortDesc: 'Fast autofreie Gasse mitten in Gràcia.',
+          longDesc: 'Eine der schönsten Straßen im alten Gràcia: fast ohne Autos, mit kleinen Läden, Bäckereien, Cafés und Balkonen voller Pflanzen. Sie verbindet die Metro Fontana an der Gran de Gràcia mit der Plaça del Diamant und führt weiter bis in die Nähe der Plaça de la Virreina – der ideale Weg, um das Viertel in Ruhe kennenzulernen. Zur Festa Major im August schmücken die Nachbarn viele Straßen hier mit selbst gebastelter Dekoration.'
         },
         highlights: []
       },
@@ -3063,7 +3080,7 @@
       {
         key: 'casa-comalat',
         cats: ['gaudi'],
-        coords: [41.397364, 2.160659],
+        coords: [41.397191, 2.160656],
         wiki: 'https://ca.wikipedia.org/wiki/Casa_Comalat',
         img: 'Casa Comalat front facade 01.JPG',
         pt: {
@@ -3181,7 +3198,7 @@
       {
         key: 'torre-glories',
         cats: ['view', 'culture'],
-        coords: [41.403538, 2.188934],
+        coords: [41.403554, 2.189543],
         wiki: 'https://ca.wikipedia.org/wiki/Torre_Gl%C3%B2ries',
         pt: {
           notes: [{ type: 'ticket', text: 'Mirante: aprox. 18 € online (na bilheteria é mais caro); Cloud Cities custa um pouco mais. Abril–outubro todos os dias 10h–21h; novembro–março 10h–18h30, fechado às terças. Última entrada 1 h antes de fechar.' }],
@@ -3209,7 +3226,7 @@
       {
         key: 'encants',
         cats: ['culture'],
-        coords: [41.40220, 2.18630],
+        coords: [41.401248, 2.186416],
         wiki: 'https://ca.wikipedia.org/wiki/Mercat_dels_Encants',
         pt: {
           notes: [{ type: 'info', text: 'Aberto segundas, quartas, sextas e sábados das 9h às 20h; algumas bancas fecham na hora do almoço. Entrada gratuita. Pechinchar faz parte – e fique de olho nos batedores de carteira.' }],
@@ -3298,7 +3315,7 @@
       {
         key: 'cementiri-poblenou',
         cats: ['culture', 'old'],
-        coords: [41.395155, 2.201759],
+        coords: [41.396033, 2.202913],
         wiki: 'https://ca.wikipedia.org/wiki/Cementiri_del_Poblenou',
         pt: {
           notes: [{ type: 'info', text: 'É um cemitério em uso – comporte-se com respeito e sem barulho.' }],
@@ -3532,6 +3549,7 @@
     let lightboxState = null;           // { key, index }  index = 'main' or highlight index
     let nearKey = null;                 // place the GPS says you are standing at
     let dismissedNearKey = null;
+    let selectedKey = null;             // explore: the one place highlighted on the map
 
     // ---------- Map ----------
     const map = L.map('map').setView([41.385, 2.17], 13);
@@ -3886,7 +3904,7 @@
         });
       }
       const color = done ? 'var(--leaf)' : CATEGORY_COLORS[item.cats[0]];
-      const sel = expanded.has(item.key);
+      const sel = selectedKey === item.key;
       const size = sel ? 26 : 20;
       return L.divIcon({
         className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
@@ -3913,9 +3931,10 @@
         }
       }
       items.forEach(item => {
-        const m = L.marker(item.coords, { icon: markerIcon(item), zIndexOffset: expanded.has(item.key) ? 500 : 0 }).addTo(markerLayer);
+        const m = L.marker(item.coords, { icon: markerIcon(item), zIndexOffset: selectedKey === item.key ? 500 : 0 }).addTo(markerLayer);
         m.bindPopup(popupHtml(item));
         m.on('click', () => onMarkerClick(item.key));
+        m.on('popupclose', () => { if (selectedKey === item.key) selectPlace(null); });
         markers[item.key] = m;
       });
       renderToilets();
@@ -4189,6 +4208,7 @@
     // ---------- Views ----------
     function setView(v) {
       view = v;
+      selectedKey = null;
       document.getElementById('view-tours').classList.toggle('active', v === 'tours');
       document.getElementById('view-map').classList.toggle('active', v !== 'tours');
       document.getElementById('tour-head').classList.toggle('hidden', v !== 'tour');
@@ -4221,6 +4241,7 @@
       renderList();
       if (key && catalogByKey[key]) {
         map.setView(catalogByKey[key].coords, 16);
+        selectPlace(key);
         scrollToCard(key);
       } else {
         fitItems();
@@ -4326,11 +4347,24 @@
       card.classList.add('card-flash');
     }
 
+    // Only one place at a time is drawn bigger on the explore map;
+    // it shrinks again when another place is chosen or its popup is closed.
+    function selectPlace(key) {
+      if (view !== 'explore' || key === selectedKey) return;
+      const prev = selectedKey;
+      selectedKey = key;
+      [prev, key].forEach(k => {
+        if (k && markers[k]) {
+          markers[k].setIcon(markerIcon(getItem(k)));
+          markers[k].setZIndexOffset(k === selectedKey ? 500 : 0);
+        }
+      });
+    }
+
     function onMarkerClick(key) {
-      if (view === 'explore' && !expanded.has(key)) {
-        expanded.add(key);
-        replaceCard(key);
-        refreshMarkers();
+      if (view === 'explore') {
+        selectPlace(key);
+        if (!expanded.has(key)) { expanded.add(key); replaceCard(key); }
       }
       scrollToCard(key);
     }
@@ -4342,12 +4376,15 @@
       if (window.innerWidth < 768) scrollToElement(document.getElementById('map-card'));
       map.setView(item.coords, 16);
       if (markers[key]) markers[key].openPopup();
+      selectPlace(key);
     };
 
     window.toggleExpand = function(key) {
-      if (expanded.has(key)) expanded.delete(key); else expanded.add(key);
+      const opening = !expanded.has(key);
+      if (opening) expanded.add(key); else expanded.delete(key);
       replaceCard(key);
-      if (markers[key]) markers[key].setIcon(markerIcon(getItem(key)));
+      if (opening) selectPlace(key);
+      else if (selectedKey === key) selectPlace(null);
     };
 
     window.toggleVisited = function(key) {
