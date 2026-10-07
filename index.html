@@ -1661,9 +1661,14 @@
       { name: "WC Público Plaça Catalunya", coords: [41.3868, 2.1702] },
       { name: "WC Mercat de la Boqueria", coords: [41.3815, 2.1712] },
       { name: "WC Maremagnum / Porto", coords: [41.375410, 2.182925] },
+      { name: "WC Café Bus Nàutic (Moll de Llevant)", coords: [41.368210, 2.187213] },
       { name: "WC Praia da Barceloneta", coords: [41.3762, 2.1915] },
       { name: "WC Parc de la Ciutadella", coords: [41.3875, 2.1865] },
       { name: "WC Sagrada Família (Praça)", coords: [41.4032, 2.1740] }
+    ];
+
+    const montjuicToilets = [
+      { name: "WC Kiosk Les Cascades", coords: [41.369371, 2.152262] }
     ];
 
     // ===== Route 2: Plaça d'Espanya -> Montjuïc -> port cable car =====
@@ -2545,7 +2550,7 @@
       }),
       ...[11, 10, 9, 8, 7, 6].map((id, i) => reuseStop(fromEixample(id), 25 + i))
     ];
-    const portToilets = eixampleToilets.filter(t => /Barceloneta|Maremagnum|Boqueria|Catalunya/.test(t.name));
+    const portToilets = montjuicToilets.concat(eixampleToilets.filter(t => /Barceloneta|Nàutic|Maremagnum|Boqueria|Catalunya/.test(t.name)));
 
     // ===== Route registry =====
     // To add a route: create a stops array like the ones above and add an entry here.
@@ -2569,7 +2574,7 @@
         pt: { title: "Plaça d'Espanya → Montjuïc → teleférico" },
         de: { title: "Plaça d'Espanya → Montjuïc → Seilbahn" },
         stops: montjuicStops,
-        toilets: []
+        toilets: montjuicToilets
       },
       {
         id: 'port',
