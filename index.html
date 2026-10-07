@@ -2815,6 +2815,512 @@
     ];
     const portToilets = montjuicToilets.concat(eixampleToilets.filter(t => /Praia|Nàutic|Maremagnum|Boqueria|Catalunya/.test(t.name)));
 
+    // ===== Places outside the tours =====
+    // They only appear under "Entdecken". Same fields as a tour stop, without id/nextBy.
+    const extraPlaces = [
+      {
+        key: 'sant-pau',
+        cats: ['gaudi'],
+        coords: [41.41278, 2.17444],
+        wiki: 'https://ca.wikipedia.org/wiki/Hospital_de_la_Santa_Creu_i_Sant_Pau',
+        img: 'Hospital de Sant Pau 01.jpg',
+        pt: {
+          notes: [
+            { type: 'ticket', text: "Entrada aprox. 17–18 €. Aberto todos os dias: abril–outubro 9h30–18h30, novembro–março 9h30–17h; última entrada 30 min antes de fechar. Entrada gratuita em 23 de abril (Sant Jordi), na Noite dos Museus em maio e em 24 de setembro (La Mercè).", url: 'https://santpaubarcelona.org', linkLabel: 'santpaubarcelona.org' }
+          ],
+          name: 'Recinte Modernista de Sant Pau',
+          shortDesc: 'O hospital modernista – uma cidade de pavilhões.',
+          longDesc: 'No fim da Avinguda de Gaudí, a cerca de um quilômetro da Sagrada Família, fica o antigo Hospital de la Santa Creu i Sant Pau. Lluís Domènech i Montaner – o arquiteto do Palau de la Música – o projetou como uma cidade-jardim para doentes: em vez de um grande bloco, doze pavilhões com cúpulas, telhas coloridas e mosaicos, ligados por galerias subterrâneas. A obra durou de 1902 a 1930 e foi paga com a herança do banqueiro Pau Gil. Até 2009 ainda se tratavam pacientes aqui; desde 2014 o conjunto restaurado pode ser visitado.'
+        },
+        de: {
+          notes: [
+            { type: 'ticket', text: 'Eintritt ca. 17–18 €. Täglich geöffnet: April–Oktober 9:30–18:30, November–März 9:30–17 Uhr; letzter Einlass 30 Min. vor Schluss. Freier Eintritt am 23. April (Sant Jordi), in der Museumsnacht im Mai und am 24. September (La Mercè).', url: 'https://santpaubarcelona.org', linkLabel: 'santpaubarcelona.org' }
+          ],
+          name: 'Recinte Modernista de Sant Pau',
+          shortDesc: 'Das Jugendstil-Krankenhaus – eine Stadt aus Pavillons.',
+          longDesc: 'Am Ende der Avinguda de Gaudí, rund einen Kilometer von der Sagrada Família entfernt, liegt das ehemalige Hospital de la Santa Creu i Sant Pau. Lluís Domènech i Montaner – der Architekt des Palau de la Música – entwarf es als Gartenstadt für Kranke: statt eines großen Blocks zwölf Pavillons mit Kuppeln, bunten Ziegeln und Mosaiken, verbunden durch unterirdische Gänge. Gebaut wurde von 1902 bis 1930, bezahlt mit dem Erbe des Bankiers Pau Gil. Bis 2009 wurden hier Patienten behandelt; seit 2014 kann man das restaurierte Gelände besichtigen.'
+        },
+        highlights: [
+          {
+            de: { title: 'Eine Stadt für Kranke', text: 'Domènech i Montaner war überzeugt, dass Licht, frische Luft und Gärten beim Gesundwerden helfen. Deshalb verteilte er die Stationen auf einzelne Pavillons zwischen Grünflächen. Wäsche, Essen und Patiententransporte liefen unter der Erde durch lange Gänge – oben in den Gärten blieb es ruhig.' },
+            pt: { title: 'Uma cidade para doentes', text: 'Domènech i Montaner acreditava que luz, ar fresco e jardins ajudam na cura. Por isso distribuiu as alas em pavilhões separados entre áreas verdes. Roupa, comida e o transporte de pacientes circulavam por longas galerias subterrâneas – lá em cima, nos jardins, tudo ficava tranquilo.' }
+          },
+          {
+            de: { title: 'Über 600 Jahre Krankenhaus', text: 'Der Name Santa Creu stammt vom Hospital de la Santa Creu, das 1401 in der Altstadt gegründet wurde. Als es dort zu eng wurde, zog das Krankenhaus hierher; »Sant Pau« kam zu Ehren des Geldgebers Pau Gil dazu. Seit 1997 gehört Sant Pau zusammen mit dem Palau de la Música Catalana zum UNESCO-Welterbe.' },
+            pt: { title: 'Mais de 600 anos de hospital', text: "O nome Santa Creu vem do Hospital de la Santa Creu, fundado em 1401 no centro antigo. Quando ficou pequeno demais, o hospital mudou-se para cá; 'Sant Pau' foi acrescentado em homenagem ao financiador Pau Gil. Desde 1997 Sant Pau é Patrimônio Mundial da UNESCO, junto com o Palau de la Música Catalana." }
+          },
+          {
+            de: { title: 'Von der Sagrada Família hierher', text: 'Die Avinguda de Gaudí führt schräg durch das Straßenraster des Eixample direkt von der Sagrada Família zum Eingang von Sant Pau – ein Spaziergang von etwa 15 Minuten. Dreh dich unterwegs um: Hinter dir ragen die Türme der Sagrada Família auf.' },
+            pt: { title: 'Da Sagrada Família até aqui', text: 'A Avinguda de Gaudí corta na diagonal a grade do Eixample e leva direto da Sagrada Família à entrada de Sant Pau – um passeio de uns 15 minutos. Olhe para trás no caminho: as torres da Sagrada Família ficam às suas costas.' }
+          }
+        ]
+      },
+      {
+        key: 'placa-vila-gracia',
+        cats: ['old'],
+        coords: [41.40011, 2.15765],
+        wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_de_la_Vila_de_Gr%C3%A0cia',
+        pt: {
+          name: 'Plaça de la Vila de Gràcia',
+          shortDesc: 'O coração da antiga vila de Gràcia, com a torre do relógio.',
+          longDesc: 'Gràcia foi um município independente até 1897, quando foi anexado a Barcelona. Esse jeito próprio se sente até hoje: ruas estreitas, pracinhas, lojas e bares em vez de grandes avenidas. No meio da sua praça mais importante fica a torre do relógio, de uns 33 metros, construída por volta de 1864 pelo arquiteto Antoni Rovira i Trias, nascido em Gràcia. Ao lado está a antiga prefeitura da vila, hoje sede do distrito.'
+        },
+        de: {
+          name: 'Plaça de la Vila de Gràcia',
+          shortDesc: 'Das Herz des alten Dorfes Gràcia mit dem Glockenturm.',
+          longDesc: 'Gràcia war bis 1897 eine eigenständige Stadt – dann wurde es von Barcelona eingemeindet. Den eigenen Charakter spürt man bis heute: enge Straßen, kleine Plätze, Läden und Bars statt großer Boulevards. Mitten auf seinem wichtigsten Platz steht der rund 33 Meter hohe Glockenturm, den der aus Gràcia stammende Architekt Antoni Rovira i Trias um 1864 baute. Daneben liegt das alte Rathaus, heute Sitz des Stadtbezirks.'
+        },
+        highlights: [
+          {
+            de: { title: 'Die Glocke, die schweigen musste', text: 'Die Glocke im Turm heißt »Marieta«. Beim Aufstand gegen die Zwangsrekrutierung 1870 läutete sie, während die Armee Gràcia beschoss – sie wurde zum Symbol des Widerstands, und die Behörden ließen sie danach verstummen. Die republikanische Satirezeitung »La Campana de Gràcia« (Die Glocke von Gràcia) trägt ihren Namen.' },
+            pt: { title: 'O sino que teve de se calar', text: "O sino da torre se chama 'Marieta'. Na revolta contra o recrutamento forçado, em 1870, ele tocou enquanto o exército bombardeava Gràcia – virou símbolo da resistência, e as autoridades mandaram silenciá-lo depois. O jornal satírico republicano 'La Campana de Gràcia' (O sino de Gràcia) leva o seu nome." }
+          },
+          {
+            de: { title: 'Ein Platz mit vielen Namen', text: 'Der Platz hieß schon Plaça d\'Orient, Plaça de la República und lange Plaça de Rius i Taulet – nach einem Bürgermeister Barcelonas. Seit 2009 heißt er wieder nach der alten »Vila«, dem Dorf Gràcia.' },
+            pt: { title: 'Uma praça de muitos nomes', text: "A praça já se chamou Plaça d'Orient, Plaça de la República e, por muito tempo, Plaça de Rius i Taulet – em homenagem a um prefeito de Barcelona. Desde 2009 voltou a levar o nome da antiga 'Vila', a vila de Gràcia." }
+          },
+          {
+            img: 'Plaça de la Vila de Gràcia - festa major 2012 foto de grup.JPG',
+            de: { title: 'Festa Major de Gràcia', text: 'Jedes Jahr um Mitte August verwandeln die Nachbarn ganze Straßen mit selbst gebastelter Dekoration in Unterwasserwelten, Dschungel oder Märchenlandschaften – oft aus Plastikflaschen, Pappe und Stoff. Dazu gibt es eine Woche lang Konzerte, Feuerläufe und Menschentürme auf diesem Platz.' },
+            pt: { title: 'Festa Major de Gràcia', text: 'Todo ano, por volta de meados de agosto, os vizinhos transformam ruas inteiras com decoração feita à mão em mundos submarinos, selvas ou paisagens de conto de fadas – muitas vezes com garrafas plásticas, papelão e tecido. Durante uma semana há shows, correfocs e torres humanas nesta praça.' }
+          }
+        ]
+      },
+      // ----- Gràcia -----
+      {
+        key: 'casa-vicens',
+        cats: ['gaudi'],
+        coords: [41.40358, 2.15079],
+        wiki: 'https://ca.wikipedia.org/wiki/Casa_Vicens',
+        pt: {
+          notes: [{ type: 'ticket', text: 'Entrada aprox. 20 € (reduzida 18 €), crianças até 10 anos grátis. Aberto todos os dias: abril–outubro 9h30–20h, novembro–março 9h30–18h.' }],
+          name: 'Casa Vicens',
+          shortDesc: 'A primeira casa de Gaudí.',
+          longDesc: 'A primeira grande casa projetada por Gaudí, construída entre 1883 e 1885 como casa de verão para o corretor de valores Manuel Vicens – naquela época Gràcia ainda ficava fora da cidade. As fachadas são cobertas de azulejos verdes e brancos e de fileiras de flores amarelas: Gaudí contou que encontrou o terreno todo coberto dessas flores. Desde 2005 é Patrimônio Mundial da UNESCO e desde 2017 funciona como museu.'
+        },
+        de: {
+          notes: [{ type: 'ticket', text: 'Eintritt ca. 20 € (ermäßigt 18 €), Kinder unter 10 frei. Täglich geöffnet: April–Oktober 9:30–20 Uhr, November–März 9:30–18 Uhr.' }],
+          name: 'Casa Vicens',
+          shortDesc: 'Gaudís allererstes Wohnhaus.',
+          longDesc: 'Das erste große Wohnhaus, das Gaudí entwarf, gebaut 1883–1885 als Sommerhaus für den Börsenmakler Manuel Vicens – damals lag Gràcia noch vor der Stadt. Die Fassaden sind mit grün-weißen Kacheln und Reihen gelber Blumen bedeckt: Gaudí erzählte, er habe das Grundstück voller solcher Blumen vorgefunden. Seit 2005 UNESCO-Welterbe, seit 2017 ein Museum.'
+        },
+        highlights: [
+          {
+            de: { title: 'Ein Tor aus Palmblättern', text: 'Das gusseiserne Gartentor zeigt die fächerförmigen Blätter einer Zwergpalme, die Gaudí auf dem Grundstück gefunden hatte. Schon hier, ganz am Anfang, holt er die Natur direkt in die Architektur – wie später an der Casa Batlló und der Sagrada Família.' },
+            pt: { title: 'Um portão de folhas de palmeira', text: 'O portão de ferro fundido mostra as folhas em leque de uma palmeira-anã que Gaudí encontrou no terreno. Já aqui, bem no começo, ele traz a natureza direto para a arquitetura – como faria depois na Casa Batlló e na Sagrada Família.' }
+          },
+          {
+            de: { title: 'Das Rauchzimmer', text: 'Der kleine Rauchsalon ist nur rund 10 m² groß, aber das Prunkstück des Hauses: Die Decke ist wie eine orientalische Tropfsteinkuppel aus bemaltem Gips und Pappmaché in Gold, Blau und Grün gestaltet.' },
+            pt: { title: 'A sala de fumar', text: 'A pequena sala de fumar tem só uns 10 m², mas é a joia da casa: o teto imita uma cúpula oriental de estalactites, feita de gesso e papel machê pintados em dourado, azul e verde.' }
+          }
+        ]
+      },
+      {
+        key: 'placa-del-sol',
+        cats: ['old', 'food'],
+        coords: [41.401653, 2.156547],
+        wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_del_Sol_(Barcelona)',
+        pt: {
+          name: 'Plaça del Sol',
+          shortDesc: 'A praça mais animada de Gràcia.',
+          longDesc: 'De dia é uma praça tranquila com cafés; à noite fica cheia de gente nos terraços, nos bancos e até no chão. É o ponto de encontro preferido dos jovens de Gràcia – e durante a Festa Major, em agosto, vira um grande palco ao ar livre. Lembre-se: em volta moram famílias, então à noite vale falar um pouco mais baixo.'
+        },
+        de: {
+          name: 'Plaça del Sol',
+          shortDesc: 'Der lebendigste Platz von Gràcia.',
+          longDesc: 'Tagsüber ein ruhiger Platz mit Cafés, abends voller Leute auf den Terrassen, den Bänken und sogar auf dem Boden. Der Lieblingstreffpunkt der jungen Leute in Gràcia – und bei der Festa Major im August eine große Open-Air-Bühne. Denk daran: Rundherum wohnen Familien, abends also lieber etwas leiser.'
+        },
+        highlights: []
+      },
+      {
+        key: 'placa-del-diamant',
+        cats: ['old', 'culture'],
+        coords: [41.40310, 2.15640],
+        wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_del_Diamant',
+        pt: {
+          notes: [{ type: 'ticket', text: "Visitas guiadas ao abrigo antiaéreo aos domingos às 11h (geralmente em catalão; no segundo domingo do mês em espanhol), 3 € em dinheiro ao guia, inscrição prévia obrigatória." }],
+          name: 'Plaça del Diamant',
+          shortDesc: 'A praça do romance mais famoso da Catalunha.',
+          longDesc: "Esta pequena praça dá nome ao romance 'La plaça del Diamant' (1962), de Mercè Rodoreda, considerado o romance mais famoso da literatura catalã. Aqui, num baile da Festa Major, a jovem Natàlia conhece Quimet, que passa a chamá-la de 'Colometa' (pombinha). Uma escultura de bronze na praça lembra a personagem."
+        },
+        de: {
+          notes: [{ type: 'ticket', text: 'Führungen durch den Luftschutzbunker sonntags um 11 Uhr (meist auf Katalanisch, am zweiten Sonntag im Monat auf Spanisch), 3 € bar beim Guide, Anmeldung nötig.' }],
+          name: 'Plaça del Diamant',
+          shortDesc: 'Der Platz aus Kataloniens berühmtestem Roman.',
+          longDesc: 'Der kleine Platz gab Mercè Rodoredas Roman »La plaça del Diamant« (1962) seinen Namen – er gilt als der bekannteste Roman der katalanischen Literatur. Hier lernt die junge Natàlia beim Tanzfest der Festa Major Quimet kennen, der sie fortan »Colometa« (Täubchen) nennt. Eine Bronzefigur auf dem Platz erinnert an sie.'
+        },
+        highlights: [
+          {
+            de: { title: 'Ein Bunker unter dem Platz', text: 'Unter dem Pflaster liegt ein Luftschutzbunker aus dem Spanischen Bürgerkrieg. Als Barcelona 1937–1939 bombardiert wurde, gruben die Bewohner überall in der Stadt solche Schutzräume – dieser hier ist erhalten und kann bei Führungen besichtigt werden.' },
+            pt: { title: 'Um abrigo sob a praça', text: 'Sob o calçamento há um abrigo antiaéreo da Guerra Civil Espanhola. Quando Barcelona foi bombardeada, entre 1937 e 1939, os moradores cavaram abrigos assim por toda a cidade – este foi preservado e pode ser visitado em visitas guiadas.' }
+          }
+        ]
+      },
+      {
+        key: 'placa-virreina',
+        cats: ['old'],
+        coords: [41.40330, 2.15985],
+        wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_de_la_Virreina',
+        pt: {
+          name: 'Plaça de la Virreina',
+          shortDesc: 'Praça tranquila com a igreja de Sant Joan.',
+          longDesc: "Uma das praças com mais cara de vilarejo em Gràcia: quase sem carros, com terraços, casinhas operárias baixas e a igreja de Sant Joan, reconstruída nos anos 1880 por Francesc Berenguer, colaborador de Gaudí. Muitos moradores ainda a chamam de 'Plaça de Sant Joan'. Na ponta da praça fica a escultura 'Ruth', de Josep Maria Camps."
+        },
+        de: {
+          name: 'Plaça de la Virreina',
+          shortDesc: 'Ruhiger Platz mit der Kirche Sant Joan.',
+          longDesc: 'Einer der dörflichsten Plätze Gràcias: fast ohne Autos, mit Terrassen, niedrigen Arbeiterhäusern und der Kirche Sant Joan, die Francesc Berenguer – ein Mitarbeiter Gaudís – in den 1880er-Jahren neu baute. Viele Nachbarn sagen noch »Plaça de Sant Joan«. Am Ende des Platzes steht die Skulptur »Ruth« von Josep Maria Camps.'
+        },
+        highlights: []
+      },
+      {
+        key: 'mercat-llibertat',
+        cats: ['food'],
+        coords: [41.39965, 2.15310],
+        wiki: 'https://ca.wikipedia.org/wiki/Mercat_de_la_Llibertat',
+        pt: {
+          notes: [{ type: 'info', text: 'Como os demais mercados municipais, fecha aos domingos.' }],
+          name: 'Mercat de la Llibertat',
+          shortDesc: 'O mercado modernista de Gràcia.',
+          longDesc: 'O mercado de Gràcia foi inaugurado em 1888: um telhado de ferro sobre paredes de tijolo aparente. A decoração modernista é de Francesc Berenguer, amigo e admirador de Gaudí. Reformado em 2009, continua sendo um verdadeiro mercado de bairro – bem menos turístico que a Boqueria e ótimo para um lanche ou frutas frescas.'
+        },
+        de: {
+          notes: [{ type: 'info', text: 'Wie alle Stadtmärkte sonntags geschlossen.' }],
+          name: 'Mercat de la Llibertat',
+          shortDesc: 'Gràcias Jugendstil-Markthalle.',
+          longDesc: 'Gràcias Markthalle wurde 1888 eröffnet: ein Eisendach über Mauern aus Sichtziegeln. Die Jugendstil-Verzierungen stammen von Francesc Berenguer, einem Freund und Bewunderer Gaudís. Seit der Renovierung 2009 ist sie wieder ein echter Nachbarschaftsmarkt – viel weniger touristisch als die Boqueria und gut für einen Snack oder frisches Obst.'
+        },
+        highlights: []
+      },
+      {
+        key: 'casa-fuster',
+        cats: ['gaudi'],
+        coords: [41.398176, 2.158110],
+        wiki: 'https://ca.wikipedia.org/wiki/Casa_Fuster',
+        pt: {
+          name: 'Casa Fuster',
+          shortDesc: 'A última obra-prima de Domènech i Montaner.',
+          longDesc: 'No alto do Passeig de Gràcia, onde começa Gràcia, Lluís Domènech i Montaner construiu entre 1908 e 1911, com seu filho Pere, sua última grande obra. Mariano Fuster mandou fazê-la como presente para a esposa, Consol Fabra. Foi um dos primeiros prédios da cidade a combinar mármore branco com calcário – com janelas trilobadas e motivos florais. Hoje é um hotel de luxo.'
+        },
+        de: {
+          name: 'Casa Fuster',
+          shortDesc: 'Das letzte Meisterwerk von Domènech i Montaner.',
+          longDesc: 'Am oberen Ende des Passeig de Gràcia, wo Gràcia beginnt, baute Lluís Domènech i Montaner 1908–1911 zusammen mit seinem Sohn Pere sein letztes großes Werk. Mariano Fuster ließ es als Geschenk für seine Frau Consol Fabra errichten. Es war eines der ersten Häuser der Stadt, das weißen Marmor mit Kalkstein kombinierte – mit dreibogigen Fenstern und Blumenmotiven. Heute ist es ein Luxushotel.'
+        },
+        highlights: []
+      },
+      {
+        key: 'carrer-verdi',
+        cats: ['culture', 'food'],
+        coords: [41.40390, 2.15720],
+        wiki: '',
+        pt: {
+          name: 'Carrer de Verdi',
+          shortDesc: 'A rua dos cinemas e barzinhos de Gràcia.',
+          longDesc: 'Uma das ruas mais charmosas de Gràcia: lojinhas, bares e restaurantes pequenos e os cinemas Verdi, que exibem filmes em versão original com legendas – queridos tanto pelos barceloneses quanto pelos estrangeiros que moram na cidade. Ótima para passear à noite.'
+        },
+        de: {
+          name: 'Carrer de Verdi',
+          shortDesc: 'Gràcias Straße der Kinos und kleinen Bars.',
+          longDesc: 'Eine der schönsten Straßen Gràcias: kleine Läden, Bars und Restaurants und die Verdi-Kinos, die Filme in Originalfassung mit Untertiteln zeigen – bei Barcelonesen und Zugezogenen gleichermaßen beliebt. Am schönsten abends zum Bummeln.'
+        },
+        highlights: []
+      },
+      {
+        key: 'park-guell',
+        cats: ['gaudi', 'park', 'view'],
+        coords: [41.41361, 2.15278],
+        wiki: 'https://ca.wikipedia.org/wiki/Park_G%C3%BCell',
+        img: 'Park Güell02.jpg',
+        pt: {
+          notes: [{ type: 'ticket', text: 'A Zona Monumental só com ingresso com horário marcado, comprado online: 18 € (2026). Aberto todos os dias aprox. 9h30–19h30; os horários da manhã esgotam rápido. A área de bosque em volta é gratuita.', url: 'https://parkguell.barcelona', linkLabel: 'parkguell.barcelona' }],
+          name: 'Park Güell',
+          shortDesc: 'O parque de Gaudí, com o dragão e o banco ondulado.',
+          longDesc: 'Eusebi Güell queria construir aqui um bairro-jardim de luxo com uns sessenta lotes – a partir de 1900 só duas casas foram erguidas, nenhuma delas de Gaudí, porque o lugar era considerado longe demais da cidade. Sobrou a infraestrutura cheia de fantasia de Gaudí: a salamandra de mosaico, a sala de colunas e o banco ondulado. Em 1926 virou parque público e desde 1984 é Patrimônio Mundial da UNESCO.'
+        },
+        de: {
+          notes: [{ type: 'ticket', text: 'Der Monumentalbereich nur mit Zeitticket, online zu kaufen: 18 € (Stand 2026). Täglich etwa 9:30–19:30 Uhr; die Vormittags-Slots sind schnell ausgebucht. Der Waldbereich drumherum ist kostenlos.', url: 'https://parkguell.barcelona', linkLabel: 'parkguell.barcelona' }],
+          name: 'Park Güell',
+          shortDesc: 'Gaudís Park mit Drache und Schlangenbank.',
+          longDesc: 'Eusebi Güell wollte hier eine Luxus-Gartenstadt mit rund sechzig Grundstücken anlegen – ab 1900 wurden aber nur zwei Häuser gebaut, keines von Gaudí, weil die Lage als zu weit draußen galt. Übrig blieb Gaudís fantasievolle Infrastruktur: der Mosaik-Salamander, die Säulenhalle und die geschwungene Bank. 1926 wurde das Gelände ein öffentlicher Park, seit 1984 ist er UNESCO-Welterbe.'
+        },
+        highlights: [
+          {
+            de: { title: 'Der Drache an der Treppe', text: 'Auf der Freitreppe am Eingang liegt der bunte Mosaik-Salamander, den die Barcelonesen »El Drac« nennen – das wohl meistfotografierte Tier der Stadt. 2007 wurde er nach einer Beschädigung restauriert.' },
+            pt: { title: 'O dragão da escadaria', text: "Na escadaria da entrada fica a salamandra colorida de mosaico que os barceloneses chamam de 'El Drac' – provavelmente o bicho mais fotografado da cidade. Foi restaurada em 2007 depois de ser danificada." }
+          },
+          {
+            de: { title: 'Die Schlangenbank', text: 'Die große Terrasse wird von einer endlos geschwungenen Bank eingefasst, die sich wie eine Seeschlange windet. Gestaltet hat ihr Mosaik aus Keramikscherben Gaudís Mitarbeiter Josep Maria Jujol – derselbe, der den Brunnen an der Plaça d\'Espanya entwarf.' },
+            pt: { title: 'O banco-serpente', text: "O grande terraço é contornado por um banco sem fim, ondulado como uma serpente marinha. O mosaico de cacos de cerâmica é de Josep Maria Jujol, colaborador de Gaudí – o mesmo que projetou a fonte da Plaça d'Espanya." }
+          },
+          {
+            de: { title: 'Wo Gaudí wohnte', text: 'Ein Musterhaus von 1904 fand keinen Käufer – Güell überredete Gaudí, es selbst zu kaufen. 1906 zog er mit seinem Vater und seiner Nichte ein. Das rosa Haus (entworfen von Francesc Berenguer) ist heute das Gaudí-Hausmuseum, mit eigenem Ticket.' },
+            pt: { title: 'Onde Gaudí morava', text: 'Uma casa-modelo de 1904 não encontrou comprador – Güell convenceu Gaudí a comprá-la. Em 1906 ele se mudou para lá com o pai e a sobrinha. A casa rosa (projetada por Francesc Berenguer) é hoje a Casa-Museu Gaudí, com ingresso próprio.' }
+          }
+        ]
+      },
+      // ----- Eixample & Ribera -----
+      {
+        key: 'casa-comalat',
+        cats: ['gaudi'],
+        coords: [41.397364, 2.160659],
+        wiki: 'https://ca.wikipedia.org/wiki/Casa_Comalat',
+        img: 'Casa Comalat front facade 01.JPG',
+        pt: {
+          notes: [{ type: 'info', text: 'Prédio residencial particular – só dá para ver por fora. Não deixe de dar a volta no quarteirão até a fachada dos fundos, na Carrer de Còrsega 316.' }],
+          name: 'Casa Comalat',
+          shortDesc: 'Uma casa com duas caras.',
+          longDesc: 'Salvador Valeri i Pupurull construiu este prédio em 1909 para o industrial Joan Comalat – com duas fachadas completamente diferentes. Para a Diagonal, uma fachada solene de pedra com varandas onduladas; nos fundos, na Carrer de Còrsega, uma fachada divertida e colorida, com galerias de madeira e cerâmica, claramente inspirada em Gaudí.'
+        },
+        de: {
+          notes: [{ type: 'info', text: 'Privates Wohnhaus – nur von außen zu sehen. Geh unbedingt um den Block zur Rückseite in der Carrer de Còrsega 316.' }],
+          name: 'Casa Comalat',
+          shortDesc: 'Ein Haus mit zwei Gesichtern.',
+          longDesc: 'Salvador Valeri i Pupurull baute dieses Haus 1909 für den Industriellen Joan Comalat – mit zwei völlig verschiedenen Fassaden. Zur Diagonal hin eine feierliche Steinfront mit geschwungenen Balkonen, auf der Rückseite in der Carrer de Còrsega eine verspielte, bunte Fassade mit Holzgalerien und Keramik – deutlich von Gaudí inspiriert.'
+        },
+        highlights: []
+      },
+      {
+        key: 'palau-quadras',
+        cats: ['gaudi'],
+        coords: [41.39675, 2.16138],
+        wiki: 'https://ca.wikipedia.org/wiki/Palau_del_Bar%C3%B3_de_Quadras',
+        pt: {
+          notes: [{ type: 'info', text: 'Normalmente só dá para ver por fora.' }],
+          name: 'Palau del Baró de Quadras',
+          shortDesc: 'Um pequeno palácio de Puig i Cadafalch.',
+          longDesc: "Josep Puig i Cadafalch transformou este prédio, entre 1904 e 1906, num pequeno palácio urbano. Para a Diagonal ele tem uma das varandas neogóticas mais impressionantes da cidade, toda esculpida em pedra, com são Jorge e o dragão, de Eusebi Arnau. A fachada dos fundos, na Carrer del Rosselló, é mais simples, com motivos florais. Hoje é a sede do Institut Ramon Llull, que divulga a língua e a cultura catalãs no exterior."
+        },
+        de: {
+          notes: [{ type: 'info', text: 'In der Regel nur von außen zu sehen.' }],
+          name: 'Palau del Baró de Quadras',
+          shortDesc: 'Ein kleiner Stadtpalast von Puig i Cadafalch.',
+          longDesc: 'Josep Puig i Cadafalch baute das Haus 1904–1906 zu einem kleinen Stadtpalast um. Zur Diagonal hin trägt es einen der prächtigsten neugotischen Erker der Stadt, ganz aus Stein gemeißelt, mit dem heiligen Georg und dem Drachen von Eusebi Arnau. Die Rückseite an der Carrer del Rosselló ist schlichter, mit Blumenmotiven. Heute sitzt hier das Institut Ramon Llull, das die katalanische Sprache und Kultur im Ausland fördert.'
+        },
+        highlights: []
+      },
+      {
+        key: 'casa-punxes',
+        cats: ['gaudi'],
+        coords: [41.398114, 2.164038],
+        wiki: 'https://ca.wikipedia.org/wiki/Casa_Terrades',
+        pt: {
+          notes: [{ type: 'info', text: 'Desde 2016 o interior pode ser visitado em alguns períodos – confira online antes se há visitas no momento.' }],
+          name: 'Casa de les Punxes',
+          shortDesc: 'O castelo de contos de fadas na Diagonal.',
+          longDesc: "A 'Casa das Pontas' de Josep Puig i Cadafalch, iniciada em 1905, parece um castelo de conto de fadas do norte da Europa: seis torres com telhados cônicos pontudos. Bartomeu Terrades mandou construí-la para as três irmãs – ela une três casas num terreno irregular entre a Diagonal e as ruas Rosselló e Bruc."
+        },
+        de: {
+          notes: [{ type: 'info', text: 'Seit 2016 zeitweise auch innen zu besichtigen – vorher online prüfen, ob gerade Besuche möglich sind.' }],
+          name: 'Casa de les Punxes',
+          shortDesc: 'Das Märchenschloss an der Diagonal.',
+          longDesc: 'Das »Haus der Spitzen« von Josep Puig i Cadafalch, begonnen 1905, sieht aus wie ein Märchenschloss aus Nordeuropa: sechs Türme mit spitzen Kegeldächern. Bartomeu Terrades ließ es für seine drei Schwestern bauen – es vereint drei Häuser auf einem unregelmäßigen Grundstück zwischen Diagonal, Carrer del Rosselló und Carrer del Bruc.'
+        },
+        highlights: [
+          {
+            de: { title: '»Gib uns die Freiheit zurück«', text: 'An der Fassade zur Carrer del Rosselló zeigt ein Keramikbild den heiligen Georg mit der Inschrift »Sant Patró de Catalunya, torneu-nos la llibertat« – »Heiliger Schutzpatron Kataloniens, gib uns die Freiheit zurück«.' },
+            pt: { title: "'Devolva-nos a liberdade'", text: "Na fachada da Carrer del Rosselló, um painel de cerâmica mostra são Jorge com a inscrição 'Sant Patró de Catalunya, torneu-nos la llibertat' – 'Santo padroeiro da Catalunha, devolva-nos a liberdade'." }
+          }
+        ]
+      },
+      {
+        key: 'palau-musica',
+        cats: ['gaudi', 'culture'],
+        coords: [41.387543, 2.175735],
+        wiki: 'https://ca.wikipedia.org/wiki/Palau_de_la_M%C3%BAsica_Catalana',
+        pt: {
+          notes: [{ type: 'ticket', text: 'Visita guiada de uns 50 min: 22 € (menores de 35 e maiores de 65: 16 €), todos os dias a partir das 9h. O mais bonito é entre 9h e 11h, quando o sol entra pelos vitrais laterais. Ou assista a um concerto.', url: 'https://www.palaumusica.cat', linkLabel: 'palaumusica.cat' }],
+          name: 'Palau de la Música Catalana',
+          shortDesc: 'A sala de concertos de vidro e mosaico.',
+          longDesc: 'A sala de concertos do coral Orfeó Català, construída entre 1905 e 1908 por Lluís Domènech i Montaner. Por dentro é uma explosão de vidro, mosaico e escultura: de dia a luz entra pelas paredes de vidro e pela grande claraboia colorida – é a única sala de concertos da Europa iluminada só com luz natural durante o dia. Desde 1997 é Patrimônio Mundial da UNESCO, junto com Sant Pau.'
+        },
+        de: {
+          notes: [{ type: 'ticket', text: 'Führung ca. 50 Min.: 22 € (unter 35 und über 65: 16 €), täglich ab 9 Uhr. Am schönsten zwischen 9 und 11 Uhr, wenn die Sonne durch die seitlichen Glasfenster fällt. Oder gleich ein Konzert besuchen.', url: 'https://www.palaumusica.cat', linkLabel: 'palaumusica.cat' }],
+          name: 'Palau de la Música Catalana',
+          shortDesc: 'Der Konzertsaal aus Glas und Mosaik.',
+          longDesc: 'Der Konzertsaal des Chors Orfeó Català, 1905–1908 von Lluís Domènech i Montaner gebaut. Innen ein Rausch aus Glas, Mosaik und Skulpturen: Tagsüber fällt das Licht durch die Glaswände und das große Buntglas-Oberlicht – es ist der einzige Konzertsaal Europas, der tagsüber nur mit Tageslicht erhellt wird. Seit 1997 gehört er zusammen mit Sant Pau zum UNESCO-Welterbe.'
+        },
+        highlights: [
+          {
+            de: { title: 'Die Sonne an der Decke', text: 'Mitten über dem Saal hängt das Oberlicht von Antoni Rigalt: eine nach unten gewölbte Kuppel aus goldenem Glas, umgeben von Blau – die Sonne am Himmel.' },
+            pt: { title: 'O sol no teto', text: 'Bem no meio da sala fica a claraboia de Antoni Rigalt: uma cúpula invertida de vidro dourado cercada de azul – o sol no céu.' }
+          },
+          {
+            de: { title: 'Die Musen auf der Bühne', text: 'Hinter der Bühne stehen im Halbkreis achtzehn Frauenfiguren, »die Musen«. Ihre Oberkörper hat Eusebi Arnau als Relief gemeißelt, die Unterkörper sind aus Mosaik von Lluís Bru – als würden sie aus der Wand heraustreten.' },
+            pt: { title: 'As musas do palco', text: "Atrás do palco, dezoito figuras femininas formam um semicírculo – 'as musas'. A parte de cima foi esculpida em relevo por Eusebi Arnau, a de baixo é de mosaico, de Lluís Bru – como se saíssem da parede." }
+          },
+          {
+            de: { title: 'Die Musik an der Hausecke', text: 'Draußen an der Ecke Carrer de Sant Pere Més Alt sitzt die große Skulpturengruppe von Miquel Blay, ein Sinnbild für das katalanische Volkslied – darüber wacht der heilige Georg.' },
+            pt: { title: 'A música na esquina', text: 'Do lado de fora, na esquina com a Carrer de Sant Pere Més Alt, fica o grande grupo escultórico de Miquel Blay, um símbolo da canção popular catalã – com são Jorge vigiando lá do alto.' }
+          }
+        ]
+      },
+      // ----- Glòries -----
+      {
+        key: 'parc-glories',
+        cats: ['park'],
+        coords: [41.40380, 2.18600],
+        wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_de_les_Gl%C3%B2ries_Catalanes',
+        pt: {
+          name: 'Parc de les Glòries',
+          shortDesc: 'Um nó viário que vira parque.',
+          longDesc: 'Durante décadas, a Plaça de les Glòries foi um grande nó de trânsito, com um anel viário elevado. Hoje o tráfego passa por túneis e, na superfície, um grande parque vai crescendo aos poucos. A primeira parte, com um gramado de um hectare, parquinho e passeio, abriu em 2019.'
+        },
+        de: {
+          name: 'Parc de les Glòries',
+          shortDesc: 'Wo ein Verkehrsknoten zum Park wird.',
+          longDesc: 'Jahrzehntelang war die Plaça de les Glòries ein riesiger Verkehrsknoten mit einem Hochstraßenring. Heute läuft der Verkehr durch Tunnel, und an der Oberfläche wächst Stück für Stück ein großer Park. Der erste Teil mit einer hektargroßen Wiese, Spielplatz und Promenade wurde 2019 eröffnet.'
+        },
+        highlights: [
+          {
+            de: { title: 'Cerdàs geplantes Zentrum', text: 'Ildefons Cerdà, der Planer des Eixample, sah Glòries als neues Zentrum Barcelonas vor – hier treffen sich Diagonal, Gran Via und Meridiana. Lange blieb davon nur ein Verkehrsknoten; erst jetzt bekommt der Platz eine echte Mitte.' },
+            pt: { title: 'O centro planejado por Cerdà', text: 'Ildefons Cerdà, o urbanista do Eixample, imaginou Glòries como o novo centro de Barcelona – aqui se cruzam a Diagonal, a Gran Via e a Meridiana. Por muito tempo isso ficou só num nó de trânsito; só agora a praça ganha um centro de verdade.' }
+          }
+        ]
+      },
+      {
+        key: 'torre-glories',
+        cats: ['view', 'culture'],
+        coords: [41.403538, 2.188934],
+        wiki: 'https://ca.wikipedia.org/wiki/Torre_Gl%C3%B2ries',
+        pt: {
+          notes: [{ type: 'ticket', text: 'Mirante: aprox. 18 € online (na bilheteria é mais caro); Cloud Cities custa um pouco mais. Abril–outubro todos os dias 10h–21h; novembro–março 10h–18h30, fechado às terças. Última entrada 1 h antes de fechar.' }],
+          name: 'Torre Glòries',
+          shortDesc: 'A torre de vidro colorida com mirante de 360°.',
+          longDesc: "A torre de 144 metros foi projetada por Jean Nouvel (com o estúdio b720) e inaugurada em 2005 como sede da empresa de águas Agbar – daí o antigo nome Torre Agbar. A forma lembra um gêiser; os barceloneses, porém, também lhe deram apelidos bem menos elegantes. À noite a fachada brilha com cerca de 4.500 pontos de LED em cores que mudam."
+        },
+        de: {
+          notes: [{ type: 'ticket', text: 'Aussichtsplattform: ca. 18 € online (an der Kasse teurer), Cloud Cities kostet etwas extra. April–Oktober täglich 10–21 Uhr, November–März 10–18:30 Uhr, dienstags geschlossen. Letzter Einlass 1 Std. vor Schluss.' }],
+          name: 'Torre Glòries',
+          shortDesc: 'Der bunte Glasturm mit 360°-Aussicht.',
+          longDesc: 'Der 144 Meter hohe Turm wurde von Jean Nouvel (mit dem Büro b720) entworfen und 2005 als Sitz der Wasserwerke Agbar eröffnet – daher der alte Name Torre Agbar. Die Form soll an einen Geysir erinnern; die Barcelonesen haben ihm aber auch weniger feine Spitznamen gegeben. Nachts leuchtet die Fassade mit rund 4.500 LED-Elementen in wechselnden Farben.'
+        },
+        highlights: [
+          {
+            de: { title: 'Rundumblick im 30. Stock', text: 'Der Mirador liegt auf 125 Metern im 30. Stock und ist der einzige 360°-Aussichtspunkt der Stadt: Sagrada Família, Meer, Montjuïc und Tibidabo in einem Rundgang.' },
+            pt: { title: 'Vista de 360° no 30º andar', text: 'O mirante fica a 125 metros, no 30º andar, e é o único mirante de 360° da cidade: Sagrada Família, mar, Montjuïc e Tibidabo numa só volta.' }
+          },
+          {
+            de: { title: 'Wolkenstadt unter der Kuppel', text: 'Unter der Kuppel hängt »Cloud Cities« des Künstlers Tomás Saraceno: eine begehbare Skulptur aus 113 durchsichtigen Plattformen an Tausenden gespannten Seilen – man klettert buchstäblich durch die Wolken.' },
+            pt: { title: 'Cidade nas nuvens sob a cúpula', text: "Sob a cúpula fica 'Cloud Cities', do artista Tomás Saraceno: uma escultura que se pode percorrer, feita de 113 plataformas transparentes presas a milhares de cabos tensionados – dá para literalmente subir pelas nuvens." }
+          }
+        ]
+      },
+      {
+        key: 'encants',
+        cats: ['culture'],
+        coords: [41.40220, 2.18630],
+        wiki: 'https://ca.wikipedia.org/wiki/Mercat_dels_Encants',
+        pt: {
+          notes: [{ type: 'info', text: 'Aberto segundas, quartas, sextas e sábados das 9h às 20h; algumas bancas fecham na hora do almoço. Entrada gratuita. Pechinchar faz parte – e fique de olho nos batedores de carteira.' }],
+          name: 'Mercat dels Encants',
+          shortDesc: 'O mercado de pulgas sob um teto de espelhos.',
+          longDesc: 'Um dos mercados mais antigos de Barcelona – suas raízes vêm de séculos atrás, e ele já mudou de lugar várias vezes. Desde 2013 fica aqui, sob um enorme teto de superfícies espelhadas inclinadas, projetado pelo escritório b720 Fermín Vázquez: lá de baixo você vê a si mesmo e o vaivém das bancas refletidos. Vende-se de tudo – antiguidades, móveis, roupas e quinquilharias.'
+        },
+        de: {
+          notes: [{ type: 'info', text: 'Geöffnet Mo, Mi, Fr und Sa 9–20 Uhr, manche Stände machen mittags Pause. Eintritt frei. Handeln gehört dazu – und auf Taschendiebe achten.' }],
+          name: 'Mercat dels Encants',
+          shortDesc: 'Der Flohmarkt unter dem Spiegeldach.',
+          longDesc: 'Einer der ältesten Märkte Barcelonas – seine Wurzeln reichen Jahrhunderte zurück, und er ist schon mehrmals umgezogen. Seit 2013 steht er hier unter einem riesigen Dach aus schrägen Spiegelflächen vom Büro b720 Fermín Vázquez: Von unten siehst du dich selbst und das Gewimmel der Stände gespiegelt. Verkauft wird alles – Antiquitäten, Möbel, Kleidung und Trödel.'
+        },
+        highlights: []
+      },
+      {
+        key: 'museu-disseny',
+        cats: ['culture'],
+        coords: [41.40240, 2.18800],
+        wiki: 'https://ca.wikipedia.org/wiki/Museu_del_Disseny_de_Barcelona',
+        pt: {
+          name: 'Museu del Disseny',
+          shortDesc: "O museu do design no prédio 'grampeador'.",
+          longDesc: "O museu do design fica no prédio do Disseny Hub, projetado pelo escritório MBM (Martorell, Bohigas, Mackay) e aberto em 2014. Como a parte de cima avança bem por cima da praça, os barceloneses o chamam de 'la grapadora' – o grampeador. Lá dentro: artes decorativas da Idade Média até hoje, moda e têxteis desde o século XVI, design gráfico e de produto."
+        },
+        de: {
+          name: 'Museu del Disseny',
+          shortDesc: 'Das Designmuseum im »Tacker«.',
+          longDesc: 'Das Designmuseum sitzt im Gebäude des Disseny Hub, entworfen vom Büro MBM (Martorell, Bohigas, Mackay) und 2014 eröffnet. Weil der obere Teil weit über den Platz hinausragt, nennen die Barcelonesen es »la grapadora« – den Tacker. Drinnen: Kunsthandwerk vom Mittelalter bis heute, Mode und Textilien seit dem 16. Jahrhundert, Grafik- und Produktdesign.'
+        },
+        highlights: []
+      },
+      {
+        key: 'teatre-nacional',
+        cats: ['culture'],
+        coords: [41.39890, 2.18430],
+        wiki: 'https://ca.wikipedia.org/wiki/Teatre_Nacional_de_Catalunya',
+        pt: {
+          name: 'Teatre Nacional de Catalunya',
+          shortDesc: 'Um templo grego de vidro para o teatro.',
+          longDesc: 'O Teatro Nacional da Catalunha, de Ricardo Bofill – o mesmo arquiteto do Hotel W –, foi inaugurado em 1996: um templo grego moderno, com colunas na frente de uma grande caixa de vidro. O prédio gerou polêmica; críticos o chamaram de paródia ou de mausoléu. São três salas; a maior, com 866 lugares, tem a forma de um teatro antigo.'
+        },
+        de: {
+          name: 'Teatre Nacional de Catalunya',
+          shortDesc: 'Ein griechischer Tempel aus Glas fürs Theater.',
+          longDesc: 'Das Katalanische Nationaltheater von Ricardo Bofill – demselben Architekten wie beim W-Hotel – wurde 1996 eröffnet: ein moderner griechischer Tempel, mit Säulen vor einem großen Glaskasten. Der Bau war umstritten; Kritiker nannten ihn eine Parodie oder ein Mausoleum. Drei Säle, der größte mit 866 Plätzen in Form eines antiken Theaters.'
+        },
+        highlights: []
+      },
+      {
+        key: 'auditori',
+        cats: ['culture'],
+        coords: [41.39830, 2.18550],
+        wiki: 'https://ca.wikipedia.org/wiki/L%27Auditori',
+        pt: {
+          name: "L'Auditori & Museu de la Música",
+          shortDesc: 'Sala de concertos de Rafael Moneo e museu da música.',
+          longDesc: "A sala de concertos de Rafael Moneo foi inaugurada em 1999: por fora, um cubo austero de concreto e aço; por dentro, três salas com acústica cuidadosamente planejada – a maior, a Sala Pau Casals, tem 2.200 lugares. É a casa da Orquestra Sinfônica de Barcelona. No mesmo complexo fica o Museu de la Música, com instrumentos históricos do mundo todo."
+        },
+        de: {
+          name: "L'Auditori & Museu de la Música",
+          shortDesc: 'Rafael Moneos Konzerthaus und das Musikmuseum.',
+          longDesc: 'Rafael Moneos Konzerthaus wurde 1999 eröffnet: außen ein strenger Kubus aus Beton und Stahl, innen drei Säle mit sorgfältig geplanter Akustik – der größte, die Sala Pau Casals, hat 2.200 Plätze. Hier spielt das Sinfonieorchester von Barcelona. Im selben Komplex liegt das Museu de la Música mit historischen Instrumenten aus aller Welt.'
+        },
+        highlights: []
+      },
+      {
+        key: 'rambla-poblenou',
+        cats: ['food'],
+        coords: [41.401395, 2.200692],
+        wiki: 'https://ca.wikipedia.org/wiki/Rambla_del_Poblenou',
+        pt: {
+          name: 'Rambla del Poblenou',
+          shortDesc: 'A Rambla tranquila do antigo bairro industrial.',
+          longDesc: "A Rambla do Poblenou, o antigo bairro de fábricas que já foi chamado de 'Manchester catalã'. Aqui não há lojas de suvenires, e sim cafés, sorveterias e bancos à sombra das árvores – a rambla vai da Diagonal quase até o mar. Ótima para descansar longe da multidão.",
+          gastro: "🥤 Experimente uma horchata (bebida de chufa) na El Tío Che – há mais de cem anos na Rambla."
+        },
+        de: {
+          name: 'Rambla del Poblenou',
+          shortDesc: 'Die ruhige Rambla des alten Industrieviertels.',
+          longDesc: 'Die Rambla von Poblenou, dem alten Fabrikviertel, das man einst das »katalanische Manchester« nannte. Hier gibt es keine Souvenirläden, sondern Cafés, Eisdielen und Bänke unter Bäumen – die Rambla führt von der Diagonal fast bis ans Meer. Gut zum Durchatmen abseits der Menge.',
+          gastro: '🥤 Probier eine Horchata (Erdmandelmilch) bei El Tío Che – seit über hundert Jahren an der Rambla.'
+        },
+        highlights: []
+      },
+      {
+        key: 'cementiri-poblenou',
+        cats: ['culture', 'old'],
+        coords: [41.395155, 2.201759],
+        wiki: 'https://ca.wikipedia.org/wiki/Cementiri_del_Poblenou',
+        pt: {
+          notes: [{ type: 'info', text: 'É um cemitério em uso – comporte-se com respeito e sem barulho.' }],
+          name: 'Cementiri del Poblenou',
+          shortDesc: "O cemitério com o 'Beijo da Morte'.",
+          longDesc: 'Um dos cemitérios mais antigos de Barcelona. Depois que as tropas de Napoleão o destruíram em 1813, o arquiteto italiano Antonio Ginesi o reconstruiu em estilo neoclássico – com longas fileiras de nichos que parecem ruas de uma cidade dos mortos. Mais ao fundo ficam os mausoléus suntuosos das famílias de industriais ricos.'
+        },
+        de: {
+          notes: [{ type: 'info', text: 'Ein aktiver Friedhof – bitte respektvoll und leise verhalten.' }],
+          name: 'Cementiri del Poblenou',
+          shortDesc: 'Der Friedhof mit dem »Kuss des Todes«.',
+          longDesc: 'Einer der ältesten Friedhöfe Barcelonas. Nachdem Napoleons Truppen ihn 1813 zerstört hatten, baute ihn der italienische Architekt Antonio Ginesi im klassizistischen Stil neu auf – mit langen Reihen von Nischengräbern, die wie Straßen einer Totenstadt wirken. Weiter hinten stehen prachtvolle Mausoleen reicher Industriellenfamilien.'
+        },
+        highlights: [
+          {
+            de: { title: 'Der Kuss des Todes', text: 'Das berühmteste Grabmal des Friedhofs, »El Petó de la Mort« von 1930: Ein geflügeltes Skelett küsst einen jungen Mann auf die Wange, der leblos in seinen Armen liegt. Es schmückt das Grab des Textilfabrikanten Josep Llaudet Soler; am Sockel steht der Name Jaume Barba und ein Vers des Dichters Jacint Verdaguer.' },
+            pt: { title: 'O Beijo da Morte', text: "O túmulo mais famoso do cemitério, 'El Petó de la Mort', de 1930: um esqueleto alado beija o rosto de um jovem que jaz sem vida em seus braços. Ele enfeita o túmulo do industrial têxtil Josep Llaudet Soler; na base estão o nome de Jaume Barba e um verso do poeta Jacint Verdaguer." }
+          }
+        ]
+      }
+    ];
+
     // ===== Tours =====
     // To add a tour: create a stops array like the ones above and add an entry here.
     // Every stop has a stable `key`; "visited" ticks are stored per key, so they
@@ -2967,6 +3473,12 @@
       }
       item.tours.push({ routeId: route.id, n: stop.id });
     }));
+    extraPlaces.forEach(place => {
+      const item = JSON.parse(JSON.stringify(place));
+      item.tours = [];
+      catalogByKey[item.key] = item;
+      catalog.push(item);
+    });
     const allToilets = [];
     routes.forEach(r => r.toilets.forEach(t => { if (!allToilets.some(x => x.name === t.name)) allToilets.push(t); }));
 
@@ -3309,10 +3821,11 @@
             </a>
           </div>
           ${bodyHtml(item, txt)}
+          ${item.tours.length ? `
           <div class="pt-1">
             <h4 class="text-xs font-semibold text-stone-500 mb-2">${txt.inTours}</h4>
             <div class="flex flex-wrap gap-2">${tours}</div>
-          </div>
+          </div>` : ''}
         </div>` : ''}`;
       return el;
     }
