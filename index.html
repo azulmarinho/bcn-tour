@@ -244,7 +244,8 @@
         listen: "Ouvir",
         markVisitedShort: "Visitado ✓",
         routeLabel: "Rota",
-        cableLeg: "De teleférico"
+        cableLeg: "De teleférico",
+        busLeg: "De ônibus"
       },
       de: {
         appTitle: "Barcelona Rundgang",
@@ -279,7 +280,8 @@
         listen: "Anhören",
         markVisitedShort: "Besucht ✓",
         routeLabel: "Route",
-        cableLeg: "Mit der Seilbahn"
+        cableLeg: "Mit der Seilbahn",
+        busLeg: "Mit dem Bus"
       }
     };
 
@@ -2096,48 +2098,30 @@
       },
       {
         id: 10,
-        coords: [41.36861, 2.16000],
-        wiki: "https://ca.wikipedia.org/wiki/Fundaci%C3%B3_Joan_Mir%C3%B3",
-        img: "Fundació Joan Miró.JPG",
+        coords: [41.366458, 2.151359],
+        wiki: "",
+        nextBy: "bus",
         pt: {
           notes: [
-            {"type":"ticket","text":"Museu com entrada paga."}
+            { type: "info", text: "Vale o bilhete normal de transporte público (por exemplo T-casual ou bilhete simples) – não o do teleférico. Confira os horários atuais no app da TMB." },
+            { type: "info", text: "Acene para o motorista quando o ônibus se aproximar – senão ele não para. Dentro do ônibus, encoste seu bilhete ou cartão sem contato numa das duas caixas cinzas até ouvir um bipe. Na hora de descer não é preciso validar de novo." }
           ],
-          name: "Fundació Joan Miró",
-          shortDesc: "O museu do próprio Miró.",
-          longDesc: "O próprio Joan Miró fundou o museu, junto com seu amigo Joan Prats. O prédio branco e luminoso, projetado por outro amigo, Josep Lluís Sert, foi inaugurado em 1975. Aqui está a maior coleção de suas obras – mais de 10.000 peças, dos primeiros desenhos às grandes telas tardias."
+          name: "Ponto de ônibus – linha 150",
+          shortDesc: "Atalho de ônibus até o bar Salts.",
+          longDesc: "Do sino olímpico são só alguns passos até este ponto. Em vez de percorrer a pé o longo trecho pela Avinguda de l'Estadi e pela Avinguda de Miramar, pegue aqui o ônibus 150 (sentido Castell de Montjuïc) e desça no ponto 'Av Miramar - Estació del Funicular', junto à estação superior do funicular. De lá são poucos passos até o bar Salts, na piscina.",
+          nextHint: "Ônibus 150 até 'Av Miramar - Estació del Funicular'"
         },
         de: {
           notes: [
-            {"type":"ticket","text":"Museum mit Eintritt."}
+            { type: "info", text: "Es gilt der normale Nahverkehrsfahrschein (z. B. T-casual oder Einzelfahrt) – nicht das Gondel-Ticket. Den aktuellen Fahrplan findest du in der TMB-App." },
+            { type: "info", text: "Wink dem Busfahrer, wenn der Bus kommt – sonst hält er nicht an. Im Bus hältst du dein Ticket bzw. deine Karte kontaktlos an eine der zwei grauen Boxen, bis es piept. Beim Aussteigen musst du die Karte nicht noch einmal dranhalten." }
           ],
-          name: "Fundació Joan Miró",
-          shortDesc: "Mirós eigenes Museum.",
-          longDesc: "Joan Miró gründete das Museum selbst, zusammen mit seinem Freund Joan Prats. Das weiße, lichtdurchflutete Gebäude seines Freundes Josep Lluís Sert eröffnete 1975. Hier liegt die größte Sammlung seiner Werke – über 10.000 Stücke, von frühen Zeichnungen bis zu den großen späten Bildern."
+          name: "Bushaltestelle Linie 150",
+          shortDesc: "Mit dem Bus abkürzen bis zur Salts-Bar.",
+          longDesc: "Von der Olympischen Glocke sind es nur ein paar Schritte bis zu dieser Haltestelle. Statt das lange Stück über die Avinguda de l'Estadi und die Avinguda de Miramar zu laufen, nimmst du hier den Bus 150 (Richtung Castell de Montjuïc) und steigst an der Haltestelle »Av Miramar - Estació del Funicular« aus, bei der Bergstation der Standseilbahn. Von dort sind es nur wenige Schritte bis zur Salts-Bar am Schwimmbad.",
+          nextHint: "Bus 150 bis »Av Miramar - Estació del Funicular«"
         },
-        highlights: [
-          {
-            de: {
-              title: "Calders Quecksilberbrunnen",
-              text: "Im Museum steht ein Kunstwerk, das man kaum glauben mag: der Quecksilberbrunnen von Alexander Calder. Er entstand 1937 für den Pavillon der Spanischen Republik auf der Pariser Weltausstellung – gleich neben Picassos »Guernica« – und erinnert an die umkämpften Quecksilberminen von Almadén. Heute steht er sicher hinter Glas."
-            },
-            pt: {
-              title: "A fonte de mercúrio de Calder",
-              text: "No museu há uma obra difícil de acreditar: a fonte de mercúrio de Alexander Calder. Ela foi criada em 1937 para o pavilhão da República Espanhola na Exposição de Paris – ao lado da 'Guernica' de Picasso – e lembra as disputadas minas de mercúrio de Almadén. Hoje fica protegida atrás de vidro."
-            }
-          },
-          {
-            img: "Terrassa de la Fundació Joan Miró.JPG",
-            de: {
-              title: "Skulpturen auf dem Dach",
-              text: "Auf den Dachterrassen stehen zwischen den gewölbten Oberlichtern bunte Miró-Skulpturen, dahinter liegt die Stadt. Ein weiteres Werk von ihm liegt mitten auf der Rambla: ein rundes, buntes Bodenmosaik, über das täglich Tausende laufen."
-            },
-            pt: {
-              title: "Esculturas no terraço",
-              text: "Nos terraços, entre as claraboias curvas, ficam esculturas coloridas de Miró, com a cidade ao fundo. Outra obra dele fica no meio da Rambla: um mosaico redondo e colorido no chão, pisado todos os dias por milhares de pessoas."
-            }
-          }
-        ]
+        highlights: []
       },
       {
         id: 11,
@@ -2468,8 +2452,8 @@
 
     const portStops = [
       reuseStop(fromMontjuic(1), 1, s => {
-        s.de.notes[0] = { type: 'info', text: 'Tipp: Diese Route ist lang (zu Fuß etwa 9–10 km) – erst geht es bergauf, dann mit Hafenseilbahn und Solarboot zurück in die Stadt und durch die Altstadt bis zur Plaça de Catalunya. Zwischen Font Màgica und Palau Nacional helfen Rolltreppen im Freien. Wasser, Sonnenschutz und etwas Bargeld für Seilbahn und Boot einpacken.' };
-        s.pt.notes[0] = { type: 'info', text: 'Dica: esta rota é longa (cerca de 9–10 km a pé) – primeiro subida, depois teleférico do porto e barco solar de volta à cidade e pelo centro antigo até a Plaça de Catalunya. Entre a Font Màgica e o Palau Nacional há escadas rolantes ao ar livre. Leve água, protetor solar e um pouco de dinheiro para o teleférico e o barco.' };
+        s.de.notes[0] = { type: 'info', text: 'Tipp: Diese Route ist lang (zu Fuß etwa 8–9 km) – erst geht es bergauf, dann mit Hafenseilbahn und Solarboot zurück in die Stadt und durch die Altstadt bis zur Plaça de Catalunya. Zwischen Font Màgica und Palau Nacional helfen Rolltreppen im Freien. Wasser, Sonnenschutz und etwas Bargeld für Seilbahn und Boot einpacken.' };
+        s.pt.notes[0] = { type: 'info', text: 'Dica: esta rota é longa (cerca de 8–9 km a pé) – primeiro subida, depois teleférico do porto e barco solar de volta à cidade e pelo centro antigo até a Plaça de Catalunya. Entre a Font Màgica e o Palau Nacional há escadas rolantes ao ar livre. Leve água, protetor solar e um pouco de dinheiro para o teleférico e o barco.' };
       }),
       ...[2, 3, 4, 5, 6, 7, 8, 9, 10].map(id => reuseStop(fromMontjuic(id), id)),
       // Salts: no gondola to the castle on this route – walk on along the slope
@@ -2580,8 +2564,8 @@
       {
         id: 'montjuic',
         storageKey: 'bcn_tour_completed_montjuic',
-        distance: '~4–5 km',
-        duration: '~5 h',
+        distance: '~3–4 km',
+        duration: '~4–5 h',
         pt: { title: "Plaça d'Espanya → Montjuïc → teleférico" },
         de: { title: "Plaça d'Espanya → Montjuïc → Seilbahn" },
         stops: montjuicStops,
@@ -2590,7 +2574,7 @@
       {
         id: 'port',
         storageKey: 'bcn_tour_completed_port',
-        distance: '~9–10 km',
+        distance: '~8–9 km',
         duration: '~7–8 h',
         pt: { title: 'Montjuïc → porto → Plaça de Catalunya' },
         de: { title: 'Montjuïc → Hafen → Plaça de Catalunya' },
@@ -2653,7 +2637,8 @@
     const LEG_STYLES = {
       walk:     { color: '#4f46e5', weight: 4, opacity: 0.7, dashArray: '6, 8' },
       boat:     { color: '#0891b2', weight: 4, opacity: 0.8, dashArray: '2, 8' },
-      cablecar: { color: '#dc2626', weight: 3, opacity: 0.85, dashArray: '12, 6' }
+      cablecar: { color: '#dc2626', weight: 3, opacity: 0.85, dashArray: '12, 6' },
+      bus:      { color: '#ea580c', weight: 4, opacity: 0.8, dashArray: '1, 7' }
     };
     function legMode(stop) { return stop.nextBy || (stop.nextByBoat ? 'boat' : 'walk'); }
 
@@ -2742,6 +2727,8 @@
       if (mode !== 'walk') {
         const look = mode === 'cablecar'
           ? { icon: 'cable-car', cls: 'bg-red-50 border-red-200 text-red-900', sub: 'text-red-700', label: txt.cableLeg }
+          : mode === 'bus'
+          ? { icon: 'bus', cls: 'bg-orange-50 border-orange-200 text-orange-900', sub: 'text-orange-700', label: txt.busLeg }
           : { icon: 'ship', cls: 'bg-cyan-50 border-cyan-200 text-cyan-900', sub: 'text-cyan-700', label: txt.boatLeg };
         const hint = stop[currentLang].nextHint || look.label;
         return `
