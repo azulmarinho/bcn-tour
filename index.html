@@ -166,7 +166,7 @@
 
   <!-- Header -->
   <header id="app-header" class="sticky top-0 z-50 bg-ink text-white">
-    <div class="max-w-6xl mx-auto px-4 h-[60px] flex items-center justify-between gap-4">
+    <div class="max-w-[1800px] mx-auto px-4 lg:px-6 h-[60px] flex items-center justify-between gap-4">
       <a href="#tours" class="flex items-center gap-2.5 min-w-0" aria-label="Barcelona">
         <!-- Logo: the "panot de flor", the flower tile of Barcelona's pavements -->
         <svg viewBox="0 0 100 100" class="w-8 h-8 shrink-0" aria-hidden="true">
@@ -210,7 +210,7 @@
   <section id="view-map" class="view">
     <!-- Tour head (only while a tour is open) -->
     <div id="tour-head" class="hidden bg-white border-b border-stone-200">
-      <div class="max-w-6xl mx-auto px-4 pt-4 pb-5">
+      <div class="max-w-[1800px] mx-auto px-4 lg:px-6 pt-4 pb-5">
         <button onclick="go('tours')" class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-800">
           <i data-lucide="arrow-left" class="w-4 h-4"></i><span id="label-all-tours"></span>
         </button>
@@ -232,7 +232,7 @@
 
     <!-- Explore head (only in explore) -->
     <div id="explore-head" class="hidden bg-white">
-      <div class="max-w-6xl mx-auto px-4 pt-5 pb-2 flex items-baseline justify-between gap-4">
+      <div class="max-w-[1800px] mx-auto px-4 lg:px-6 pt-5 pb-2 flex items-baseline justify-between gap-4">
         <h1 id="explore-title" class="font-display text-2xl md:text-3xl leading-tight"></h1>
         <span id="explore-count" class="text-sm text-stone-500 font-medium"></span>
       </div>
@@ -240,7 +240,7 @@
 
     <!-- Sticky toolbar -->
     <div id="toolbar" class="sticky top-[60px] z-40 bg-white/95 backdrop-blur border-b border-stone-200">
-      <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center gap-2 text-sm">
+      <div class="max-w-[1800px] mx-auto px-4 lg:px-6 py-2.5 flex flex-wrap items-center gap-2 text-sm">
         <label id="search-wrap" class="hidden relative flex-1 min-w-[150px]">
           <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
           <span id="label-search" class="sr-only"></span>
@@ -255,11 +255,11 @@
             <span class="text-[11px] font-bold border-2 border-current rounded px-0.5 leading-none py-0.5">WC</span><span id="label-wc" class="truncate hidden sm:inline"></span>
           </button>
         </div>
-        <div id="cat-chips" class="hidden chip-row w-full flex gap-2 overflow-x-auto pb-0.5 -mx-4 px-4"></div>
+        <div id="cat-chips" class="hidden chip-row w-full flex gap-2 overflow-x-auto pb-0.5 -mx-4 px-4 md:flex-wrap md:overflow-visible md:mx-0 md:px-0"></div>
       </div>
     </div>
 
-    <main class="max-w-6xl w-full mx-auto px-4 py-4 grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-4 md:gap-6 items-start">
+    <main class="max-w-[1800px] w-full mx-auto px-4 lg:px-6 py-4 grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1.8fr)_minmax(400px,1fr)] 2xl:grid-cols-[minmax(0,2.2fr)_minmax(440px,1fr)] gap-4 md:gap-6 items-start">
       <div id="map-card" class="bg-white rounded-2xl overflow-hidden border border-stone-200">
         <div id="map"></div>
         <div id="map-legend" class="px-3 py-2 text-[11px] text-stone-600 flex flex-wrap gap-x-4 gap-y-1 border-t border-stone-200"></div>
@@ -3552,7 +3552,7 @@
     let selectedKey = null;             // explore: the one place highlighted on the map
 
     // ---------- Map ----------
-    const map = L.map('map').setView([41.385, 2.17], 13);
+    const map = L.map('map', { zoomSnap: 0.5 }).setView([41.385, 2.17], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
@@ -3560,7 +3560,15 @@
     const markerLayer = L.layerGroup().addTo(map);
     const wcMarkersGroup = L.layerGroup().addTo(map);
     const markers = {};
-    watchSize(document.getElementById('map'), () => map.invalidateSize());
+    // While the map still shows the automatic overview, keep it fitted when its box changes size
+    // (window resized, styles arriving late). Once you pan, zoom or pick a place, it stays put.
+    let autoFit = false;
+    watchSize(document.getElementById('map'), () => {
+      map.invalidateSize();
+      if (autoFit && view !== 'tours') fitItems();
+    });
+    map.on('dragstart', () => { autoFit = false; });
+    ['wheel', 'touchstart', 'dblclick'].forEach(ev => document.getElementById('map').addEventListener(ev, () => { autoFit = false; }, { passive: true }));
 
     // How a leg is travelled decides how its line looks (main map and tour cards)
     const LEG_STYLES = {
@@ -3944,6 +3952,7 @@
       items.forEach(item => { if (markers[item.key]) markers[item.key].setIcon(markerIcon(item)); });
     }
     function fitItems() {
+      autoFit = true;
       const list = view === 'tour' ? currentRoute.stops : items;
       if (list.length) map.fitBounds(L.latLngBounds(list.map(s => s.coords)), { padding: [25, 25], maxZoom: 16 });
     }
@@ -4240,6 +4249,7 @@
       document.getElementById('list-container').innerHTML = '';
       renderList();
       if (key && catalogByKey[key]) {
+        autoFit = false;
         map.setView(catalogByKey[key].coords, 16);
         selectPlace(key);
         scrollToCard(key);
@@ -4374,6 +4384,7 @@
       const item = getItem(key);
       if (!item) return;
       if (window.innerWidth < 768) scrollToElement(document.getElementById('map-card'));
+      autoFit = false;
       map.setView(item.coords, 16);
       if (markers[key]) markers[key].openPopup();
       selectPlace(key);
@@ -4542,6 +4553,7 @@
           if (!userMarker) {
             const userIcon = L.divIcon({ className: 'user-location-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
             userMarker = L.marker(userCoords, { icon: userIcon, zIndexOffset: 1000 }).addTo(map).bindPopup(`<b>${T().userLocation}</b>`);
+            autoFit = false;
             map.setView(userCoords, 16);
           } else {
             userMarker.setLatLng(userCoords);
@@ -4625,7 +4637,10 @@
       if (action === 'close') { dismissedNearKey = nearKey; updateNearBanner(); }
     };
 
+    // The toolbar's height decides where the sticky map starts and how tall it is. Measure it again
+    // whenever it changes – e.g. when the styles arrive late or the category chips wrap.
     window.addEventListener('resize', () => { if (view !== 'tours') updateStickyTop(); });
+    watchSize(document.getElementById('toolbar'), () => { if (view !== 'tours') updateStickyTop(); });
 
     // ---------- Init ----------
     paintTiles();
