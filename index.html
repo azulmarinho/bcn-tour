@@ -2,59 +2,100 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcelona Walking Tour & Audioguide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#13253F">
+  <title>Barcelona a pé · Roteiros & Audioguia</title>
+
+  <!-- Fonts: Young Serif for names and headings, Figtree for everything else -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Young+Serif&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Colour and type tokens. "brand" is the cobalt of Barcelona's tiles,
+    // "stone" the grey-green of the hexagonal pavement on Passeig de Gràcia.
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#13253F',
+            brand: { 50: '#EEF4FB', 100: '#D8E6F6', 200: '#B3CDEC', 300: '#82ABDD', 400: '#4F86CB', 500: '#2D6AB8', 600: '#1F57A0', 700: '#1A4884', 800: '#173B6B', 900: '#142F55' },
+            stone: { 50: '#F5F7F6', 100: '#ECF0EE', 200: '#DDE4E1', 300: '#C5CFCB', 400: '#97A5A0', 500: '#6E7D78', 600: '#55625E' },
+            saffron: { 50: '#FDF6E7', 100: '#FAE9C2', 200: '#F5D68C', 400: '#EDA526', 600: '#B97A0C', 800: '#6E4706' },
+            leaf: { 50: '#EAF6EF', 100: '#CDEBD9', 500: '#2F8A5B', 600: '#25724A' }
+          },
+          fontFamily: {
+            sans: ['Figtree', 'system-ui', 'sans-serif'],
+            display: ['"Young Serif"', 'Georgia', 'serif']
+          }
+        }
+      }
+    };
+  </script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    #map { height: 380px; width: 100%; z-index: 10; }
+    :root {
+      --ink: #13253F;
+      --brand: #1F57A0;
+      --stone: #DDE4E1;
+      --saffron: #EDA526;
+      --leaf: #2F8A5B;
+      --coral: #D9483B;
+      --teal: #0C8C99;
+      --bus: #C77C0A;
+      --header-h: 60px;
+      --bottom-nav-h: 0px;
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: #F2F5F4; color: var(--ink); }
+
+    /* Hexagonal pavement pattern (the tile is generated in JS, see paintTiles) */
+    .tile-bg { background-color: #E7ECEA; background-image: var(--tile-light); background-size: 52px 90px; }
+    .tile-bg-dark { background-color: var(--ink); background-image: var(--tile-dark); background-size: 52px 90px; }
+
+    /* Views */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Map */
+    #map { height: 42vh; min-height: 260px; width: 100%; z-index: 10; background: #dfe6e3; }
     @media (min-width: 768px) {
-      #map { height: 100%; min-height: 550px; }
+      #map-card { position: sticky; top: var(--map-top, 140px); }
+      #map { height: calc(100vh - var(--map-top, 140px) - 56px); min-height: 440px; }
+    }
+    .leaflet-popup-content { font-family: Figtree, system-ui, sans-serif; }
+    .leaflet-popup-content b { font-family: "Young Serif", Georgia, serif; font-weight: 400; font-size: 15px; }
+
+    /* Map markers */
+    .stop-pin {
+      background: var(--ink); color: #fff; border: 2px solid #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font: 600 12px/1 Figtree, system-ui, sans-serif;
+      box-shadow: 0 1px 4px rgba(19, 37, 63, .45);
+    }
+    .stop-pin.has-details { box-shadow: 0 0 0 3px var(--saffron), 0 1px 4px rgba(19, 37, 63, .45); }
+    .stop-pin.completed { background: var(--leaf); }
+    .place-pin {
+      border: 2px solid #fff; border-radius: 50%; box-shadow: 0 1px 4px rgba(19, 37, 63, .45);
+      display: flex; align-items: center; justify-content: center; color: #fff; font: 700 11px/1 Figtree, sans-serif;
+    }
+    .place-pin.selected { outline: 3px solid var(--ink); outline-offset: 1px; }
+    .wc-pin {
+      background: #fff; color: var(--brand); border: 2px solid var(--brand); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font: 700 10px/1 Figtree, sans-serif;
+      box-shadow: 0 1px 3px rgba(19, 37, 63, .3);
     }
 
-    /* Custom Map Markers */
-    .custom-div-icon {
-      background: #4f46e5;
-      color: white;
-      border-radius: 50%;
-      text-align: center;
-      font-weight: bold;
-      font-size: 12px;
-      line-height: 26px;
-      border: 2px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
-    }
-    .custom-div-icon:hover { transform: scale(1.15); }
-    .custom-div-icon.completed { background: #22c55e; }
-    /* Stops with extra highlights get a small amber ring */
-    .custom-div-icon.has-details { box-shadow: 0 0 0 3px #fbbf24, 0 2px 6px rgba(0,0,0,0.3); }
-
-    /* WC Marker */
-    .wc-icon {
-      background: #0284c7;
-      color: white;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 12px;
-      line-height: 22px;
-      border: 2px solid white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
-    }
-
-    /* User GPS Pulsing Dot */
+    /* User GPS dot */
     .user-location-marker {
-      background: #2563eb;
-      border: 3px solid white;
-      border-radius: 50%;
-      box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.3);
-      animation: pulse 2s infinite;
+      background: #2563eb; border: 3px solid white; border-radius: 50%;
+      box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.3); animation: pulse 2s infinite;
     }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0px rgba(37, 99, 235, 0.5); }
@@ -68,20 +109,19 @@
     .chevron { transition: transform 0.2s ease; }
     .open-btn .chevron { transform: rotate(180deg); }
 
-    /* Highlight image: placeholder colour while loading */
-    .hl-img-wrap { background: #e2e8f0; }
+    .hl-img-wrap { background: var(--stone); }
     .hl-img-wrap img { transition: transform 0.3s ease; }
     .hl-img-wrap:hover img { transform: scale(1.03); }
 
-    /* Card selected on the map: short amber glow */
+    /* Card selected on the map: short saffron glow */
     @keyframes cardFlash {
-      0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-      15%  { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.9); }
-      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+      0%   { box-shadow: 0 0 0 0 rgba(237, 165, 38, 0); }
+      15%  { box-shadow: 0 0 0 4px rgba(237, 165, 38, 0.9); }
+      100% { box-shadow: 0 0 0 0 rgba(237, 165, 38, 0); }
     }
     .card-flash { animation: cardFlash 2s ease-out; }
 
-    /* Card of the stop you are standing at (GPS) */
+    /* Card of the place you are standing at (GPS) */
     .is-near { outline: 3px solid #2563eb; outline-offset: 2px; }
     .is-near::before {
       content: attr(data-near-label);
@@ -89,81 +129,154 @@
       background: #2563eb; color: #fff; font-size: 11px; font-weight: 700;
     }
 
+    /* Horizontal chip rows scroll without a visible scrollbar */
+    .chip-row { scrollbar-width: none; }
+    .chip-row::-webkit-scrollbar { display: none; }
+
+    /* Route sketch on the tour cards */
+    .sketch svg { width: 100%; height: 100%; display: block; }
+
+    /* Hero headline: set large, tight, with the tile showing through the counter of the type */
+    .hero-title { font-family: "Young Serif", Georgia, serif; line-height: .95; letter-spacing: -.01em; }
+
     /* Lightbox */
     #lightbox { display: none; }
     #lightbox.open { display: flex; }
 
+    /* Toast */
+    #toast { transition: opacity .2s ease, transform .2s ease; opacity: 0; transform: translate(-50%, 8px); pointer-events: none; }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* Phones: navigation sits at the bottom, within thumb reach */
+    @media (max-width: 767px) {
+      :root { --bottom-nav-h: calc(60px + env(safe-area-inset-bottom, 0px)); }
+      body { padding-bottom: var(--bottom-nav-h); }
+    }
+    #near-banner { bottom: var(--bottom-nav-h); }
+
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; animation: none !important; }
     }
-    button:focus-visible, a:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen font-sans">
+<body class="min-h-screen flex flex-col font-sans antialiased">
 
-  <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-3">
-      <div class="flex items-center gap-2">
-        <i data-lucide="map-pin" class="w-6 h-6 text-amber-300"></i>
-        <div>
-          <h1 class="text-lg md:text-xl font-bold leading-tight" id="app-title">Tour Barcelona</h1>
-          <p class="text-xs text-indigo-200" id="app-subtitle">Diagonal → Sagrada Família</p>
-        </div>
-      </div>
+  <!-- Header -->
+  <header id="app-header" class="sticky top-0 z-50 bg-ink text-white">
+    <div class="max-w-6xl mx-auto px-4 h-[60px] flex items-center justify-between gap-4">
+      <a href="#tours" class="flex items-center gap-2.5 min-w-0" aria-label="Barcelona">
+        <svg viewBox="0 0 24 24" class="w-7 h-7 shrink-0" aria-hidden="true">
+          <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75Z" fill="none" stroke="#EDA526" stroke-width="1.6"/>
+          <path d="M12 7.2a4.8 4.8 0 1 1-4.6 6.2M12 9.6a2.4 2.4 0 1 1-2.2 3.3" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span class="font-display text-xl leading-none truncate">Barcelona</span>
+      </a>
 
-      <div class="flex items-center gap-3">
-        <span id="progress-text" class="text-xs bg-indigo-700/80 border border-indigo-500 px-3 py-1.5 rounded-full font-semibold">0 / 28</span>
+      <nav class="hidden md:flex items-center gap-1 bg-white/10 rounded-full p-1" aria-label="Main">
+        <button data-nav="tours" onclick="go('tours')" class="nav-btn px-4 py-1.5 rounded-full text-sm font-semibold transition flex items-center gap-2">
+          <i data-lucide="route" class="w-4 h-4"></i><span class="nav-label-tours">Roteiros</span>
+        </button>
+        <button data-nav="explore" onclick="go('explore')" class="nav-btn px-4 py-1.5 rounded-full text-sm font-semibold transition flex items-center gap-2">
+          <i data-lucide="map" class="w-4 h-4"></i><span class="nav-label-explore">Explorar</span>
+        </button>
+      </nav>
 
-        <div class="flex items-center bg-indigo-800 p-1 rounded-lg border border-indigo-500/50">
-          <button id="lang-pt-btn" onclick="setLanguage('pt')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm" title="Português (Brasil)">
-            <span class="text-sm">🇧🇷</span> <span class="hidden sm:inline font-bold">PT</span>
-          </button>
-          <button id="lang-de-btn" onclick="setLanguage('de')" class="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white" title="Deutsch">
-            <span class="text-sm">🇩🇪</span> <span class="hidden sm:inline font-bold">DE</span>
-          </button>
-        </div>
+      <div class="flex items-center bg-white/10 p-1 rounded-full" role="group" aria-label="Sprache / Idioma">
+        <button id="lang-pt-btn" onclick="setLanguage('pt')" class="px-2.5 py-1 rounded-full text-xs font-semibold transition" title="Português (Brasil)">PT</button>
+        <button id="lang-de-btn" onclick="setLanguage('de')" class="px-2.5 py-1 rounded-full text-xs font-semibold transition" title="Deutsch">DE</button>
       </div>
     </div>
   </header>
 
-  <div id="toolbar" class="bg-white border-b border-slate-200 p-3 sticky top-[60px] z-40 shadow-sm">
-    <div class="max-w-5xl mx-auto flex flex-wrap gap-2 items-center text-xs">
-      <label class="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-900 font-semibold min-w-0 w-full sm:w-auto sm:flex-1">
-        <i data-lucide="route" class="w-4 h-4 shrink-0"></i>
-        <span id="label-route" class="sr-only">Rota</span>
-        <select id="route-select" onchange="setRoute(this.value)" class="bg-transparent font-semibold focus:outline-none min-w-0 w-full cursor-pointer text-base sm:text-xs truncate"></select>
-      </label>
-      <div class="flex items-center gap-2 w-full sm:w-auto">
-        <button id="gps-btn" onclick="toggleGPS()" class="flex-1 sm:flex-none justify-center px-3 py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-300 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
-          <i data-lucide="navigation" class="w-4 h-4 shrink-0"></i> <span id="label-gps" class="truncate">Localização GPS</span>
-        </button>
-        <button id="wc-toggle" onclick="toggleWC()" class="flex-1 sm:flex-none justify-center px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95">
-          <i data-lucide="bath" class="w-4 h-4 shrink-0"></i> <span id="label-wc" class="truncate">🚻 Ocultar Banheiros</span>
-        </button>
+  <!-- ===== View: tour overview ===== -->
+  <section id="view-tours" class="view" aria-labelledby="hero-title">
+    <div class="tile-bg-dark text-white">
+      <div class="max-w-6xl mx-auto px-4 pt-10 pb-24 md:pt-16 md:pb-32">
+        <h1 id="hero-title" class="hero-title text-[3.2rem] sm:text-7xl md:text-8xl max-w-3xl"></h1>
+        <p id="hero-text" class="mt-5 max-w-xl text-base md:text-lg text-white/80 leading-relaxed"></p>
       </div>
     </div>
-  </div>
+    <div id="tour-list" class="max-w-6xl mx-auto px-4 -mt-16 md:-mt-20 pb-12 space-y-6"></div>
+  </section>
 
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-4">
-    <!-- Left Column: Map -->
-    <div class="w-full md:w-1/2 flex flex-col gap-4">
-      <div id="map-card" class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 sticky top-[130px]">
-        <div id="map"></div>
-        <div class="p-3 bg-slate-100 border-t border-slate-200 text-xs text-slate-600 flex justify-between items-center font-medium">
-          <span class="flex items-center gap-1"><i data-lucide="footprints" class="w-4 h-4 text-indigo-500"></i> <span id="route-distance">~12–14 km</span></span>
-          <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> <span id="route-duration">~7–9 h</span></span>
+  <!-- ===== View: map (used by "explore" and by a running tour) ===== -->
+  <section id="view-map" class="view">
+    <!-- Tour head (only while a tour is open) -->
+    <div id="tour-head" class="hidden bg-white border-b border-stone-200">
+      <div class="max-w-6xl mx-auto px-4 pt-4 pb-5">
+        <button onclick="go('tours')" class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-800">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i><span id="label-all-tours"></span>
+        </button>
+        <div class="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <div class="min-w-0">
+            <h1 id="tour-title" class="font-display text-2xl md:text-3xl leading-tight"></h1>
+            <p id="tour-stats" class="mt-1.5 text-sm text-stone-600 flex flex-wrap gap-x-4 gap-y-1"></p>
+          </div>
+          <button id="tour-share" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-stone-300 text-sm font-semibold hover:bg-stone-100">
+            <i data-lucide="share-2" class="w-4 h-4"></i><span class="share-label"></span>
+          </button>
+        </div>
+        <div class="mt-4">
+          <div class="h-2 rounded-full bg-stone-200 overflow-hidden"><div id="tour-progress-bar" class="h-full bg-leaf-500 rounded-full transition-all" style="width:0%"></div></div>
+          <p id="progress-text" class="mt-1.5 text-xs font-semibold text-stone-600"></p>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Interactive List -->
-    <div class="w-full md:w-1/2 flex flex-col gap-3" id="stops-container"></div>
-  </main>
+    <!-- Explore head (only in explore) -->
+    <div id="explore-head" class="hidden bg-white">
+      <div class="max-w-6xl mx-auto px-4 pt-5 pb-2 flex items-baseline justify-between gap-4">
+        <h1 id="explore-title" class="font-display text-2xl md:text-3xl leading-tight"></h1>
+        <span id="explore-count" class="text-sm text-stone-500 font-medium"></span>
+      </div>
+    </div>
 
-  <!-- Lightbox for highlight photos -->
-  <div id="lightbox" class="fixed inset-0 z-[2000] bg-slate-950/95 text-white flex-col" role="dialog" aria-modal="true" aria-labelledby="lb-title">
+    <!-- Sticky toolbar -->
+    <div id="toolbar" class="sticky top-[60px] z-40 bg-white/95 backdrop-blur border-b border-stone-200">
+      <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center gap-2 text-sm">
+        <label id="search-wrap" class="hidden relative flex-1 min-w-[150px]">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"></i>
+          <span id="label-search" class="sr-only"></span>
+          <input id="search-input" type="search" autocomplete="off" oninput="onSearch(this.value)"
+                 class="w-full pl-9 pr-3 py-2 rounded-lg bg-stone-100 border border-stone-200 text-base sm:text-sm focus:outline-none focus:border-brand-400 focus:bg-white">
+        </label>
+        <div class="flex items-center gap-2 ml-auto">
+          <button id="gps-btn" onclick="toggleGPS()" aria-label="GPS" class="px-3 py-2 rounded-lg border border-stone-300 bg-white font-semibold flex items-center gap-2 transition active:scale-95 hover:bg-stone-100">
+            <i data-lucide="locate" class="w-4 h-4 shrink-0"></i><span id="label-gps" class="truncate hidden sm:inline"></span>
+          </button>
+          <button id="wc-toggle" onclick="toggleWC()" aria-pressed="true" class="px-3 py-2 rounded-lg border font-semibold flex items-center gap-2 transition active:scale-95">
+            <span class="text-[11px] font-bold border-2 border-current rounded px-0.5 leading-none py-0.5">WC</span><span id="label-wc" class="truncate hidden sm:inline"></span>
+          </button>
+        </div>
+        <div id="cat-chips" class="hidden chip-row w-full flex gap-2 overflow-x-auto pb-0.5 -mx-4 px-4"></div>
+      </div>
+    </div>
+
+    <main class="max-w-6xl w-full mx-auto px-4 py-4 grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-4 md:gap-6 items-start">
+      <div id="map-card" class="bg-white rounded-2xl overflow-hidden border border-stone-200">
+        <div id="map"></div>
+        <div id="map-legend" class="px-3 py-2 text-[11px] text-stone-600 flex flex-wrap gap-x-4 gap-y-1 border-t border-stone-200"></div>
+      </div>
+      <div id="list-container" class="flex flex-col gap-3 min-w-0"></div>
+    </main>
+  </section>
+
+  <!-- Phone navigation -->
+  <nav id="bottom-nav" class="md:hidden fixed inset-x-0 bottom-0 z-[1600] bg-white border-t border-stone-200 grid grid-cols-2"
+       style="padding-bottom: env(safe-area-inset-bottom, 0px);" aria-label="Main">
+    <button data-nav="tours" onclick="go('tours')" class="nav-tab h-[60px] flex flex-col items-center justify-center gap-0.5 text-xs font-semibold">
+      <i data-lucide="route" class="w-5 h-5"></i><span class="nav-label-tours">Roteiros</span>
+    </button>
+    <button data-nav="explore" onclick="go('explore')" class="nav-tab h-[60px] flex flex-col items-center justify-center gap-0.5 text-xs font-semibold">
+      <i data-lucide="map" class="w-5 h-5"></i><span class="nav-label-explore">Explorar</span>
+    </button>
+  </nav>
+
+  <!-- Lightbox for photos -->
+  <div id="lightbox" class="fixed inset-0 z-[2000] bg-ink/95 text-white flex-col" role="dialog" aria-modal="true" aria-labelledby="lb-title">
     <div class="flex items-center justify-between p-3 text-sm">
-      <span id="lb-counter" class="text-slate-300 font-medium"></span>
+      <span id="lb-counter" class="text-white/70 font-medium"></span>
       <button id="lb-close" onclick="closeLightbox()" class="p-2 rounded-lg hover:bg-white/10" aria-label="Fechar">
         <i data-lucide="x" class="w-6 h-6"></i>
       </button>
@@ -178,14 +291,14 @@
       </button>
     </div>
     <div class="p-4 max-w-2xl w-full mx-auto">
-      <h2 id="lb-title" class="font-bold text-base"></h2>
-      <p id="lb-text" class="text-sm text-slate-300 mt-1 leading-relaxed max-h-32 overflow-y-auto"></p>
-      <p id="lb-credit" class="text-[11px] text-slate-400 mt-2"></p>
+      <h2 id="lb-title" class="font-display text-lg"></h2>
+      <p id="lb-text" class="text-sm text-white/75 mt-1 leading-relaxed max-h-32 overflow-y-auto"></p>
+      <p id="lb-credit" class="text-[11px] text-white/50 mt-2"></p>
     </div>
   </div>
 
   <!-- "You are here" banner (GPS proximity) -->
-  <div id="near-banner" class="fixed inset-x-0 bottom-0 z-[1500] px-3 pt-3 hidden" style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));" role="status" aria-live="polite">
+  <div id="near-banner" class="fixed inset-x-0 z-[1500] px-3 pt-3 pb-3 hidden" role="status" aria-live="polite">
     <div class="max-w-xl mx-auto bg-blue-600 text-white rounded-xl shadow-lg p-3 flex flex-wrap items-center gap-2">
       <span id="near-text" class="text-sm font-semibold flex-1 min-w-[160px]"></span>
       <button id="near-show" onclick="nearAction('show')" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-semibold"></button>
@@ -196,6 +309,9 @@
       </button>
     </div>
   </div>
+
+  <!-- Short confirmation message -->
+  <div id="toast" class="fixed left-1/2 z-[2100] px-4 py-2 rounded-full bg-ink text-white text-sm font-semibold shadow-lg" style="bottom: calc(var(--bottom-nav-h) + 16px);" role="status" aria-live="polite"></div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -212,18 +328,42 @@
     // ---------- UI translations ----------
     const uiTranslations = {
       pt: {
-        appTitle: "Tour Barcelona",
-        appSubtitle: "Diagonal → Sagrada Família",
-        gpsLabel: "Localização GPS",
+        navTours: "Roteiros",
+        navExplore: "Explorar",
+        heroTitle: "Barcelona a pé",
+        heroText: "Três roteiros com mapa, audioguia e as histórias de cada parada. Ou explore livremente todos os lugares em 'Explorar'.",
+        startLabel: "Início",
+        finishLabel: "Chegada",
+        stopsCount: n => `${n} paradas`,
+        startTour: "Começar roteiro",
+        continueTour: n => `Continuar na parada ${n}`,
+        viewTour: "Ver roteiro",
+        shareLink: "Compartilhar link",
+        linkCopied: "Link copiado",
+        allTours: "Todos os roteiros",
+        tourHighlights: "Destaques",
+        progressOf: (a, b) => `${a} de ${b} visitados`,
+        exploreTitle: "Todos os lugares",
+        placesCount: n => `${n} lugares`,
+        searchPlaceholder: "Buscar lugar",
+        allCats: "Todos",
+        cats: { gaudi: "Gaudí e Modernismo", old: "Centro histórico", culture: "Arte e cultura", view: "Mirantes", park: "Parques e jardins", food: "Comer e beber", sea: "Praia e porto", transport: "Transporte" },
+        inTours: "Nos roteiros",
+        stationShort: n => `parada ${n}`,
+        directions: "Como chegar",
+        noResults: "Nenhum lugar encontrado. Mude a busca ou escolha outra categoria.",
+        away: d => `a ${d}`,
+        legendWalk: "a pé", legendBus: "ônibus", legendCable: "teleférico", legendBoat: "barco",
+        visited: "Visitado",
+        gpsLabel: "Minha localização",
         gpsSearching: "Buscando sinal...",
-        gpsActive: "GPS Ativo",
-        wcShow: "🚻 Mostrar Banheiros",
-        wcHide: "🚻 Ocultar Banheiros",
-        wcPopupTitle: "Banheiro Público",
+        gpsActive: "GPS ativo",
+        wcShow: "Mostrar banheiros",
+        wcHide: "Ocultar banheiros",
+        wcPopupTitle: "Banheiro público",
         readMoreWiki: "Ler mais na Wikipedia",
         audioTooltip: "Ouvir audioguia",
         userLocation: "Sua localização atual",
-        visitedLabel: "visitados",
         markVisited: "Marcar como visitado",
         moreLabel: "Descobrir detalhes",
         lessLabel: "Fechar detalhes",
@@ -243,23 +383,46 @@
         show: "Mostrar",
         listen: "Ouvir",
         markVisitedShort: "Visitado ✓",
-        routeLabel: "Rota",
         cableLeg: "De teleférico",
         busLeg: "De ônibus"
       },
       de: {
-        appTitle: "Barcelona Rundgang",
-        appSubtitle: "Diagonal → Sagrada Família",
-        gpsLabel: "GPS Standort",
+        navTours: "Touren",
+        navExplore: "Entdecken",
+        heroTitle: "Barcelona zu Fuß",
+        heroText: "Drei Rundgänge mit Karte, Audioguide und den Geschichten zu jeder Station. Oder stöbere unter »Entdecken« frei durch alle Orte.",
+        startLabel: "Start",
+        finishLabel: "Ziel",
+        stopsCount: n => `${n} Stationen`,
+        startTour: "Tour starten",
+        continueTour: n => `Weiter bei Station ${n}`,
+        viewTour: "Tour ansehen",
+        shareLink: "Link teilen",
+        linkCopied: "Link kopiert",
+        allTours: "Alle Touren",
+        tourHighlights: "Höhepunkte",
+        progressOf: (a, b) => `${a} von ${b} besucht`,
+        exploreTitle: "Alle Orte",
+        placesCount: n => `${n} Orte`,
+        searchPlaceholder: "Ort suchen",
+        allCats: "Alle",
+        cats: { gaudi: "Gaudí & Modernisme", old: "Altstadt & Geschichte", culture: "Kunst & Kultur", view: "Aussicht", park: "Parks & Gärten", food: "Essen & Trinken", sea: "Strand & Hafen", transport: "Unterwegs" },
+        inTours: "In den Touren",
+        stationShort: n => `Station ${n}`,
+        directions: "Weg dorthin",
+        noResults: "Keine Orte gefunden. Ändere die Suche oder wähle eine andere Kategorie.",
+        away: d => `${d} entfernt`,
+        legendWalk: "zu Fuß", legendBus: "Bus", legendCable: "Seilbahn", legendBoat: "Boot",
+        visited: "Besucht",
+        gpsLabel: "Mein Standort",
         gpsSearching: "Ortung läuft...",
-        gpsActive: "GPS Aktiviert",
-        wcShow: "🚻 WCs anzeigen",
-        wcHide: "🚻 WCs ausblenden",
+        gpsActive: "GPS aktiv",
+        wcShow: "WCs zeigen",
+        wcHide: "WCs ausblenden",
         wcPopupTitle: "Öffentliches WC",
         readMoreWiki: "Mehr auf Wikipedia lesen",
         audioTooltip: "Audioguide anhören",
         userLocation: "Dein aktueller Standort",
-        visitedLabel: "besucht",
         markVisited: "Als besucht markieren",
         moreLabel: "Details entdecken",
         lessLabel: "Details schließen",
@@ -279,7 +442,6 @@
         show: "Anzeigen",
         listen: "Anhören",
         markVisitedShort: "Besucht ✓",
-        routeLabel: "Route",
         cableLeg: "Mit der Seilbahn",
         busLeg: "Mit dem Bus"
       }
@@ -292,6 +454,8 @@
     const eixampleStops = [
       {
         id: 1,
+        key: 'diagonal',
+        cats: ['transport'],
         coords: [41.3965, 2.1588],
         wiki: "https://pt.wikipedia.org/wiki/Passeig_de_Gr%C3%A0cia",
         img: "Passeig de Gràcia, Barcelona.jpg",
@@ -299,7 +463,7 @@
         license: "CC BY-SA 3.0",
         pt: {
           notes: [
-            {"type": "info", "text": "Dica para o dia: o roteiro é longo (cerca de 13–14 km a pé). Leve sapatos confortáveis, água e protetor solar. Reserve o ingresso da Sagrada Família de preferência para o fim da tarde – assim você chega no horário certo ao fim do roteiro e vê os vitrais vermelhos do lado oeste brilhando (parada 28)."}
+            {"route": true, "type": "info", "text": "Dica para o dia: o roteiro é longo (cerca de 13–14 km a pé). Leve sapatos confortáveis, água e protetor solar. Reserve o ingresso da Sagrada Família de preferência para o fim da tarde – assim você chega no horário certo ao fim do roteiro e vê os vitrais vermelhos do lado oeste brilhando (parada 28)."}
           ],
           name: "Estação de Metrô Diagonal",
           shortDesc: "Ponto de partida no topo do Passeig de Gràcia.",
@@ -307,7 +471,7 @@
         },
         de: {
           notes: [
-            {"type": "info", "text": "Tipp für den Tag: Die Tour ist lang (zu Fuß etwa 13–14 km). Bequeme Schuhe, Wasser und Sonnenschutz einpacken. Das Sagrada-Família-Ticket am besten für den späten Nachmittag buchen – dann kommst du am Tourende passend an und siehst die roten Westfenster leuchten (Station 28)."}
+            {"route": true, "type": "info", "text": "Tipp für den Tag: Die Tour ist lang (zu Fuß etwa 13–14 km). Bequeme Schuhe, Wasser und Sonnenschutz einpacken. Das Sagrada-Família-Ticket am besten für den späten Nachmittag buchen – dann kommst du am Tourende passend an und siehst die roten Westfenster leuchten (Station 28)."}
           ],
           name: "U-Bahn Station Diagonal",
           shortDesc: "Startpunkt am oberen Passeig de Gràcia.",
@@ -316,6 +480,8 @@
       },
       {
         id: 2,
+        key: 'casa-mila',
+        cats: ['gaudi'],
         coords: [41.3954, 2.1612],
         wiki: "https://pt.wikipedia.org/wiki/Casa_Mil%C3%A0",
         pt: {
@@ -412,6 +578,8 @@
       },
       {
         id: 3,
+        key: 'passeig-de-gracia',
+        cats: ['gaudi'],
         coords: [41.39355, 2.16305],
         wiki: "https://pt.wikipedia.org/wiki/Passeig_de_Gr%C3%A0cia",
         pt: {
@@ -487,6 +655,8 @@
       },
       {
         id: 4,
+        key: 'casa-batllo',
+        cats: ['gaudi'],
         coords: [41.3917, 2.1649],
         wiki: "https://pt.wikipedia.org/wiki/Casa_Batll%C3%B3",
         pt: {
@@ -593,6 +763,8 @@
       },
       {
         id: 5,
+        key: 'el-nacional',
+        cats: ['food', 'gaudi'],
         coords: [41.390248, 2.167854],
         wiki: "",
         img: "Restaurant El Nacional Barcelona - 04.JPG",
@@ -624,6 +796,8 @@
       },
       {
         id: 6,
+        key: 'placa-catalunya',
+        cats: ['food', 'view'],
         coords: [41.3870, 2.1700],
         wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_da_Catalunha",
         pt: {
@@ -666,6 +840,8 @@
       },
       {
         id: 7,
+        key: 'kiss-mosaic',
+        cats: ['culture'],
         coords: [41.385088, 2.174845],
         wiki: "https://es.wikipedia.org/wiki/El_mundo_nace_en_cada_beso",
         pt: {
@@ -696,6 +872,8 @@
       },
       {
         id: 8,
+        key: 'cathedral',
+        cats: ['old'],
         coords: [41.384525, 2.17593],
         wiki: "https://pt.wikipedia.org/wiki/Catedral_de_Barcelona",
         pt: {
@@ -768,6 +946,8 @@
       },
       {
         id: 9,
+        key: 'casa-ardiaca',
+        cats: ['old'],
         coords: [41.384037, 2.175771],
         wiki: "https://ca.wikipedia.org/wiki/Casa_de_l%27Ardiaca",
         pt: {
@@ -810,6 +990,8 @@
       },
       {
         id: 10,
+        key: 'sant-felip-neri',
+        cats: ['old'],
         coords: [41.383413, 2.175122],
         wiki: "",
         pt: {
@@ -865,6 +1047,8 @@
       },
       {
         id: 11,
+        key: 'pont-del-bisbe',
+        cats: ['old'],
         coords: [41.383301, 2.176431],
         wiki: "",
         pt: {
@@ -895,6 +1079,8 @@
       },
       {
         id: 12,
+        key: 'placa-sant-jaume',
+        cats: ['old'],
         coords: [41.382704, 2.177034],
         wiki: "",
         pt: {
@@ -936,6 +1122,8 @@
       },
       {
         id: 13,
+        key: 'temple-august',
+        cats: ['old'],
         coords: [41.383384, 2.177149],
         wiki: "https://ca.wikipedia.org/wiki/Temple_d%27August_de_Barcelona",
         pt: {
@@ -993,6 +1181,8 @@
       },
       {
         id: 14,
+        key: 'placa-reial',
+        cats: ['old', 'gaudi'],
         coords: [41.380107, 2.175285],
         wiki: "https://pt.wikipedia.org/wiki/Pra%C3%A7a_Real",
         pt: {
@@ -1023,6 +1213,8 @@
       },
       {
         id: 15,
+        key: 'boqueria',
+        cats: ['food', 'old'],
         coords: [41.3817, 2.1715],
         wiki: "https://pt.wikipedia.org/wiki/Mercado_da_Boqueria",
         pt: {
@@ -1084,6 +1276,8 @@
       },
       {
         id: 16,
+        key: 'colom',
+        cats: ['view', 'sea'],
         coords: [41.3758, 2.1778],
         wiki: "https://pt.wikipedia.org/wiki/Monumento_a_Colombo",
         pt: {
@@ -1114,6 +1308,8 @@
       },
       {
         id: 17,
+        key: 'rambla-de-mar',
+        cats: ['sea'],
         coords: [41.375138, 2.180848],
         wiki: "",
         img: "J23 539 Rambla de Mar, geöffnet.jpg",
@@ -1130,6 +1326,8 @@
       },
       {
         id: 18,
+        key: 'bus-nautic-pau',
+        cats: ['transport', 'sea'],
         coords: [41.375283, 2.178901],
         wiki: "",
         img: "W Barcelona (Hotel Vela) des del mar 02.jpg",
@@ -1154,6 +1352,8 @@
       },
       {
         id: 19,
+        key: 'honest-greens',
+        cats: ['food', 'sea'],
         coords: [41.369966, 2.188416],
         wiki: "",
         pt: {
@@ -1184,6 +1384,8 @@
       },
       {
         id: 20,
+        key: 'barceloneta',
+        cats: ['sea'],
         coords: [41.374774, 2.190016],
         wiki: "https://pt.wikipedia.org/wiki/Barceloneta",
         pt: {
@@ -1273,6 +1475,8 @@
       },
       {
         id: 21,
+        key: 'museu-historia',
+        cats: ['culture'],
         coords: [41.3810, 2.1862],
         wiki: "",
         img: "014 Port Vell, moll del Dipòsit i Palau de Mar.JPG",
@@ -1305,6 +1509,8 @@
       },
       {
         id: 22,
+        key: 'santa-maria-del-mar',
+        cats: ['old'],
         coords: [41.3836, 2.1821],
         wiki: "https://pt.wikipedia.org/wiki/Bas%C3%ADlica_de_Santa_Maria_do_Mar",
         pt: {
@@ -1358,6 +1564,8 @@
       },
       {
         id: 23,
+        key: 'el-born',
+        cats: ['old', 'food'],
         coords: [41.3849, 2.1835],
         wiki: "",
         pt: {
@@ -1390,6 +1598,8 @@
       },
       {
         id: 24,
+        key: 'born-centre',
+        cats: ['culture', 'old'],
         coords: [41.38577, 2.183695],
         wiki: "",
         pt: {
@@ -1420,6 +1630,8 @@
       },
       {
         id: 25,
+        key: 'ciutadella',
+        cats: ['park'],
         coords: [41.3882, 2.1874],
         wiki: "https://pt.wikipedia.org/wiki/Parque_da_Cidadela",
         pt: {
@@ -1462,6 +1674,8 @@
       },
       {
         id: 26,
+        key: 'arc-de-triomf',
+        cats: ['gaudi'],
         coords: [41.3911, 2.1806],
         wiki: "https://pt.wikipedia.org/wiki/Arco_do_Triunfo_(Barcelona)",
         pt: {
@@ -1505,6 +1719,8 @@
       },
       {
         id: 27,
+        key: 'monumental',
+        cats: ['culture'],
         coords: [41.399763, 2.180718],
         wiki: "",
         pt: {
@@ -1535,6 +1751,8 @@
       },
       {
         id: 28,
+        key: 'sagrada-familia',
+        cats: ['gaudi'],
         coords: [41.4036, 2.1744],
         wiki: "https://pt.wikipedia.org/wiki/Templo_Expiat%C3%B3rio_da_Sagrada_Fam%C3%ADlia",
         pt: {
@@ -1680,12 +1898,14 @@
     const montjuicStops = [
       {
         id: 1,
+        key: 'arenas',
+        cats: ['view', 'food'],
         coords: [41.376296, 2.149269],
         wiki: "https://ca.wikipedia.org/wiki/Arenas_de_Barcelona",
         img: "080 La plaça d'Espanya i l'avinguda de Maria Cristina (Barcelona) des del CC Les Arenes.jpg",
         pt: {
           notes: [
-            {"type":"info","text":"Dica: esta rota é mais curta, mas é subida. Entre a Font Màgica e o Palau Nacional há escadas rolantes ao ar livre. Leve água e protetor solar."},
+            {"route": true, "type":"info","text":"Dica: esta rota é mais curta, mas é subida. Entre a Font Màgica e o Palau Nacional há escadas rolantes ao ar livre. Leve água e protetor solar."},
             {"type":"info","text":"Pelas escadas rolantes internas você sobe de graça até o terraço; o elevador panorâmico de vidro do lado de fora cobra uma pequena taxa."}
           ],
           name: "Arenas de Barcelona",
@@ -1695,7 +1915,7 @@
         },
         de: {
           notes: [
-            {"type":"info","text":"Tipp: Diese Route ist kürzer, aber es geht bergauf. Zwischen Font Màgica und Palau Nacional helfen Rolltreppen im Freien. Wasser und Sonnenschutz einpacken."},
+            {"route": true, "type":"info","text":"Tipp: Diese Route ist kürzer, aber es geht bergauf. Zwischen Font Màgica und Palau Nacional helfen Rolltreppen im Freien. Wasser und Sonnenschutz einpacken."},
             {"type":"info","text":"Mit den Rolltreppen im Inneren kommst du kostenlos aufs Dach; der gläserne Panoramaaufzug außen am Gebäude kostet eine kleine Gebühr."}
           ],
           name: "Arenas de Barcelona",
@@ -1730,6 +1950,8 @@
       },
       {
         id: 2,
+        key: 'placa-espanya',
+        cats: ['culture'],
         coords: [41.37505, 2.14916],
         wiki: "https://ca.wikipedia.org/wiki/Pla%C3%A7a_d%27Espanya_(Barcelona)",
         img: "Plaça d'Espanya (Barcelona) 03.jpg",
@@ -1772,6 +1994,8 @@
       },
       {
         id: 3,
+        key: 'font-magica',
+        cats: ['culture'],
         coords: [41.37115, 2.15155],
         wiki: "https://ca.wikipedia.org/wiki/Font_M%C3%A0gica_de_Montju%C3%AFc",
         pt: {
@@ -1817,6 +2041,8 @@
       },
       {
         id: 4,
+        key: 'mies-pavilion',
+        cats: ['culture'],
         coords: [41.37050, 2.15000],
         wiki: "https://ca.wikipedia.org/wiki/Pavell%C3%B3_Mies_van_der_Rohe",
         pt: {
@@ -1875,6 +2101,8 @@
       },
       {
         id: 5,
+        key: 'les-cascades',
+        cats: ['food'],
         coords: [41.36944, 2.15242],
         wiki: "",
         img: "Barcelona - Montjuïc - Plaça del Marquès de Foronda - View SSE on Les Cascades Montjuïc & Palau Nacional 1929 by Eugenio Cendoya & Enric Catà.jpg",
@@ -1922,6 +2150,8 @@
       },
       {
         id: 6,
+        key: 'palau-nacional',
+        cats: ['culture', 'view'],
         coords: [41.36915, 2.15335],
         wiki: "https://ca.wikipedia.org/wiki/Museu_Nacional_d%27Art_de_Catalunya",
         img: "Palau Nacional - Montjuic.JPG",
@@ -1975,6 +2205,8 @@
       },
       {
         id: 7,
+        key: 'botanic-historic',
+        cats: ['park'],
         coords: [41.367387, 2.152835],
         wiki: "https://ca.wikipedia.org/wiki/Jard%C3%AD_Bot%C3%A0nic_Hist%C3%B2ric",
         img: "Jardín Botánico Histórico de Barcelona.JPG",
@@ -2020,6 +2252,8 @@
       },
       {
         id: 8,
+        key: 'anella-olimpica',
+        cats: ['culture'],
         coords: [41.365351, 2.152175],
         wiki: "https://ca.wikipedia.org/wiki/Anella_Ol%C3%ADmpica_de_Montju%C3%AFc",
         pt: {
@@ -2065,6 +2299,8 @@
       },
       {
         id: 9,
+        key: 'olympic-bell',
+        cats: ['culture'],
         coords: [41.366064, 2.152312],
         wiki: "",
         pt: {
@@ -2108,6 +2344,8 @@
       },
       {
         id: 10,
+        key: 'bus-150',
+        cats: ['transport'],
         coords: [41.366458, 2.151359],
         wiki: "",
         nextBy: "bus",
@@ -2135,6 +2373,8 @@
       },
       {
         id: 11,
+        key: 'salts',
+        cats: ['food', 'view'],
         coords: [41.36945, 2.16504],
         wiki: "https://ca.wikipedia.org/wiki/Piscina_Municipal_de_Montju%C3%AFc",
         img: "Piscina Municipal de Montjuïc - vista general.JPG",
@@ -2198,6 +2438,8 @@
       },
       {
         id: 12,
+        key: 'castell-montjuic',
+        cats: ['old', 'view'],
         coords: [41.36340, 2.16580],
         wiki: "https://ca.wikipedia.org/wiki/Castell_de_Montju%C3%AFc",
         img: "Castell de Montjuic - Fossat entrada - Barcelona (Catalonia).jpg",
@@ -2296,6 +2538,8 @@
       },
       {
         id: 13,
+        key: 'mirador-miramar',
+        cats: ['view', 'park'],
         coords: [41.36991, 2.17216],
         wiki: "https://ca.wikipedia.org/wiki/Jardins_de_Miramar",
         img: "Jardins de Miramar - panoramio.jpg",
@@ -2337,6 +2581,8 @@
       },
       {
         id: 14,
+        key: 'cactus-garden',
+        cats: ['park'],
         coords: [41.36890, 2.17233],
         wiki: "https://ca.wikipedia.org/wiki/Jardins_de_Moss%C3%A8n_Costa_i_Llobera",
         img: "Jardins Mossèn Costa i Llobera.jpg",
@@ -2387,6 +2633,8 @@
       },
       {
         id: 15,
+        key: 'port-cable-car',
+        cats: ['transport', 'view'],
         coords: [41.37088, 2.17234],
         wiki: "https://ca.wikipedia.org/wiki/Telef%C3%A8ric_del_Port_de_Barcelona",
         img: "Telefèric del Port (vist des de Miramar).JPG",
@@ -2425,6 +2673,8 @@
       },
       {
         id: 16,
+        key: 'torre-sant-sebastia',
+        cats: ['sea', 'transport'],
         coords: [41.373147, 2.187825],
         wiki: "",
         img: "002 Torre de Sant Sebastià, Torre del Rellotge i Hotel W (Barcelona), des del moll d'Espanya.jpg",
@@ -2501,6 +2751,8 @@
       // Departure pier of the boat behind the W hotel
       reuseStop(fromEixample(18), 17, s => {
         s.coords = [41.368178, 2.187288];
+        s.key = 'bus-nautic-llevant';
+        s.cats = ['transport', 'sea'];
         s.de = {
           notes: [{ type: 'ticket', text: 'Das Ticket musst du vorher am Automaten im kleinen Café-Gebäude am Anleger kaufen. Es gibt nur eine Verbindung – direkt hinüber zum Portal de la Pau. Abfahrt etwa alle 15–30 Minuten, ca. 1,90 € pro Fahrt (Stand 2024).' }],
           name: 'Bus Nàutic – Anleger Moll de Llevant',
@@ -2557,41 +2809,160 @@
     ];
     const portToilets = montjuicToilets.concat(eixampleToilets.filter(t => /Praia|Nàutic|Maremagnum|Boqueria|Catalunya/.test(t.name)));
 
-    // ===== Route registry =====
-    // To add a route: create a stops array like the ones above and add an entry here.
-    // storageKey keeps each route's "visited" progress separate.
+    // ===== Tours =====
+    // To add a tour: create a stops array like the ones above and add an entry here.
+    // Every stop has a stable `key`; "visited" ticks are stored per key, so they
+    // survive new stations being inserted and are shared between tours and the explore map.
     const routes = [
       {
         id: 'eixample',
-        storageKey: 'bcn_tour_completed_v3',
+        legacyKey: 'bcn_tour_completed_v3',
         distance: '~12–14 km',
         duration: '~7–9 h',
-        pt: { title: 'Diagonal → Sagrada Família' },
-        de: { title: 'Diagonal → Sagrada Família' },
+        transport: [{ mode: 'boat', de: 'Bus Nàutic', pt: 'Bus Nàutic' }],
+        highlights: ['casa-mila', 'casa-batllo', 'cathedral', 'sagrada-familia'],
+        pt: {
+          title: 'Diagonal → Sagrada Família',
+          desc: 'O grande clássico: a Casa Milà e a Casa Batlló de Gaudí no Passeig de Gràcia, o bairro gótico, de barco até a praia da Barceloneta e, pelo Born e pelo Parc de la Ciutadella, até a Sagrada Família.',
+          effort: 'Plano, mas longo – reserve o dia inteiro. O barco custa aprox. 1,90 €.',
+          best: 'Comece cedo e reserve o ingresso da Sagrada Família para o fim da tarde.'
+        },
+        de: {
+          title: 'Diagonal → Sagrada Família',
+          desc: 'Der große Klassiker: Gaudís Casa Milà und Casa Batlló am Passeig de Gràcia, die gotische Altstadt, mit dem Boot hinüber zum Strand der Barceloneta und durch El Born und den Parc de la Ciutadella bis zur Sagrada Família.',
+          effort: 'Flach, aber lang – plan einen ganzen Tag ein. Das Boot kostet ca. 1,90 €.',
+          best: 'Früh starten und das Sagrada-Família-Ticket für den späten Nachmittag buchen.'
+        },
         stops: eixampleStops,
         toilets: eixampleToilets
       },
       {
         id: 'montjuic',
-        storageKey: 'bcn_tour_completed_montjuic',
+        legacyKey: 'bcn_tour_completed_montjuic',
         distance: '~3–4 km',
         duration: '~4–5 h',
-        pt: { title: "Plaça d'Espanya → Montjuïc → teleférico" },
-        de: { title: "Plaça d'Espanya → Montjuïc → Seilbahn" },
+        transport: [
+          { mode: 'bus', de: 'Bus 150', pt: 'Ônibus 150' },
+          { mode: 'cablecar', de: 'Gondel zur Festung', pt: 'Teleférico ao castelo' },
+          { mode: 'cablecar', de: 'Hafenseilbahn', pt: 'Teleférico do porto' }
+        ],
+        highlights: ['arenas', 'palau-nacional', 'castell-montjuic', 'cactus-garden'],
+        pt: {
+          title: "Plaça d'Espanya → Montjuïc → teleférico",
+          desc: "Da antiga arena de touros na Plaça d'Espanya, Montjuïc acima: Font Màgica, Palau Nacional e a área olímpica. De ônibus até o bar Salts, de teleférico até o castelo e, no fim, pelo teleférico do porto até a praia.",
+          effort: 'É subida, mas escadas rolantes, ônibus e teleférico vencem os trechos mais íngremes. Os dois teleféricos têm bilhetes próprios.',
+          best: 'Comece de manhã – o teleférico do porto funciona, conforme a estação, só até cerca de 17h30–20h.'
+        },
+        de: {
+          title: "Plaça d'Espanya → Montjuïc → Seilbahn",
+          desc: "Von der alten Stierkampfarena an der Plaça d'Espanya den Montjuïc hinauf: Zauberbrunnen, Palau Nacional und Olympiagelände. Mit dem Bus zur Salts-Bar, mit der Gondel zur Festung und zum Schluss mit der Hafenseilbahn hinunter an den Strand.",
+          effort: 'Es geht bergauf, aber Rolltreppen, Bus und Gondel nehmen dir die steilsten Stücke ab. Beide Seilbahnen brauchen eigene Tickets.',
+          best: 'Vormittags starten – die Hafenseilbahn fährt je nach Jahreszeit nur bis etwa 17:30–20 Uhr.'
+        },
         stops: montjuicStops,
         toilets: montjuicToilets
       },
       {
         id: 'port',
-        storageKey: 'bcn_tour_completed_port',
+        legacyKey: 'bcn_tour_completed_port',
         distance: '~8–9 km',
         duration: '~7–8 h',
-        pt: { title: 'Montjuïc → porto → Plaça de Catalunya' },
-        de: { title: 'Montjuïc → Hafen → Plaça de Catalunya' },
+        transport: [
+          { mode: 'bus', de: 'Bus 150', pt: 'Ônibus 150' },
+          { mode: 'cablecar', de: 'Hafenseilbahn', pt: 'Teleférico do porto' },
+          { mode: 'boat', de: 'Bus Nàutic', pt: 'Bus Nàutic' }
+        ],
+        highlights: ['font-magica', 'mirador-miramar', 'boqueria', 'cathedral'],
+        pt: {
+          title: 'Montjuïc → porto → Plaça de Catalunya',
+          desc: 'Como o roteiro de Montjuïc, mas sem o castelo: depois do Mirador e do jardim de cactos, o teleférico do porto leva você à praia, o barco solar até a coluna de Colombo, e você sobe a Rambla pelo bairro gótico até a Plaça de Catalunya.',
+          effort: 'Primeiro subida, depois plano pelo centro antigo. O teleférico do porto e o barco têm bilhetes próprios.',
+          best: 'Comece de manhã para pegar o teleférico do porto com folga.'
+        },
+        de: {
+          title: 'Montjuïc → Hafen → Plaça de Catalunya',
+          desc: 'Wie die Montjuïc-Tour, aber ohne Festung: Nach Mirador und Kakteengarten schwebst du mit der Hafenseilbahn an den Strand, fährst mit dem Solarboot zur Kolumbussäule und gehst die Rambla hinauf durch die gotische Altstadt bis zur Plaça de Catalunya.',
+          effort: 'Erst bergauf, danach flach durch die Altstadt. Hafenseilbahn und Boot brauchen eigene Tickets.',
+          best: 'Vormittags starten, damit du die Hafenseilbahn sicher erreichst.'
+        },
         stops: portStops,
         toilets: portToilets
       }
     ];
+
+    // ===== Explore: every place once, with texts that don't depend on a tour =====
+    const CATEGORY_ORDER = ['gaudi', 'old', 'culture', 'view', 'park', 'food', 'sea', 'transport'];
+    const CATEGORY_COLORS = { gaudi: '#D9931A', old: '#8A5A3B', culture: '#7A4E9E', view: '#1F57A0', park: '#2F8A5B', food: '#D9483B', sea: '#0C8C99', transport: '#5E6E7A' };
+
+    // A bracket like "(Station 8)" or "(próxima parada)" only makes sense inside a tour
+    const STATION_REF = /\s*\([^()]*\b(?:Station|parada)\b[^()]*\)/g;
+    function neutralize(obj) {
+      Object.keys(obj).forEach(k => {
+        if (typeof obj[k] === 'string') obj[k] = obj[k].replace(STATION_REF, '');
+        else if (obj[k] && typeof obj[k] === 'object') neutralize(obj[k]);
+      });
+    }
+    // Sentences that point along a tour get a neutral wording on the explore map
+    const EXPLORE_EDITS = {
+      'diagonal': s => {
+        swapText(s.de, 'longDesc', 'Hier startet die Route den Passeig de Gràcia hinunter', 'Von hier führt der Passeig de Gràcia hinunter');
+        swapText(s.de, 'longDesc', 'findest du bei Station 3.', 'findest du beim Passeig de Gràcia.');
+        swapText(s.pt, 'longDesc', 'Aqui começa o seu roteiro a pé, descendo o Passeig de Gràcia', 'Daqui desce o Passeig de Gràcia');
+        swapText(s.pt, 'longDesc', 'está na parada 3.', 'está no Passeig de Gràcia.');
+      },
+      'casa-mila': s => {
+        swapText(s.highlights[2].de, 'text', ' – das Ziel dieser Tour.', '.');
+        swapText(s.highlights[2].pt, 'text', ' – o destino final deste roteiro.', '.');
+      },
+      'placa-reial': s => {
+        swapText(s.highlights[0].de, 'text', ', an dem du später vorbeikommst.', ' beim Born-Viertel.');
+        swapText(s.highlights[0].pt, 'text', ', por onde você passará mais tarde.', ', perto do bairro do Born.');
+      },
+      'boqueria': s => {
+        swapText(s.highlights[2].de, 'text', 'Nach dem Drachen der Casa Batlló ist das schon der zweite Drache der Tour.', 'Barcelona liebt Drachen – den berühmtesten trägt Gaudís Casa Batlló auf dem Dach.');
+        swapText(s.highlights[2].pt, 'text', 'Depois do dragão da Casa Batlló, este já é o segundo dragão do roteiro.', 'Barcelona adora dragões – o mais famoso está no telhado da Casa Batlló, de Gaudí.');
+      },
+      'sagrada-familia': s => {
+        s.de.shortDesc = 'Gaudís unvollendetes Meisterwerk.';
+        s.pt.shortDesc = 'A obra-prima inacabada de Gaudí.';
+      },
+      'arenas': s => {
+        swapText(s.de, 'longDesc', 'Starte die Route in der ehemaligen Stierkampfarena an der Nordseite', 'Die ehemalige Stierkampfarena steht an der Nordseite');
+        swapText(s.pt, 'longDesc', 'Comece o roteiro na antiga arena de touros, no lado norte', 'A antiga arena de touros fica no lado norte');
+        swapText(s.highlights[0].de, 'text', 'liegt die ganze Route vor dir', 'liegt der ganze Weg auf den Montjuïc vor dir');
+        swapText(s.highlights[0].pt, 'text', 'todo o roteiro está à sua frente', 'todo o caminho até o Montjuïc está à sua frente');
+      },
+      'les-cascades': s => {
+        swapText(s.highlights[0].de, 'text', ', an denen du später vorbeikommst.', '.');
+        swapText(s.highlights[0].pt, 'text', ', por onde você passará mais tarde.', '.');
+      },
+      'castell-montjuic': s => {
+        swapText(s.highlights[5].de, 'text', ' – wenn du am Ende mit der Hafenseilbahn dort ankommst, landest du in einem zweiten Werk desselben Mannes.', '.');
+        swapText(s.highlights[5].pt, 'text', ' – quando você chegar lá no fim, de teleférico, estará numa segunda obra do mesmo homem.', '.');
+      }
+    };
+
+    const catalog = [];
+    const catalogByKey = {};
+    routes.forEach(route => route.stops.forEach(stop => {
+      let item = catalogByKey[stop.key];
+      if (!item) {
+        item = JSON.parse(JSON.stringify(stop));   // the first tour that has a place provides its base texts
+        delete item.id; delete item.nextBy; delete item.nextByBoat;
+        ['pt', 'de'].forEach(l => {
+          delete item[l].nextHint;
+          if (item[l].notes) item[l].notes = item[l].notes.filter(n => !n.route);
+        });
+        if (EXPLORE_EDITS[item.key]) EXPLORE_EDITS[item.key](item);
+        neutralize(item);
+        item.tours = [];
+        catalogByKey[item.key] = item;
+        catalog.push(item);
+      }
+      item.tours.push({ routeId: route.id, n: stop.id });
+    }));
+    const allToilets = [];
+    routes.forEach(r => r.toilets.forEach(t => { if (!allToilets.some(x => x.name === t.name)) allToilets.push(t); }));
 
     // ---------- Storage (wrapped so the page still works if storage is blocked) ----------
     function loadStored(key, fallback) {
@@ -2604,65 +2975,64 @@
       try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
     }
 
-    // ---------- App state ----------
-    let currentLang = loadStored('bcn_tour_lang_v2', 'pt');
-
-    function loadProgress(route) {
-      if (route.id !== 'eixample') return loadStored(route.storageKey, []);
-      // Saved progress migrations for the first route (stops were inserted over time):
-      // v2: new stop 3 (Passeig de Gràcia)  -> old ids >= 3 move up by one
-      // v3: new stop 13 (Temple d'August)   -> v2 ids >= 13 move up by one
+    // Old versions stored station numbers per tour; read them once and turn them into keys
+    function legacyProgress(route) {
+      if (route.id !== 'eixample') return loadStored(route.legacyKey, []);
       let done = loadStored('bcn_tour_completed_v3', null);
       if (done === null) {
         let v2 = loadStored('bcn_tour_completed_v2', null);
         if (v2 === null) v2 = loadStored('bcn_tour_completed', []).map(id => id >= 3 ? id + 1 : id);
         done = v2.map(id => id >= 13 ? id + 1 : id);
-        saveStored('bcn_tour_completed_v3', done);
       }
       return done;
     }
+    const VISITED_KEY = 'bcn_visited_v1';
+    function loadVisited() {
+      const saved = loadStored(VISITED_KEY, null);
+      if (Array.isArray(saved)) return new Set(saved);
+      const set = new Set();
+      routes.forEach(route => legacyProgress(route).forEach(n => {
+        const stop = route.stops.find(s => s.id === n);
+        if (stop) set.add(stop.key);
+      }));
+      saveStored(VISITED_KEY, [...set]);
+      return set;
+    }
 
-    let currentRoute = routes.find(r => r.id === loadStored('bcn_tour_route', 'eixample')) || routes[0];
-    let stops = currentRoute.stops;
-    let publicToilets = currentRoute.toilets;
-    let completedStops = loadProgress(currentRoute);
+    // ---------- App state ----------
+    let currentLang = loadStored('bcn_tour_lang_v2', 'pt');
+    const visited = loadVisited();
+    let view = 'tours';                 // 'tours' | 'explore' | 'tour'
+    let currentRoute = null;
+    let items = [];                     // places the list and the map show right now
     let showWC = true;
-    let userMarker = null;
-    let watchId = null;
-    const openDetails = new Set();     // stop ids with expanded details
-    let lightboxState = null;           // { stopId, index }  index = 'main' or highlight index
-    let nearStopId = null;              // stop the GPS says you are standing at
-    let dismissedNearId = null;         // banner closed for this stop
+    let userMarker = null, watchId = null, userCoords = null, lastSortCoords = null;
+    const openDetails = new Set();      // keys with the highlight panel open
+    const expanded = new Set();         // explore: keys with the full card open
+    const activeCats = new Set();       // explore filter, empty = everything
+    let searchTerm = '';
+    let lightboxState = null;           // { key, index }  index = 'main' or highlight index
+    let nearKey = null;                 // place the GPS says you are standing at
+    let dismissedNearKey = null;
 
-    const map = L.map('map').setView([41.385, 2.175], 13);
+    // ---------- Map ----------
+    const map = L.map('map').setView([41.385, 2.17], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
-
-    // Everything route-specific on the map (line + numbered markers) lives in this layer
     const routeLayer = L.layerGroup().addTo(map);
-    const stopMarkers = {};
+    const markerLayer = L.layerGroup().addTo(map);
+    const wcMarkersGroup = L.layerGroup().addTo(map);
+    const markers = {};
 
-    // How a leg is travelled decides how its line looks on the map
+    // How a leg is travelled decides how its line looks (map and tour sketches)
     const LEG_STYLES = {
-      walk:     { color: '#4f46e5', weight: 4, opacity: 0.7, dashArray: '6, 8' },
-      boat:     { color: '#0891b2', weight: 4, opacity: 0.8, dashArray: '2, 8' },
-      cablecar: { color: '#dc2626', weight: 3, opacity: 0.85, dashArray: '12, 6' },
-      bus:      { color: '#ea580c', weight: 4, opacity: 0.8, dashArray: '1, 7' }
+      walk:     { color: '#1F57A0', weight: 4, opacity: 0.75, dashArray: '6, 8' },
+      bus:      { color: '#C77C0A', weight: 5, opacity: 0.9, dashArray: '1, 8', lineCap: 'round' },
+      cablecar: { color: '#D9483B', weight: 3, opacity: 0.9, dashArray: '12, 6' },
+      boat:     { color: '#0C8C99', weight: 4, opacity: 0.85, dashArray: '2, 8' }
     };
     function legMode(stop) { return stop.nextBy || (stop.nextByBoat ? 'boat' : 'walk'); }
-
-    function drawRoute() {
-      routeLayer.clearLayers();
-      Object.keys(stopMarkers).forEach(k => delete stopMarkers[k]);
-      for (let i = 0; i < stops.length - 1; i++) {
-        L.polyline([stops[i].coords, stops[i + 1].coords], LEG_STYLES[legMode(stops[i])] || LEG_STYLES.walk).addTo(routeLayer);
-      }
-    }
-    function fitRoute() {
-      map.fitBounds(L.latLngBounds(stops.map(s => s.coords)), { padding: [25, 25] });
-    }
-    const wcMarkersGroup = L.layerGroup().addTo(map);
 
     // ---------- Helpers ----------
     function escapeHtml(str) {
@@ -2670,79 +3040,200 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
-
     function creditHtml(h, txt) {
       if (!h.img) return '';
       const who = h.author ? escapeHtml(h.author) : 'Wikimedia Commons';
       const lic = h.license ? ` (${escapeHtml(h.license)})` : '';
-      return `${txt.photo}: ${who}${lic} – <a href="${commonsPage(h.img)}" target="_blank" rel="noopener noreferrer" class="underline hover:text-indigo-600">${txt.source}</a>`;
+      return `${txt.photo}: ${who}${lic} – <a href="${commonsPage(h.img)}" target="_blank" rel="noopener noreferrer" class="underline hover:text-brand-600">${txt.source}</a>`;
     }
+    const T = () => uiTranslations[currentLang];
+    function getItem(key) {
+      return view === 'tour' ? currentRoute.stops.find(s => s.key === key) : catalogByKey[key];
+    }
+    function firstImage(item) {
+      if (item.img) return item.img;
+      const h = (item.highlights || []).find(x => x.img);
+      return h ? h.img : null;
+    }
+    const fold = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-    function getStop(id) { return stops.find(s => s.id === id); }
-
-    // Straight-line distance in metres
     function distanceMeters(a, b) {
       const R = 6371000, rad = x => x * Math.PI / 180;
       const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
       const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
       return 2 * R * Math.asin(Math.sqrt(h));
     }
-
+    function formatDistance(meters) {
+      return meters < 1000 ? `${Math.max(50, Math.round(meters / 50) * 50)} m` : `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
+    }
     // Rough walking estimate: streets are ~30 % longer than the straight line, 80 m per minute
     function walkEstimate(a, b) {
       const meters = distanceMeters(a, b) * 1.3;
-      const shown = meters < 1000 ? `${Math.max(50, Math.round(meters / 50) * 50)} m` : `${(meters / 1000).toFixed(1).replace('.', currentLang === 'pt' || currentLang === 'de' ? ',' : '.')} km`;
-      return { label: shown, minutes: Math.max(1, Math.round(meters / 80)) };
+      return { label: formatDistance(meters), minutes: Math.max(1, Math.round(meters / 80)) };
     }
-
     function mapsUrl(coords) {
       return `https://www.google.com/maps/dir/?api=1&destination=${coords[0]},${coords[1]}&travelmode=walking`;
     }
+    function routeProgress(route) {
+      const done = route.stops.filter(s => visited.has(s.key)).length;
+      const next = route.stops.find(s => !visited.has(s.key));
+      return { done, total: route.stops.length, next };
+    }
 
+    // ---------- Hexagon pavement tiles (inspired by the Passeig de Gràcia panot) ----------
+    function hexTile(stroke, shell) {
+      const w = 51.96, r = 30;
+      const hex = (cx, cy) => {
+        const pts = [];
+        for (let i = 0; i < 6; i++) {
+          const a = Math.PI / 180 * (60 * i - 90);
+          pts.push(`${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`);
+        }
+        return `<polygon points="${pts.join(' ')}"/>`;
+      };
+      const spiral = (cx, cy) => `<path d="M${cx} ${cy - 9}a9 9 0 1 1-8.5 6 6 6 0 1 1 6.2 6.6 3 3 0 1 1 3.2-3.4" fill="none" stroke="${shell}"/>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="90" viewBox="0 0 ${w} 90">` +
+        `<g fill="none" stroke="${stroke}" stroke-width="1.2">${hex(w / 2, 30)}${hex(0, 75)}${hex(w, 75)}${hex(0, -15)}${hex(w, -15)}</g>` +
+        `<g stroke-width="1.3" stroke-linecap="round">${spiral(w / 2, 30)}${spiral(0, 75)}${spiral(w, 75)}</g></svg>`;
+      return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    }
+    function paintTiles() {
+      const root = document.documentElement.style;
+      root.setProperty('--tile-dark', hexTile('rgba(255,255,255,0.09)', 'rgba(237,165,38,0.35)'));
+      root.setProperty('--tile-light', hexTile('rgba(19,37,63,0.10)', 'rgba(31,87,160,0.22)'));
+    }
+
+    // Small drawing of a tour's course for the overview cards
+    function routeSketch(route) {
+      const W = 340, H = 340, pad = 30;
+      const pts = route.stops.map(s => s.coords);
+      const k = Math.cos(pts[0][0] * Math.PI / 180);
+      const xs = pts.map(p => p[1] * k), ys = pts.map(p => -p[0]);
+      const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+      const scale = Math.min((W - 2 * pad) / (maxX - minX || 1), (H - 2 * pad) / (maxY - minY || 1));
+      const offX = (W - (maxX - minX) * scale) / 2, offY = (H - (maxY - minY) * scale) / 2;
+      const P = i => [offX + (xs[i] - minX) * scale, offY + (ys[i] - minY) * scale].map(v => v.toFixed(1));
+      let legs = '';
+      for (let i = 0; i < pts.length - 1; i++) {
+        const st = LEG_STYLES[legMode(route.stops[i])];
+        const [x1, y1] = P(i), [x2, y2] = P(i + 1);
+        legs += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${st.color}" stroke-width="${st.weight}" stroke-dasharray="${st.dashArray}" stroke-linecap="round"/>`;
+      }
+      const dots = pts.map((_, i) => { const [x, y] = P(i); return `<circle cx="${x}" cy="${y}" r="3.2" fill="#fff" stroke="#13253F" stroke-width="1.5"/>`; }).join('');
+      const [sx, sy] = P(0), [ex, ey] = P(pts.length - 1);
+      return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${legs}${dots}
+        <circle cx="${sx}" cy="${sy}" r="8" fill="#13253F" stroke="#fff" stroke-width="2"/>
+        <circle cx="${ex}" cy="${ey}" r="8.5" fill="#EDA526" stroke="#13253F" stroke-width="2.2"/></svg>`;
+    }
+
+    // ---------- Shared card parts ----------
     const NOTE_STYLES = {
       warn:   { icon: '⚠️', cls: 'bg-red-50 border-red-200 text-red-900' },
-      ticket: { icon: '🎟️', cls: 'bg-indigo-50 border-indigo-200 text-indigo-900' },
-      info:   { icon: 'ℹ️', cls: 'bg-sky-50 border-sky-200 text-sky-900' }
+      ticket: { icon: '🎟️', cls: 'bg-brand-50 border-brand-200 text-brand-900' },
+      info:   { icon: 'ℹ️', cls: 'bg-stone-50 border-stone-300 text-ink' }
     };
     function notesHtml(notes) {
       if (!notes || !notes.length) return '';
       return notes.map(n => {
         const st = NOTE_STYLES[n.type] || NOTE_STYLES.info;
         const link = n.url ? ` <a href="${n.url}" target="_blank" rel="noopener noreferrer" class="underline font-semibold whitespace-nowrap">${escapeHtml(n.linkLabel || n.url)} ↗</a>` : '';
-        return `<div class="p-2.5 border rounded-lg font-medium flex items-start gap-1.5 ${st.cls}"><span class="shrink-0">${st.icon}</span><div>${escapeHtml(n.text)}${link}</div></div>`;
+        return `<div class="p-2.5 border rounded-lg flex items-start gap-1.5 ${st.cls}"><span class="shrink-0">${st.icon}</span><div>${escapeHtml(n.text)}${link}</div></div>`;
       }).join('');
     }
 
-    function stopPhotoHtml(stop, txt) {
-      if (!stop.img) return '';
-      const name = escapeHtml(stop[currentLang].name);
+    function stopPhotoHtml(item, txt) {
+      if (!item.img) return '';
+      const name = escapeHtml(item[currentLang].name);
       return `
         <figure class="space-y-1">
-          <button onclick="openLightbox(${stop.id}, 'main')" class="hl-img-wrap block w-full aspect-[16/9] overflow-hidden rounded-lg" aria-label="${name}">
-            <img src="${commonsImg(stop.img, 500)}" alt="${name}" loading="lazy" decoding="async" class="w-full h-full object-cover"
+          <button onclick="openLightbox('${item.key}', 'main')" class="hl-img-wrap block w-full aspect-[16/9] overflow-hidden rounded-lg" aria-label="${name}">
+            <img src="${commonsImg(item.img, 600)}" alt="${name}" loading="lazy" decoding="async" class="w-full h-full object-cover"
                  onerror="this.closest('figure').style.display='none'">
           </button>
-          <figcaption class="text-[10px] text-slate-400">${creditHtml(stop, txt)}</figcaption>
+          <figcaption class="text-[10px] text-stone-400">${creditHtml(item, txt)}</figcaption>
         </figure>`;
     }
 
+    function highlightsHtml(item, txt) {
+      const list = item.highlights || [];
+      if (!list.length) return '';
+      const key = item.key;
+      const isOpen = openDetails.has(key);
+      const hasImages = list.some(h => h.img);
+      const entries = list.map((h, idx) => {
+        const t = h[currentLang];
+        const imgBlock = h.img ? `
+          <button onclick="openLightbox('${key}', ${idx})" class="hl-img-wrap block w-full aspect-[16/10] overflow-hidden rounded-lg" aria-label="${escapeHtml(t.title)}">
+            <img src="${commonsImg(h.img, 600)}" alt="${escapeHtml(t.title)}" loading="lazy" decoding="async" class="w-full h-full object-cover"
+                 onerror="this.parentElement.style.display='none'">
+          </button>` : '';
+        return `
+          <figure class="space-y-2">
+            ${imgBlock}
+            <figcaption>
+              <h4 class="font-display text-[15px] text-ink">${escapeHtml(t.title)}</h4>
+              <p class="text-[13px] text-stone-600 leading-relaxed mt-1">${escapeHtml(t.text)}</p>
+              ${h.img ? `<p class="text-[10px] text-stone-400 mt-1">${creditHtml(h, txt)}</p>` : ''}
+            </figcaption>
+          </figure>`;
+      }).join('');
+      return `
+        <button id="details-btn-${key}" onclick="toggleDetails('${key}')" aria-expanded="${isOpen}"
+          class="${isOpen ? 'open-btn ' : ''}mt-1 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-saffron-50 border border-saffron-200 text-saffron-800 text-[13px] font-semibold hover:bg-saffron-100 transition">
+          <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i><span class="details-label">${isOpen ? txt.lessLabel : txt.moreLabel}</span> (${list.length})</span>
+          <i data-lucide="chevron-down" class="chevron w-4 h-4"></i>
+        </button>
+        <div id="details-panel-${key}" class="details-panel ${isOpen ? 'open' : ''} mt-3 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <button onclick="speakItem('${key}', true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition">
+              <i data-lucide="headphones" class="w-4 h-4"></i> ${txt.listenDetailed}
+            </button>
+            ${hasImages ? `<span class="text-[11px] text-stone-400">${txt.tapToEnlarge}</span>` : ''}
+          </div>
+          ${entries}
+          <button onclick="toggleDetails('${key}', true)" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-saffron-200 text-saffron-800 text-xs font-semibold hover:bg-saffron-50 transition">
+            <i data-lucide="chevron-up" class="w-4 h-4"></i> ${txt.lessLabel}
+          </button>
+        </div>`;
+    }
+
+    // Photo, text, tips, notes, wiki link and highlights – the same in tours and on the explore map
+    function bodyHtml(item, txt) {
+      const data = item[currentLang];
+      return `
+        ${stopPhotoHtml(item, txt)}
+        <p class="leading-relaxed">${escapeHtml(data.longDesc)}</p>
+        ${data.gastro ? `
+          <div class="p-2.5 bg-saffron-50 border border-saffron-200 rounded-lg text-saffron-800 flex items-start gap-1.5">
+            <span class="shrink-0">💡</span><div>${escapeHtml(data.gastro)}</div>
+          </div>` : ''}
+        ${notesHtml(data.notes)}
+        ${item.wiki ? `
+          <a href="${item.wiki}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-brand-600 hover:underline font-semibold">
+            ${txt.readMoreWiki} <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>` : ''}
+        ${highlightsHtml(item, txt)}`;
+    }
+
+    // Way to the next stop inside a tour
     function navHtml(stop, txt) {
-      const i = stops.findIndex(s => s.id === stop.id);
+      const stops = currentRoute.stops;
+      const i = stops.findIndex(s => s.key === stop.key);
       const next = stops[i + 1];
       if (!next) {
-        return `<div class="mt-3 px-3 py-2 rounded-lg bg-green-50 border border-green-200 text-green-800 text-xs font-semibold text-center">${txt.endOfTour}</div>`;
+        return `<div class="px-3 py-2 rounded-lg bg-leaf-50 border border-leaf-100 text-leaf-600 text-xs font-semibold text-center">${txt.endOfTour}</div>`;
       }
       const nextName = escapeHtml(next[currentLang].name);
       const mode = legMode(stop);
       if (mode !== 'walk') {
-        const look = mode === 'cablecar'
-          ? { icon: 'cable-car', cls: 'bg-red-50 border-red-200 text-red-900', sub: 'text-red-700', label: txt.cableLeg }
-          : mode === 'bus'
-          ? { icon: 'bus', cls: 'bg-orange-50 border-orange-200 text-orange-900', sub: 'text-orange-700', label: txt.busLeg }
-          : { icon: 'ship', cls: 'bg-cyan-50 border-cyan-200 text-cyan-900', sub: 'text-cyan-700', label: txt.boatLeg };
+        const look = {
+          cablecar: { icon: 'cable-car', cls: 'bg-red-50 border-red-200 text-red-900', sub: 'text-red-700', label: txt.cableLeg },
+          bus:      { icon: 'bus', cls: 'bg-saffron-50 border-saffron-200 text-saffron-800', sub: 'text-saffron-600', label: txt.busLeg },
+          boat:     { icon: 'ship', cls: 'bg-cyan-50 border-cyan-200 text-cyan-900', sub: 'text-cyan-700', label: txt.boatLeg }
+        }[mode];
         const hint = stop[currentLang].nextHint || look.label;
         return `
-          <div class="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-xs font-semibold ${look.cls}">
+          <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border text-xs font-semibold ${look.cls}">
             <span class="flex items-center gap-2 min-w-0"><i data-lucide="${look.icon}" class="w-4 h-4 shrink-0"></i><span class="truncate">${next.id}. ${nextName}</span></span>
             <span class="shrink-0 ${look.sub}">${escapeHtml(hint)}</span>
           </div>`;
@@ -2750,140 +3241,243 @@
       const w = walkEstimate(stop.coords, next.coords);
       return `
         <a href="${mapsUrl(next.coords)}" target="_blank" rel="noopener noreferrer"
-           class="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs font-semibold hover:bg-indigo-100 transition">
+           class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-brand-50 border border-brand-100 text-brand-800 text-xs font-semibold hover:bg-brand-100 transition">
           <span class="flex items-center gap-2 min-w-0"><i data-lucide="footprints" class="w-4 h-4 shrink-0"></i><span class="truncate">${txt.nextStop} ${next.id}: ${nextName}</span></span>
-          <span class="shrink-0 text-indigo-500 flex items-center gap-1">${w.label} · ≈ ${w.minutes} ${txt.walkMin} <i data-lucide="external-link" class="w-3 h-3"></i></span>
+          <span class="shrink-0 text-brand-500 flex items-center gap-1">${w.label} · ≈ ${w.minutes} ${txt.walkMin} <i data-lucide="external-link" class="w-3 h-3"></i></span>
         </a>`;
     }
 
-    // ---------- Render ----------
-    function updateUI() {
-      const txt = uiTranslations[currentLang];
-      document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'de';
-
-      document.getElementById('app-title').innerText = txt.appTitle;
-      document.getElementById('app-subtitle').innerText = currentRoute[currentLang].title;
-      document.getElementById('route-distance').innerText = currentRoute.distance;
-      document.getElementById('route-duration').innerText = currentRoute.duration;
-      document.getElementById('label-route').innerText = txt.routeLabel;
-      const sel = document.getElementById('route-select');
-      sel.setAttribute('aria-label', txt.routeLabel);
-      sel.innerHTML = routes.map(r => `<option value="${r.id}" ${r.id === currentRoute.id ? 'selected' : ''}>${escapeHtml(r[currentLang].title)}</option>`).join('');
-      // Toilet toggle only makes sense if the route has toilet data
-      document.getElementById('wc-toggle').style.display = publicToilets.length ? '' : 'none';
-      document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
-
-      if (watchId === null) {
-        document.getElementById('label-gps').innerText = txt.gpsLabel;
-      }
-
-      const ptBtn = document.getElementById('lang-pt-btn');
-      const deBtn = document.getElementById('lang-de-btn');
-      const activeCls = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all bg-white text-indigo-900 shadow-sm font-bold";
-      const idleCls = "flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all text-indigo-200 hover:text-white";
-      ptBtn.className = currentLang === 'pt' ? activeCls : idleCls;
-      deBtn.className = currentLang === 'de' ? activeCls : idleCls;
-
-      document.getElementById('progress-text').innerText = `${completedStops.length} / ${stops.length} ${txt.visitedLabel}`;
-      document.getElementById('lb-close').setAttribute('aria-label', txt.close);
-
-      renderStops();
-      renderToilets();
-      updateNearBanner();
+    function categoryLabels(item, txt) {
+      return (item.cats || []).map(c =>
+        `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:${CATEGORY_COLORS[c]}"></span>${txt.cats[c]}</span>`
+      ).join('');
     }
 
-    window.setRoute = function(id) {
-      const route = routes.find(r => r.id === id);
-      if (!route || route.id === currentRoute.id) return;
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      if (lightboxState) closeLightbox();
-      currentRoute = route;
-      stops = route.stops;
-      publicToilets = route.toilets;
-      completedStops = loadProgress(route);
-      saveStored('bcn_tour_route', route.id);
-      openDetails.clear();
-      nearStopId = null;
-      dismissedNearId = null;
-      drawRoute();
-      fitRoute();
-      document.getElementById('stops-container').innerHTML = ''; // no scroll anchoring across routes
-      updateUI();
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    };
+    // ---------- Cards ----------
+    function tourCardEl(stop, txt) {
+      const done = visited.has(stop.key);
+      const data = stop[currentLang];
+      const el = document.createElement('article');
+      el.id = `card-${stop.key}`;
+      el.className = `p-4 bg-white rounded-xl border ${done ? 'border-leaf-100 bg-leaf-50/40' : 'border-stone-200'} ${stop.key === nearKey ? 'is-near' : ''}`;
+      el.dataset.nearLabel = `📍 ${txt.hereNow}`;
+      el.innerHTML = `
+        <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="focusItem('${stop.key}')">
+          <div class="flex items-start gap-3 min-w-0">
+            <button onclick="event.stopPropagation(); toggleVisited('${stop.key}')" title="${txt.markVisited}" aria-label="${txt.markVisited}" aria-pressed="${done}"
+              class="mt-0.5 w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold shrink-0 transition ${done ? 'bg-leaf-500 border-leaf-500 text-white' : 'border-ink text-ink hover:bg-ink hover:text-white'}">
+              ${done ? '✓' : stop.id}
+            </button>
+            <div class="min-w-0">
+              <h3 class="font-display text-lg leading-snug ${done ? 'text-stone-500' : 'text-ink'}">${escapeHtml(data.name)}</h3>
+              <p class="text-[13px] text-stone-600 mt-0.5">${escapeHtml(data.shortDesc)}</p>
+            </div>
+          </div>
+          <button onclick="event.stopPropagation(); speakItem('${stop.key}', false)" class="p-2 text-stone-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg shrink-0 transition" title="${txt.audioTooltip}" aria-label="${txt.audioTooltip}">
+            <i data-lucide="volume-2" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="mt-3 pt-3 border-t border-stone-100 text-[13px] text-stone-700 space-y-3">
+          ${bodyHtml(stop, txt)}
+          ${navHtml(stop, txt)}
+        </div>`;
+      return el;
+    }
 
-    function setLanguage(lang) {
-      if (currentLang !== lang) {
-        currentLang = lang;
-        saveStored('bcn_tour_lang_v2', lang);
-        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        updateUI();
-        if (lightboxState) renderLightbox();
+    function exploreCardEl(item, txt) {
+      const done = visited.has(item.key);
+      const open = expanded.has(item.key);
+      const data = item[currentLang];
+      const img = firstImage(item);
+      const dist = userCoords ? formatDistance(distanceMeters(userCoords, item.coords)) : '';
+      const thumb = img
+        ? `<img src="${commonsImg(img, 160)}" alt="" loading="lazy" class="w-full h-full object-cover" onerror="this.remove()">`
+        : '';
+      const tours = item.tours.map(t => {
+        const r = routes.find(x => x.id === t.routeId);
+        return `<a href="#tour/${t.routeId}/${t.n}" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-xs font-semibold text-ink">
+          <i data-lucide="route" class="w-3.5 h-3.5"></i>${escapeHtml(r[currentLang].title)} <span class="text-stone-500 font-medium">${txt.stationShort(t.n)}</span></a>`;
+      }).join('');
+      const el = document.createElement('article');
+      el.id = `card-${item.key}`;
+      el.className = `bg-white rounded-xl border ${open ? 'border-stone-300' : 'border-stone-200'} ${item.key === nearKey ? 'is-near' : ''}`;
+      el.dataset.nearLabel = `📍 ${txt.hereNow}`;
+      el.innerHTML = `
+        <button onclick="toggleExpand('${item.key}')" aria-expanded="${open}" class="${open ? 'open-btn ' : ''}w-full text-left flex items-center gap-3 p-3">
+          <span class="w-16 h-16 rounded-lg overflow-hidden shrink-0 tile-bg relative">${thumb}
+            ${done ? '<span class="absolute inset-0 bg-leaf-500/80 text-white flex items-center justify-center text-xl font-bold">✓</span>' : ''}
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="font-display text-[17px] leading-snug block text-ink">${escapeHtml(data.name)}</span>
+            <span class="text-[13px] text-stone-600 block mt-0.5 ${open ? '' : 'line-clamp-1'}">${escapeHtml(data.shortDesc)}</span>
+            <span class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold text-stone-600">${categoryLabels(item, txt)}${dist ? `<span class="text-brand-600">${txt.away(dist)}</span>` : ''}</span>
+          </span>
+          <i data-lucide="chevron-down" class="chevron w-5 h-5 text-stone-400 shrink-0"></i>
+        </button>
+        ${open ? `
+        <div class="px-4 pb-4 pt-3 border-t border-stone-100 text-[13px] text-stone-700 space-y-3">
+          <div class="flex flex-wrap gap-2">
+            <button onclick="toggleVisited('${item.key}')" aria-pressed="${done}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold ${done ? 'bg-leaf-500 border-leaf-500 text-white' : 'border-stone-300 hover:bg-stone-100'}">
+              <i data-lucide="${done ? 'check-circle-2' : 'circle'}" class="w-4 h-4"></i>${done ? txt.visited : txt.markVisited}
+            </button>
+            <button onclick="speakItem('${item.key}', false)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 hover:bg-stone-100 text-xs font-semibold">
+              <i data-lucide="volume-2" class="w-4 h-4"></i>${txt.listen}
+            </button>
+            <button onclick="focusItem('${item.key}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 hover:bg-stone-100 text-xs font-semibold">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>${txt.show}
+            </button>
+            <a href="${mapsUrl(item.coords)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 hover:bg-stone-100 text-xs font-semibold">
+              <i data-lucide="footprints" class="w-4 h-4"></i>${txt.directions} <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+          ${bodyHtml(item, txt)}
+          <div class="pt-1">
+            <h4 class="text-xs font-semibold text-stone-500 mb-2">${txt.inTours}</h4>
+            <div class="flex flex-wrap gap-2">${tours}</div>
+          </div>
+        </div>` : ''}`;
+      return el;
+    }
+
+    // ---------- Explore filter ----------
+    function filteredItems() {
+      const q = fold(searchTerm.trim());
+      let list = catalog.filter(item =>
+        (!activeCats.size || item.cats.some(c => activeCats.has(c))) &&
+        (!q || fold(item[currentLang].name + ' ' + item[currentLang].shortDesc + ' ' + item.pt.name + ' ' + item.de.name).includes(q))
+      );
+      if (userCoords) {
+        list = list.slice().sort((a, b) => distanceMeters(userCoords, a.coords) - distanceMeters(userCoords, b.coords));
+      } else {
+        list = list.slice().sort((a, b) => a[currentLang].name.localeCompare(b[currentLang].name, currentLang));
       }
+      return list;
+    }
+
+    function renderCategoryChips() {
+      const txt = T();
+      const chip = (id, label, color, active) => `
+        <button onclick="toggleCategory('${id}')" aria-pressed="${active}"
+          class="shrink-0 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[13px] font-semibold transition ${active ? 'bg-ink border-ink text-white' : 'bg-white border-stone-300 text-ink hover:bg-stone-100'}">
+          ${color ? `<span class="w-2.5 h-2.5 rounded-full" style="background:${color}"></span>` : ''}${label}
+        </button>`;
+      document.getElementById('cat-chips').innerHTML =
+        chip('all', txt.allCats, null, activeCats.size === 0) +
+        CATEGORY_ORDER.map(c => chip(c, txt.cats[c], CATEGORY_COLORS[c], activeCats.has(c))).join('');
+    }
+
+    window.toggleCategory = function(id) {
+      if (id === 'all') activeCats.clear();
+      else if (activeCats.has(id)) activeCats.delete(id);
+      else activeCats.add(id);
+      renderCategoryChips();
+      refreshExplore(true);
+    };
+    window.onSearch = function(value) {
+      searchTerm = value;
+      refreshExplore(false);
+    };
+    function refreshExplore(refit) {
+      items = filteredItems();
+      drawMap();
+      renderList();
+      if (refit && items.length) fitItems();
+    }
+
+    // ---------- Map drawing ----------
+    function markerIcon(item) {
+      const done = visited.has(item.key);
+      if (view === 'tour') {
+        const hasDetails = !!(item.highlights && item.highlights.length);
+        return L.divIcon({
+          className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+          html: `<div class="stop-pin ${done ? 'completed' : ''} ${hasDetails ? 'has-details' : ''}" style="width:28px;height:28px">${done ? '✓' : item.id}</div>`
+        });
+      }
+      const color = done ? 'var(--leaf)' : CATEGORY_COLORS[item.cats[0]];
+      const sel = expanded.has(item.key);
+      const size = sel ? 26 : 20;
+      return L.divIcon({
+        className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
+        html: `<div class="place-pin ${sel ? 'selected' : ''}" style="width:${size}px;height:${size}px;background:${color}">${done ? '✓' : ''}</div>`
+      });
+    }
+
+    function popupHtml(item) {
+      const data = item[currentLang];
+      const img = firstImage(item);
+      const pic = img ? `<img src="${commonsImg(img, 330)}" alt="" style="width:200px;height:120px;object-fit:cover;border-radius:6px;margin-top:6px" loading="lazy" onerror="this.remove()">` : '';
+      const label = view === 'tour' ? `${item.id}. ${escapeHtml(data.name)}` : escapeHtml(data.name);
+      return `<b>${label}</b><br>${escapeHtml(data.shortDesc)}${pic}`;
+    }
+
+    function drawMap() {
+      routeLayer.clearLayers();
+      markerLayer.clearLayers();
+      Object.keys(markers).forEach(k => delete markers[k]);
+      if (view === 'tour') {
+        const stops = currentRoute.stops;
+        for (let i = 0; i < stops.length - 1; i++) {
+          L.polyline([stops[i].coords, stops[i + 1].coords], LEG_STYLES[legMode(stops[i])]).addTo(routeLayer);
+        }
+      }
+      items.forEach(item => {
+        const m = L.marker(item.coords, { icon: markerIcon(item), zIndexOffset: expanded.has(item.key) ? 500 : 0 }).addTo(markerLayer);
+        m.bindPopup(popupHtml(item));
+        m.on('click', () => onMarkerClick(item.key));
+        markers[item.key] = m;
+      });
+      renderToilets();
+      renderLegend();
+    }
+    function refreshMarkers() {
+      items.forEach(item => { if (markers[item.key]) markers[item.key].setIcon(markerIcon(item)); });
+    }
+    function fitItems() {
+      const list = view === 'tour' ? currentRoute.stops : items;
+      if (list.length) map.fitBounds(L.latLngBounds(list.map(s => s.coords)), { padding: [25, 25], maxZoom: 16 });
     }
 
     function renderToilets() {
       wcMarkersGroup.clearLayers();
-      const txt = uiTranslations[currentLang];
-      if (!showWC) return;
-      publicToilets.forEach(wc => {
-        const wcIcon = L.divIcon({ className: 'wc-icon', html: '🚻', iconSize: [24, 24], iconAnchor: [12, 12] });
-        L.marker(wc.coords, { icon: wcIcon })
-          .bindPopup(`<b>${txt.wcPopupTitle}</b><br>${escapeHtml(wc.name)}`)
-          .addTo(wcMarkersGroup);
+      const txt = T();
+      if (!showWC || view === 'tours') return;
+      currentToilets().forEach(wc => {
+        const icon = L.divIcon({ className: '', html: '<div class="wc-pin" style="width:24px;height:20px">WC</div>', iconSize: [24, 20], iconAnchor: [12, 10] });
+        L.marker(wc.coords, { icon }).bindPopup(`<b>${txt.wcPopupTitle}</b><br>${escapeHtml(wc.name)}`).addTo(wcMarkersGroup);
       });
     }
+    function currentToilets() { return view === 'tour' ? currentRoute.toilets : allToilets; }
 
-    function highlightsHtml(stop, txt) {
-      const list = stop.highlights || [];
-      if (!list.length) return '';
-      const isOpen = openDetails.has(stop.id);
-      const hasImages = list.some(h => h.img);
-
-      const items = list.map((h, idx) => {
-        const t = h[currentLang];
-        const imgBlock = h.img ? `
-          <button onclick="openLightbox(${stop.id}, ${idx})" class="hl-img-wrap block w-full aspect-[16/10] overflow-hidden rounded-lg" aria-label="${escapeHtml(t.title)}">
-            <img src="${commonsImg(h.img, 500)}" alt="${escapeHtml(t.title)}" loading="lazy" decoding="async"
-                 class="w-full h-full object-cover"
-                 onerror="this.parentElement.style.display='none'">
-          </button>` : '';
-        return `
-          <figure class="space-y-2">
-            ${imgBlock}
-            <figcaption>
-              <h4 class="font-bold text-sm text-slate-800">${escapeHtml(t.title)}</h4>
-              <p class="text-xs text-slate-600 leading-relaxed mt-1">${escapeHtml(t.text)}</p>
-              ${h.img ? `<p class="text-[10px] text-slate-400 mt-1">${creditHtml(h, txt)}</p>` : ''}
-            </figcaption>
-          </figure>`;
+    function renderLegend() {
+      const el = document.getElementById('map-legend');
+      if (view !== 'tour') { el.innerHTML = ''; el.classList.add('hidden'); return; }
+      const txt = T();
+      const modes = [...new Set(currentRoute.stops.slice(0, -1).map(legMode))];
+      const label = { walk: txt.legendWalk, bus: txt.legendBus, cablecar: txt.legendCable, boat: txt.legendBoat };
+      el.innerHTML = ['walk', 'bus', 'cablecar', 'boat'].filter(m => modes.includes(m)).map(m => {
+        const st = LEG_STYLES[m];
+        return `<span class="inline-flex items-center gap-1.5"><svg width="26" height="6" aria-hidden="true"><line x1="2" y1="3" x2="24" y2="3" stroke="${st.color}" stroke-width="3" stroke-dasharray="${st.dashArray}" stroke-linecap="round"/></svg>${label[m]}</span>`;
       }).join('');
-
-      return `
-        <button id="details-btn-${stop.id}" onclick="toggleDetails(${stop.id})" aria-expanded="${isOpen}"
-          class="${isOpen ? 'open-btn ' : ''}mt-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition">
-          <span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i><span class="details-label">${isOpen ? txt.lessLabel : txt.moreLabel}</span> (${list.length})</span>
-          <i data-lucide="chevron-down" class="chevron w-4 h-4"></i>
-        </button>
-        <div id="details-panel-${stop.id}" class="details-panel ${isOpen ? 'open' : ''} mt-3 space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <button onclick="speakStop(${stop.id}, true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">
-              <i data-lucide="headphones" class="w-4 h-4"></i> ${txt.listenDetailed}
-            </button>
-            ${hasImages ? `<span class="text-[11px] text-slate-400">${txt.tapToEnlarge}</span>` : ''}
-          </div>
-          ${items}
-          <button onclick="toggleDetails(${stop.id}, true)" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-amber-200 text-amber-900 text-xs font-semibold hover:bg-amber-50 transition">
-            <i data-lucide="chevron-up" class="w-4 h-4"></i> ${txt.lessLabel}
-          </button>
-        </div>`;
+      el.classList.toggle('hidden', modes.length < 2);
     }
 
-    // Remember which card is at the top of the screen, so a full re-render
-    // (language switch, marking as visited) doesn't make the list jump.
+    // ---------- Rendering ----------
+    function stickyOffset() {
+      const bar = document.getElementById('toolbar');
+      if (view !== 'tours' && bar) return bar.getBoundingClientRect().bottom + 12;
+      return document.getElementById('app-header').getBoundingClientRect().bottom + 12;
+    }
+    function updateStickyTop() {
+      const header = document.getElementById('app-header').offsetHeight;
+      const bar = document.getElementById('toolbar').offsetHeight;
+      document.documentElement.style.setProperty('--map-top', `${header + bar + 16}px`);
+    }
+
+    // Remember which card is at the top of the screen, so a full re-render doesn't make the list jump
     function captureListAnchor() {
       const limit = stickyOffset();
-      for (const card of document.querySelectorAll('#stops-container > [id^="stop-card-"]')) {
+      for (const card of document.querySelectorAll('#list-container > article')) {
         const r = card.getBoundingClientRect();
         if (r.bottom > limit) return { id: card.id, top: r.top };
       }
@@ -2897,157 +3491,354 @@
       if (diff) window.scrollBy(0, diff);
     }
 
-    function renderStops() {
-      const container = document.getElementById('stops-container');
+    function renderList() {
+      const container = document.getElementById('list-container');
       const anchor = captureListAnchor();
+      const txt = T();
       container.innerHTML = '';
-      const txt = uiTranslations[currentLang];
-
-      stops.forEach((stop) => {
-        const isCompleted = completedStops.includes(stop.id);
-        const data = stop[currentLang];
-        const hasDetails = !!(stop.highlights && stop.highlights.length);
-
-        const customIcon = L.divIcon({
-          className: `custom-div-icon ${isCompleted ? 'completed' : ''} ${hasDetails ? 'has-details' : ''}`,
-          html: `${stop.id}`,
-          iconSize: [26, 26],
-          iconAnchor: [13, 13]
-        });
-        if (!stopMarkers[stop.id]) {
-          stopMarkers[stop.id] = L.marker(stop.coords, { icon: customIcon }).addTo(routeLayer);
-          stopMarkers[stop.id].on('click', () => scrollToCard(stop.id));
-        } else {
-          stopMarkers[stop.id].setIcon(customIcon);
+      if (view === 'tour') {
+        currentRoute.stops.forEach(stop => container.appendChild(tourCardEl(stop, txt)));
+      } else {
+        if (!items.length) {
+          container.innerHTML = `<p class="p-6 rounded-xl border border-dashed border-stone-300 text-sm text-stone-600 text-center">${txt.noResults}</p>`;
         }
-
-        // Popup: show first highlight photo as a teaser if available
-        const firstImg = stop.img ? stop : (hasDetails ? stop.highlights.find(h => h.img) : null);
-        const popupImg = firstImg
-          ? `<img src="${commonsImg(firstImg.img, 330)}" alt="" style="width:200px;height:120px;object-fit:cover;border-radius:6px;margin-top:6px" loading="lazy" onerror="this.remove()">`
-          : '';
-        stopMarkers[stop.id].bindPopup(`<b>${stop.id}. ${escapeHtml(data.name)}</b><br>${escapeHtml(data.shortDesc)}${popupImg}`);
-
-        const card = document.createElement('div');
-        card.id = `stop-card-${stop.id}`;
-        card.className = `p-4 bg-white rounded-xl shadow-sm border ${isCompleted ? 'border-green-200 bg-green-50/30' : 'border-slate-200'} transition-all hover:shadow-md ${stop.id === nearStopId ? 'is-near' : ''}`;
-        card.dataset.nearLabel = `📍 ${txt.hereNow}`;
-
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-2 cursor-pointer" onclick="focusStop(${stop.id})">
-            <div class="flex items-start gap-3">
-              <button onclick="event.stopPropagation(); toggleStop(${stop.id})" class="mt-0.5 w-6 h-6 rounded-full border flex items-center justify-center font-bold text-xs shrink-0 ${isCompleted ? 'bg-green-500 text-white border-green-500' : 'border-slate-300 text-slate-500 hover:border-indigo-500'}" title="${txt.markVisited}" aria-label="${txt.markVisited}">
-                ${isCompleted ? '✓' : stop.id}
-              </button>
-              <div>
-                <h3 class="font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-slate-800'}">${escapeHtml(data.name)}</h3>
-                <p class="text-xs text-slate-500 mt-0.5">${escapeHtml(data.shortDesc)}</p>
-              </div>
-            </div>
-            <button onclick="event.stopPropagation(); speakStop(${stop.id}, false)" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg shrink-0 transition" title="${txt.audioTooltip}" aria-label="${txt.audioTooltip}">
-              <i data-lucide="volume-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-
-          <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-2">
-            ${stopPhotoHtml(stop, txt)}
-            <p class="leading-relaxed">${escapeHtml(data.longDesc)}</p>
-
-            ${data.gastro ? `
-              <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 font-medium flex items-start gap-1.5">
-                <span class="shrink-0">💡</span>
-                <div>${escapeHtml(data.gastro)}</div>
-              </div>
-            ` : ''}
-
-            ${notesHtml(data.notes)}
-
-            ${stop.wiki ? `
-              <a href="${stop.wiki}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-indigo-600 hover:underline font-semibold pt-1">
-                ${txt.readMoreWiki} <i data-lucide="external-link" class="w-3 h-3"></i>
-              </a>
-            ` : ''}
-
-            ${highlightsHtml(stop, txt)}
-            ${navHtml(stop, txt)}
-          </div>
-        `;
-
-        container.appendChild(card);
-      });
-
+        items.forEach(item => container.appendChild(exploreCardEl(item, txt)));
+        document.getElementById('explore-count').innerText = txt.placesCount(items.length);
+      }
       lucide.createIcons();
       restoreListAnchor(anchor);
+    }
+
+    function replaceCard(key) {
+      const old = document.getElementById(`card-${key}`);
+      const item = getItem(key);
+      if (!old || !item) return;
+      const txt = T();
+      old.replaceWith(view === 'tour' ? tourCardEl(item, txt) : exploreCardEl(item, txt));
+      lucide.createIcons();
+    }
+
+    function renderTourList() {
+      const txt = T();
+      const list = document.getElementById('tour-list');
+      list.innerHTML = routes.map(route => {
+        const r = route[currentLang];
+        const first = route.stops[0][currentLang].name, last = route.stops[route.stops.length - 1][currentLang].name;
+        const p = routeProgress(route);
+        const action = p.done === 0
+          ? { label: txt.startTour, hash: `#tour/${route.id}` }
+          : p.next
+            ? { label: txt.continueTour(p.next.id), hash: `#tour/${route.id}/${p.next.id}` }
+            : { label: txt.viewTour, hash: `#tour/${route.id}` };
+        const modeIcon = { bus: 'bus', cablecar: 'cable-car', boat: 'ship' };
+        const modeCls = { bus: 'bg-saffron-50 text-saffron-800 border-saffron-200', cablecar: 'bg-red-50 text-red-800 border-red-200', boat: 'bg-cyan-50 text-cyan-900 border-cyan-200' };
+        const transport = route.transport.map(t => `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${modeCls[t.mode]}">
+            <i data-lucide="${modeIcon[t.mode]}" class="w-3.5 h-3.5"></i>${escapeHtml(t[currentLang])}</span>`).join('');
+        const highlights = route.highlights.map(key => {
+          const s = route.stops.find(x => x.key === key);
+          const img = firstImage(s);
+          return `
+            <a href="#tour/${route.id}/${s.id}" class="group block min-w-0">
+              <span class="block aspect-square rounded-lg overflow-hidden tile-bg">${img ? `<img src="${commonsImg(img, 240)}" alt="" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.remove()">` : ''}</span>
+              <span class="block mt-1.5 text-xs font-semibold leading-snug text-ink line-clamp-2">${escapeHtml(s[currentLang].name)}</span>
+            </a>`;
+        }).join('');
+        const pct = Math.round(p.done / p.total * 100);
+        return `
+        <article class="bg-white rounded-2xl border border-stone-200 overflow-hidden grid md:grid-cols-[minmax(0,320px)_minmax(0,1fr)] shadow-[0_20px_40px_-28px_rgba(19,37,63,0.45)]">
+          <a href="#tour/${route.id}" class="sketch tile-bg block aspect-[34/25] md:aspect-auto md:h-full p-2" aria-label="${escapeHtml(r.title)}">${routeSketch(route)}</a>
+          <div class="p-5 md:p-7 min-w-0">
+            <h2 class="font-display text-[1.65rem] md:text-3xl leading-tight text-ink">${escapeHtml(r.title)}</h2>
+            <dl class="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
+              <dt class="text-stone-500 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-ink"></span>${txt.startLabel}</dt><dd class="font-semibold truncate">${escapeHtml(first)}</dd>
+              <dt class="text-stone-500 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-saffron-400 ring-2 ring-ink"></span>${txt.finishLabel}</dt><dd class="font-semibold truncate">${escapeHtml(last)}</dd>
+            </dl>
+            <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-ink">
+              <span class="inline-flex items-center gap-1.5"><i data-lucide="footprints" class="w-4 h-4 text-brand-600"></i>${route.distance}</span>
+              <span class="inline-flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-brand-600"></i>${route.duration}</span>
+              <span class="inline-flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i>${txt.stopsCount(p.total)}</span>
+            </div>
+            <p class="mt-4 text-[15px] leading-relaxed text-stone-700 max-w-prose">${escapeHtml(r.desc)}</p>
+            <ul class="mt-3 space-y-1.5 text-sm text-stone-700 max-w-prose">
+              <li class="flex gap-2"><i data-lucide="mountain" class="w-4 h-4 mt-0.5 shrink-0 text-stone-500"></i><span>${escapeHtml(r.effort)}</span></li>
+              <li class="flex gap-2"><i data-lucide="sun" class="w-4 h-4 mt-0.5 shrink-0 text-saffron-600"></i><span>${escapeHtml(r.best)}</span></li>
+            </ul>
+            <div class="mt-4 flex flex-wrap gap-2">${transport}</div>
+            <h3 class="mt-6 text-sm font-semibold text-stone-500">${txt.tourHighlights}</h3>
+            <div class="mt-2 grid grid-cols-4 gap-2 md:gap-3 max-w-lg">${highlights}</div>
+            ${p.done ? `
+            <div class="mt-6 max-w-lg">
+              <div class="h-2 rounded-full bg-stone-200 overflow-hidden"><div class="h-full bg-leaf-500 rounded-full" style="width:${pct}%"></div></div>
+              <p class="mt-1.5 text-xs font-semibold text-stone-600">${txt.progressOf(p.done, p.total)}</p>
+            </div>` : ''}
+            <div class="mt-6 flex flex-wrap gap-2">
+              <a href="${action.hash}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold">
+                <i data-lucide="${p.done && p.next ? 'play' : 'navigation'}" class="w-4 h-4"></i>${action.label}
+              </a>
+              <button onclick="shareTour('${route.id}')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 hover:bg-stone-100 font-semibold">
+                <i data-lucide="share-2" class="w-4 h-4"></i>${txt.shareLink}
+              </button>
+            </div>
+          </div>
+        </article>`;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function updateTourHead() {
+      const txt = T();
+      const r = currentRoute;
+      const p = routeProgress(r);
+      document.getElementById('tour-title').innerText = r[currentLang].title;
+      document.getElementById('tour-stats').innerHTML = `
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="footprints" class="w-4 h-4 text-brand-600"></i>${r.distance}</span>
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-brand-600"></i>${r.duration}</span>
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i>${txt.stopsCount(p.total)}</span>`;
+      document.getElementById('tour-progress-bar').style.width = `${Math.round(p.done / p.total * 100)}%`;
+      document.getElementById('progress-text').innerText = txt.progressOf(p.done, p.total);
+      document.getElementById('tour-share').onclick = () => shareTour(r.id);
+    }
+
+    // Texts in the fixed parts of the page
+    function updateChrome() {
+      const txt = T();
+      document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'de';
+      document.title = currentLang === 'pt' ? 'Barcelona a pé · Roteiros & Audioguia' : 'Barcelona zu Fuß · Touren & Audioguide';
+      document.querySelectorAll('.nav-label-tours').forEach(el => el.innerText = txt.navTours);
+      document.querySelectorAll('.nav-label-explore').forEach(el => el.innerText = txt.navExplore);
+      const navActive = view === 'explore' ? 'explore' : 'tours';
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        const on = b.dataset.nav === navActive;
+        b.className = `nav-btn px-4 py-1.5 rounded-full text-sm font-semibold transition flex items-center gap-2 ${on ? 'bg-white text-ink' : 'text-white/75 hover:text-white'}`;
+        b.setAttribute('aria-current', on ? 'page' : 'false');
+      });
+      document.querySelectorAll('.nav-tab').forEach(b => {
+        const on = b.dataset.nav === navActive;
+        b.className = `nav-tab h-[60px] flex flex-col items-center justify-center gap-0.5 text-xs font-semibold ${on ? 'text-brand-600' : 'text-stone-500'}`;
+        b.setAttribute('aria-current', on ? 'page' : 'false');
+      });
+      const on = 'px-2.5 py-1 rounded-full text-xs font-semibold transition bg-white text-ink';
+      const off = 'px-2.5 py-1 rounded-full text-xs font-semibold transition text-white/70 hover:text-white';
+      document.getElementById('lang-pt-btn').className = currentLang === 'pt' ? on : off;
+      document.getElementById('lang-de-btn').className = currentLang === 'de' ? on : off;
+
+      document.getElementById('hero-title').innerText = txt.heroTitle;
+      document.getElementById('hero-text').innerText = txt.heroText;
+      document.getElementById('label-all-tours').innerText = txt.allTours;
+      document.querySelectorAll('.share-label').forEach(el => el.innerText = txt.shareLink);
+      document.getElementById('explore-title').innerText = txt.exploreTitle;
+      document.getElementById('label-search').innerText = txt.searchPlaceholder;
+      document.getElementById('search-input').placeholder = txt.searchPlaceholder;
+      if (watchId === null) document.getElementById('label-gps').innerText = txt.gpsLabel;
+      document.getElementById('gps-btn').setAttribute('aria-label', txt.gpsLabel);
+      document.getElementById('gps-btn').title = txt.gpsLabel;
+      updateWcButton();
+      document.getElementById('lb-close').setAttribute('aria-label', txt.close);
+    }
+
+    function updateWcButton() {
+      const txt = T();
+      const btn = document.getElementById('wc-toggle');
+      btn.style.display = view !== 'tours' && currentToilets().length ? '' : 'none';
+      document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
+      btn.title = showWC ? txt.wcHide : txt.wcShow;
+      btn.setAttribute('aria-label', btn.title);
+      btn.setAttribute('aria-pressed', String(showWC));
+      btn.className = `px-3 py-2 rounded-lg border font-semibold flex items-center gap-2 transition active:scale-95 ${showWC ? 'bg-brand-50 border-brand-200 text-brand-700' : 'bg-white border-stone-300 text-stone-500'}`;
+    }
+
+    // ---------- Views ----------
+    function setView(v) {
+      view = v;
+      document.getElementById('view-tours').classList.toggle('active', v === 'tours');
+      document.getElementById('view-map').classList.toggle('active', v !== 'tours');
+      document.getElementById('tour-head').classList.toggle('hidden', v !== 'tour');
+      document.getElementById('explore-head').classList.toggle('hidden', v !== 'explore');
+      document.getElementById('search-wrap').classList.toggle('hidden', v !== 'explore');
+      document.getElementById('cat-chips').classList.toggle('hidden', v !== 'explore');
+      nearKey = null;
+      dismissedNearKey = null;
+      updateNearBanner();
+    }
+
+    function showTours() {
+      setView('tours');
+      updateChrome();
+      renderTourList();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function showExplore(key) {
+      setView('explore');
+      currentRoute = null;
+      if (key && catalogByKey[key]) { expanded.add(key); activeCats.clear(); searchTerm = ''; document.getElementById('search-input').value = ''; }
+      items = filteredItems();
+      updateChrome();
+      renderCategoryChips();
+      updateStickyTop();
+      map.invalidateSize();
+      drawMap();
+      document.getElementById('list-container').innerHTML = '';
+      renderList();
+      if (key && catalogByKey[key]) {
+        map.setView(catalogByKey[key].coords, 16);
+        scrollToCard(key);
+      } else {
+        fitItems();
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      }
+      if (userCoords) checkProximity(userCoords, 0);
+    }
+
+    function showTour(id, n) {
+      const route = routes.find(r => r.id === id);
+      setView('tour');
+      if (currentRoute !== route) openDetails.clear();
+      currentRoute = route;
+      items = route.stops;
+      updateChrome();
+      updateTourHead();
+      updateStickyTop();
+      map.invalidateSize();
+      drawMap();
+      fitItems();
+      document.getElementById('list-container').innerHTML = '';
+      renderList();
+      const target = n ? route.stops.find(s => s.id === n) : null;
+      if (target) scrollToCard(target.key);
+      else window.scrollTo({ top: 0, behavior: 'auto' });
+      if (userCoords) checkProximity(userCoords, 0);
+    }
+
+    function parseHash() {
+      const parts = decodeURIComponent(location.hash.replace(/^#\/?/, '')).split('/');
+      if (parts[0] === 'explore') return { view: 'explore', key: parts[1] || null };
+      if (parts[0] === 'tour' && routes.some(r => r.id === parts[1])) return { view: 'tour', id: parts[1], n: parts[2] ? Number(parts[2]) : null };
+      return { view: 'tours' };
+    }
+    function applyHash() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (lightboxState) closeLightbox();
+      const st = parseHash();
+      if (st.view === 'explore') showExplore(st.key);
+      else if (st.view === 'tour') showTour(st.id, st.n);
+      else showTours();
+    }
+    window.go = function(v, arg) {
+      const hash = arg ? `#${v}/${arg}` : `#${v}`;
+      if (location.hash === hash) applyHash(); else location.hash = hash;
+    };
+    window.addEventListener('hashchange', applyHash);
+
+    function rerender() {
+      updateChrome();
+      if (view === 'tours') { renderTourList(); return; }
+      if (view === 'tour') updateTourHead();
+      else { renderCategoryChips(); items = filteredItems(); }
+      drawMap();
+      renderList();
+      updateNearBanner();
+      updateStickyTop();
+    }
+
+    window.setLanguage = function(lang) {
+      if (currentLang === lang) return;
+      currentLang = lang;
+      saveStored('bcn_tour_lang_v2', lang);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      rerender();
+      if (lightboxState) renderLightbox();
+    };
+
+    window.shareTour = function(id) {
+      const route = routes.find(r => r.id === id);
+      const url = `${location.href.split('#')[0]}#tour/${id}`;
+      const title = route[currentLang].title;
+      if (navigator.share) {
+        navigator.share({ title, url }).catch(() => {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => toast(T().linkCopied), () => window.prompt(T().shareLink, url));
+      } else {
+        window.prompt(T().shareLink, url);
+      }
+    };
+    let toastTimer = null;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.innerText = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
     }
 
     // ---------- Interactions ----------
     const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Height covered by the sticky header + toolbar, so targets don't end up hidden behind them
-    function stickyOffset() {
-      const bar = document.getElementById('toolbar');
-      return (bar ? bar.getBoundingClientRect().bottom : 120) + 12;
-    }
-
     function scrollToElement(el) {
       const top = el.getBoundingClientRect().top + window.scrollY - stickyOffset();
       window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     }
-
-    // Map marker clicked -> bring its card into view and highlight it briefly
-    function scrollToCard(id) {
-      const card = document.getElementById(`stop-card-${id}`);
+    function scrollToCard(key) {
+      const card = document.getElementById(`card-${key}`);
       if (!card) return;
       scrollToElement(card);
       card.classList.remove('card-flash');
-      void card.offsetWidth; // restart animation if clicked twice
+      void card.offsetWidth;
       card.classList.add('card-flash');
     }
 
-    // Card header clicked -> center the map on the stop.
-    // On phones the map sits above the list, so scroll back up to it.
-    window.focusStop = function(id) {
-      const stop = getStop(id);
-      if (!stop) return;
-      if (window.innerWidth < 768) {
-        scrollToElement(document.getElementById('map-card'));
+    function onMarkerClick(key) {
+      if (view === 'explore' && !expanded.has(key)) {
+        expanded.add(key);
+        replaceCard(key);
+        refreshMarkers();
       }
-      map.setView(stop.coords, 16);
-      stopMarkers[id].openPopup();
+      scrollToCard(key);
+    }
+
+    // Card header clicked -> centre the map on the place. On phones the map sits above the list.
+    window.focusItem = function(key) {
+      const item = getItem(key);
+      if (!item) return;
+      if (window.innerWidth < 768) scrollToElement(document.getElementById('map-card'));
+      map.setView(item.coords, 16);
+      if (markers[key]) markers[key].openPopup();
     };
 
-    window.toggleStop = function(id) {
-      if (completedStops.includes(id)) {
-        completedStops = completedStops.filter(i => i !== id);
-      } else {
-        completedStops.push(id);
-      }
-      saveStored(currentRoute.storageKey, completedStops);
-      updateUI();
+    window.toggleExpand = function(key) {
+      if (expanded.has(key)) expanded.delete(key); else expanded.add(key);
+      replaceCard(key);
+      if (markers[key]) markers[key].setIcon(markerIcon(getItem(key)));
     };
 
-    // Open/close the details of one stop without rebuilding the list.
+    window.toggleVisited = function(key) {
+      if (visited.has(key)) visited.delete(key); else visited.add(key);
+      saveStored(VISITED_KEY, [...visited]);
+      replaceCard(key);
+      refreshMarkers();
+      if (view === 'tour') updateTourHead();
+      updateNearBanner();
+    };
+
+    // Open/close the details of one place without rebuilding the list.
     // fromBottom = the "close" button at the end of a long panel was used.
-    window.toggleDetails = function(id, fromBottom) {
-      const btn = document.getElementById(`details-btn-${id}`);
-      const panel = document.getElementById(`details-panel-${id}`);
+    window.toggleDetails = function(key, fromBottom) {
+      const btn = document.getElementById(`details-btn-${key}`);
+      const panel = document.getElementById(`details-panel-${key}`);
       if (!btn || !panel) return;
-      const txt = uiTranslations[currentLang];
-      const opening = !openDetails.has(id);
+      const txt = T();
+      const opening = !openDetails.has(key);
       const before = btn.getBoundingClientRect().top;
-
-      if (opening) openDetails.add(id); else openDetails.delete(id);
+      if (opening) openDetails.add(key); else openDetails.delete(key);
       panel.classList.toggle('open', opening);
       btn.classList.toggle('open-btn', opening);
       btn.setAttribute('aria-expanded', String(opening));
       btn.querySelector('.details-label').textContent = opening ? txt.lessLabel : txt.moreLabel;
-
       if (fromBottom) {
-        // Panel collapsed above the viewport: bring this stop's card back into view
-        const card = document.getElementById(`stop-card-${id}`);
+        const card = document.getElementById(`card-${key}`);
         if (card && card.getBoundingClientRect().top < stickyOffset()) scrollToElement(card);
       } else {
-        // Keep the clicked button exactly where it was on screen
         const diff = btn.getBoundingClientRect().top - before;
         if (diff) window.scrollBy(0, diff);
       }
@@ -3056,25 +3847,20 @@
     window.toggleWC = function() {
       showWC = !showWC;
       renderToilets();
-      const txt = uiTranslations[currentLang];
-      document.getElementById('label-wc').innerText = showWC ? txt.wcHide : txt.wcShow;
-      document.getElementById('wc-toggle').className = showWC
-        ? "flex-1 sm:flex-none justify-center px-3 py-2 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg font-semibold flex items-center gap-2 transition active:scale-95"
-        : "flex-1 sm:flex-none justify-center px-3 py-2 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg font-semibold flex items-center gap-2 transition opacity-60 active:scale-95";
+      updateWcButton();
     };
 
     // ---------- Text-to-Speech ----------
-    // detailed=true also reads all highlight texts of the stop.
-    window.speakStop = function(id, detailed) {
-      const txt = uiTranslations[currentLang];
+    // detailed=true also reads all highlight texts.
+    window.speakItem = function(key, detailed) {
+      const txt = T();
       if (!('speechSynthesis' in window)) { alert(txt.ttsUnsupported); return; }
       if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
-
-      const stop = getStop(id);
-      const data = stop[currentLang];
+      const item = getItem(key);
+      const data = item[currentLang];
       let text = `${data.name}. ${data.longDesc}`;
-      if (detailed && stop.highlights) {
-        text += ' ' + stop.highlights.map(h => `${h[currentLang].title}. ${h[currentLang].text}`).join(' ');
+      if (detailed && item.highlights) {
+        text += ' ' + item.highlights.map(h => `${h[currentLang].title}. ${h[currentLang].text}`).join(' ');
       }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = currentLang === 'pt' ? 'pt-BR' : 'de-DE';
@@ -3083,67 +3869,59 @@
     };
 
     // ---------- Lightbox ----------
-    // All photos of a stop: the stop photo ('main') first, then highlight photos (by index)
-    function lightboxList(stopId) {
-      const stop = getStop(stopId);
+    // All photos of a place: its own photo ('main') first, then highlight photos (by index)
+    function lightboxList(key) {
+      const item = getItem(key);
       const list = [];
-      if (stop.img) list.push({ key: 'main', src: stop, title: stop[currentLang].name, text: stop[currentLang].shortDesc });
-      (stop.highlights || []).forEach((h, idx) => {
+      if (item.img) list.push({ key: 'main', src: item, title: item[currentLang].name, text: item[currentLang].shortDesc });
+      (item.highlights || []).forEach((h, idx) => {
         if (h.img) list.push({ key: idx, src: h, title: h[currentLang].title, text: h[currentLang].text });
       });
       return list;
     }
-
     function renderLightbox() {
-      const { stopId, index } = lightboxState;
-      const txt = uiTranslations[currentLang];
-      const list = lightboxList(stopId);
-      const pos = Math.max(0, list.findIndex(item => item.key === index));
-      const item = list[pos];
-
+      const { key, index } = lightboxState;
+      const txt = T();
+      const list = lightboxList(key);
+      const pos = Math.max(0, list.findIndex(entry => entry.key === index));
+      const entry = list[pos];
       const img = document.getElementById('lb-img');
-      img.src = commonsImg(item.src.img, 1280);
-      img.alt = item.title;
-      document.getElementById('lb-title').innerText = item.title;
-      document.getElementById('lb-text').innerText = item.text;
-      document.getElementById('lb-credit').innerHTML = creditHtml(item.src, txt);
+      img.src = commonsImg(entry.src.img, 1280);
+      img.alt = entry.title;
+      document.getElementById('lb-title').innerText = entry.title;
+      document.getElementById('lb-text').innerText = entry.text;
+      document.getElementById('lb-credit').innerHTML = creditHtml(entry.src, txt);
       document.getElementById('lb-counter').innerText = `${pos + 1} / ${list.length}`;
       document.getElementById('lb-prev').style.visibility = list.length > 1 ? 'visible' : 'hidden';
       document.getElementById('lb-next').style.visibility = list.length > 1 ? 'visible' : 'hidden';
     }
-
-    window.openLightbox = function(stopId, index) {
-      lightboxState = { stopId, index };
+    window.openLightbox = function(key, index) {
+      lightboxState = { key, index };
       renderLightbox();
       document.getElementById('lightbox').classList.add('open');
       document.body.style.overflow = 'hidden';
       document.getElementById('lb-close').focus();
     };
-
     window.closeLightbox = function() {
       document.getElementById('lightbox').classList.remove('open');
       document.body.style.overflow = '';
       document.getElementById('lb-img').src = '';
       lightboxState = null;
     };
-
     window.stepLightbox = function(dir) {
       if (!lightboxState) return;
-      const list = lightboxList(lightboxState.stopId);
-      const pos = list.findIndex(item => item.key === lightboxState.index);
-      const next = (pos + dir + list.length) % list.length;
-      lightboxState.index = list[next].key;
+      const list = lightboxList(lightboxState.key);
+      const pos = list.findIndex(entry => entry.key === lightboxState.index);
+      lightboxState.index = list[(pos + dir + list.length) % list.length].key;
       renderLightbox();
     };
-
     document.addEventListener('keydown', (e) => {
       if (!lightboxState) return;
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') stepLightbox(-1);
       if (e.key === 'ArrowRight') stepLightbox(1);
     });
-
-    // Swipe left/right on phones; tap on dark background closes
+    // Swipe left/right on phones; tap on the dark background closes
     (function initSwipe() {
       const stage = document.getElementById('lb-stage');
       let startX = null;
@@ -3161,76 +3939,79 @@
     window.toggleGPS = function() {
       const btn = document.getElementById('gps-btn');
       const label = document.getElementById('label-gps');
-      const txt = uiTranslations[currentLang];
+      const txt = T();
+      const activeCls = ['bg-brand-600', 'border-brand-600', 'text-white', 'hover:bg-brand-700'];
+      const idleCls = ['bg-white', 'border-stone-300', 'hover:bg-stone-100'];
 
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
         if (userMarker) map.removeLayer(userMarker);
         userMarker = null;
-        btn.classList.remove('bg-indigo-600', 'text-white');
-        btn.classList.add('bg-slate-100');
+        userCoords = null;
+        lastSortCoords = null;
+        btn.classList.remove(...activeCls);
+        btn.classList.add(...idleCls);
         label.innerText = txt.gpsLabel;
-        setNearStop(null);
+        setNearKey(null);
+        if (view === 'explore') { items = filteredItems(); renderList(); }
         return;
       }
-
-      if ('geolocation' in navigator) {
-        btn.classList.add('bg-indigo-600', 'text-white');
-        btn.classList.remove('bg-slate-100');
-        label.innerText = txt.gpsSearching;
-
-        watchId = navigator.geolocation.watchPosition(
-          (pos) => {
-            const userCoords = [pos.coords.latitude, pos.coords.longitude];
-            if (!userMarker) {
-              const userIcon = L.divIcon({ className: 'user-location-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
-              userMarker = L.marker(userCoords, { icon: userIcon })
-                .addTo(map)
-                .bindPopup(`<b>${uiTranslations[currentLang].userLocation}</b>`);
-              map.setView(userCoords, 16);
-            } else {
-              userMarker.setLatLng(userCoords);
-            }
-            label.innerText = uiTranslations[currentLang].gpsActive;
-            checkProximity(userCoords, pos.coords.accuracy);
-          },
-          () => {
-            alert(uiTranslations[currentLang].gpsError);
-            toggleGPS();
-          },
-          { enableHighAccuracy: true }
-        );
-      } else {
-        alert(txt.noGps);
-      }
+      if (!('geolocation' in navigator)) { alert(txt.noGps); return; }
+      btn.classList.add(...activeCls);
+      btn.classList.remove(...idleCls);
+      label.innerText = txt.gpsSearching;
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          userCoords = [pos.coords.latitude, pos.coords.longitude];
+          if (!userMarker) {
+            const userIcon = L.divIcon({ className: 'user-location-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
+            userMarker = L.marker(userCoords, { icon: userIcon, zIndexOffset: 1000 }).addTo(map).bindPopup(`<b>${T().userLocation}</b>`);
+            map.setView(userCoords, 16);
+          } else {
+            userMarker.setLatLng(userCoords);
+          }
+          label.innerText = T().gpsActive;
+          // Explore list is sorted by distance; re-sort only after moving a bit
+          if (view === 'explore' && (!lastSortCoords || distanceMeters(lastSortCoords, userCoords) > 40)) {
+            lastSortCoords = userCoords;
+            items = filteredItems();
+            renderList();
+          }
+          checkProximity(userCoords, pos.coords.accuracy);
+        },
+        () => {
+          alert(T().gpsError);
+          toggleGPS();
+        },
+        { enableHighAccuracy: true }
+      );
     };
 
-    // ---------- "You are here": detect when the GPS position reaches a stop ----------
-    const NEAR_ENTER_M = 60;   // closer than this -> you are at the stop
+    // ---------- "You are here": detect when the GPS position reaches a place ----------
+    const NEAR_ENTER_M = 60;   // closer than this -> you are at the place
     const NEAR_LEAVE_M = 110;  // farther than this -> you left it (gap avoids flickering)
+    function proximityPool() { return view === 'tour' ? currentRoute.stops : view === 'explore' ? catalog : []; }
 
     function checkProximity(coords, accuracy) {
-      if (nearStopId !== null && distanceMeters(coords, getStop(nearStopId).coords) > NEAR_LEAVE_M) {
-        setNearStop(null);
-      }
+      const pool = proximityPool();
+      const current = nearKey && pool.find(s => s.key === nearKey);
+      if (nearKey !== null && (!current || distanceMeters(coords, current.coords) > NEAR_LEAVE_M)) setNearKey(null);
       let best = null, bestD = Infinity;
-      stops.forEach(s => {
+      pool.forEach(s => {
         const d = distanceMeters(coords, s.coords);
         if (d < bestD) { bestD = d; best = s; }
       });
-      const tolerance = Math.min(accuracy || 0, 40);   // be a bit lenient with a fuzzy fix
-      if (best && bestD <= NEAR_ENTER_M + tolerance && best.id !== nearStopId) {
-        setNearStop(best.id);
-      }
+      const tolerance = Math.min(accuracy || 0, 40);
+      if (best && bestD <= NEAR_ENTER_M + tolerance && best.key !== nearKey) setNearKey(best.key);
     }
 
-    function setNearStop(id) {
-      if (id === nearStopId) return;
+    function setNearKey(key) {
+      if (key === nearKey) return;
       document.querySelectorAll('.is-near').forEach(el => el.classList.remove('is-near'));
-      nearStopId = id;
-      if (id !== null) {
-        const card = document.getElementById(`stop-card-${id}`);
+      nearKey = key;
+      if (key !== null) {
+        const card = document.getElementById(`card-${key}`);
         if (card) card.classList.add('is-near');
         if (navigator.vibrate) { try { navigator.vibrate(120); } catch (e) {} }
       }
@@ -3239,35 +4020,41 @@
 
     function updateNearBanner() {
       const banner = document.getElementById('near-banner');
-      if (!banner) return;
-      if (nearStopId === null || nearStopId === dismissedNearId) {
-        banner.classList.add('hidden');
-        return;
-      }
-      const txt = uiTranslations[currentLang];
-      const stop = getStop(nearStopId);
-      document.getElementById('near-text').innerText = `📍 ${txt.hereNow}: ${stop.id}. ${stop[currentLang].name}`;
+      if (nearKey === null || nearKey === dismissedNearKey || view === 'tours') { banner.classList.add('hidden'); return; }
+      const txt = T();
+      const item = view === 'tour' ? currentRoute.stops.find(s => s.key === nearKey) : catalogByKey[nearKey];
+      if (!item) { banner.classList.add('hidden'); return; }
+      const label = view === 'tour' ? `${item.id}. ${item[currentLang].name}` : item[currentLang].name;
+      document.getElementById('near-text').innerText = `📍 ${txt.hereNow}: ${label}`;
       document.getElementById('near-show').innerText = txt.show;
       document.getElementById('near-listen').innerText = `🔊 ${txt.listen}`;
       const visitBtn = document.getElementById('near-visit');
       visitBtn.innerText = txt.markVisitedShort;
-      visitBtn.style.display = completedStops.includes(stop.id) ? 'none' : '';
+      visitBtn.style.display = visited.has(nearKey) ? 'none' : '';
       document.getElementById('near-close').setAttribute('aria-label', txt.close);
       banner.classList.remove('hidden');
     }
 
     window.nearAction = function(action) {
-      if (nearStopId === null) return;
-      if (action === 'show') scrollToCard(nearStopId);
-      if (action === 'listen') speakStop(nearStopId, false);
-      if (action === 'visit' && !completedStops.includes(nearStopId)) toggleStop(nearStopId);
-      if (action === 'close') { dismissedNearId = nearStopId; updateNearBanner(); }
+      if (nearKey === null) return;
+      if (action === 'show') {
+        if (view === 'explore') {
+          // the place might be filtered out – show everything again
+          if (!items.some(i => i.key === nearKey)) { activeCats.clear(); searchTerm = ''; document.getElementById('search-input').value = ''; renderCategoryChips(); refreshExplore(false); }
+          if (!expanded.has(nearKey)) { expanded.add(nearKey); replaceCard(nearKey); refreshMarkers(); }
+        }
+        scrollToCard(nearKey);
+      }
+      if (action === 'listen') speakItem(nearKey, false);
+      if (action === 'visit' && !visited.has(nearKey)) toggleVisited(nearKey);
+      if (action === 'close') { dismissedNearKey = nearKey; updateNearBanner(); }
     };
 
+    window.addEventListener('resize', () => { if (view !== 'tours') updateStickyTop(); });
+
     // ---------- Init ----------
-    drawRoute();
-    fitRoute();
-    updateUI();
+    paintTiles();
+    applyHash();
   </script>
 </body>
 </html>
