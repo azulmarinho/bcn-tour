@@ -3030,6 +3030,7 @@
     const markerLayer = L.layerGroup().addTo(map);
     const wcMarkersGroup = L.layerGroup().addTo(map);
     const markers = {};
+    watchSize(document.getElementById('map'), () => map.invalidateSize());
 
     // How a leg is travelled decides how its line looks (main map and tour cards)
     const LEG_STYLES = {
@@ -3495,10 +3496,22 @@
       lucide.createIcons();
     }
 
-    // Small, fixed OpenStreetMap maps on the tour cards
+    // Small, fixed OpenStreetMap maps on the tour cards.
+    // Tailwind styles new elements a moment after they are inserted, so a card's map box can
+    // still be 0 px high when the map is created. Fitting the route then zooms in all the way –
+    // so the route is fitted again whenever the box gets (or changes) its real size.
     const miniMaps = [];
+    function removeMiniMaps() {
+      miniMaps.splice(0).forEach(m => { if (m._sizeWatch) m._sizeWatch.disconnect(); m.remove(); });
+    }
+    function watchSize(el, onResize) {
+      if (typeof ResizeObserver === 'undefined') { setTimeout(onResize, 300); return null; }
+      const ro = new ResizeObserver(onResize);
+      ro.observe(el);
+      return ro;
+    }
     function renderMiniMaps() {
-      miniMaps.splice(0).forEach(m => m.remove());
+      removeMiniMaps();
       routes.forEach(route => {
         const el = document.getElementById(`mini-map-${route.id}`);
         if (!el) return;
@@ -3514,7 +3527,15 @@
         stops.forEach(s => L.circleMarker(s.coords, { radius: 3.5, color: '#13253F', weight: 1.5, fillColor: '#fff', fillOpacity: 1, interactive: false }).addTo(m));
         L.circleMarker(stops[0].coords, { radius: 8, color: '#fff', weight: 2, fillColor: '#13253F', fillOpacity: 1, interactive: false }).addTo(m);
         L.circleMarker(stops[stops.length - 1].coords, { radius: 8.5, color: '#13253F', weight: 2.2, fillColor: '#EDA526', fillOpacity: 1, interactive: false }).addTo(m);
-        m.fitBounds(L.latLngBounds(stops.map(s => s.coords)), { padding: [24, 24] });
+        const bounds = L.latLngBounds(stops.map(s => s.coords));
+        const fit = () => {
+          if (!el.clientWidth || !el.clientHeight) return;
+          m.invalidateSize();
+          m.fitBounds(bounds, { padding: [24, 24] });
+        };
+        m.setView(bounds.getCenter(), 13);   // a valid start view, replaced by fit() once the size is known
+        fit();
+        m._sizeWatch = watchSize(el, fit);
         miniMaps.push(m);
       });
     }
@@ -3522,7 +3543,7 @@
     function renderTourList() {
       const txt = T();
       const list = document.getElementById('tour-list');
-      miniMaps.splice(0).forEach(m => m.remove());
+      removeMiniMaps();
       list.innerHTML = routes.map(route => {
         const r = route[currentLang];
         const first = route.stops[0][currentLang].name, last = route.stops[route.stops.length - 1][currentLang].name;
