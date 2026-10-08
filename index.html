@@ -93,11 +93,18 @@
       box-shadow: 0 1px 3px rgba(19, 37, 63, .3);
     }
 
-    /* User GPS dot */
+    /* User GPS dot, with a light cone showing the direction the phone points to */
+    .user-loc { position: relative; width: 18px; height: 18px; }
     .user-location-marker {
+      position: absolute; inset: 0;
       background: #2563eb; border: 3px solid white; border-radius: 50%;
       box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.3); animation: pulse 2s infinite;
     }
+    .user-cone {
+      position: absolute; left: -41px; top: -41px; width: 100px; height: 100px;
+      opacity: 0; transition: opacity .3s ease; pointer-events: none; transform-origin: 50% 50%;
+    }
+    .user-cone.on { opacity: 1; }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0px rgba(37, 99, 235, 0.5); }
       70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
@@ -337,7 +344,7 @@
         navTours: "Roteiros",
         navExplore: "Explorar",
         heroTitle: "Barcelona a pé",
-        heroText: "Três roteiros com mapa, audioguia e as histórias de cada parada. Ou explore livremente todos os lugares em 'Explorar'.",
+        heroText: "Quatro roteiros com mapa, audioguia e as histórias de cada parada. Ou explore livremente todos os lugares em 'Explorar'.",
         startLabel: "Início",
         finishLabel: "Chegada",
         stopsCount: n => `${n} paradas`,
@@ -396,7 +403,7 @@
         navTours: "Touren",
         navExplore: "Entdecken",
         heroTitle: "Barcelona zu Fuß",
-        heroText: "Drei Rundgänge mit Karte, Audioguide und den Geschichten zu jeder Station. Oder stöbere unter »Entdecken« frei durch alle Orte.",
+        heroText: "Vier Rundgänge mit Karte, Audioguide und den Geschichten zu jeder Station. Oder stöbere unter »Entdecken« frei durch alle Orte.",
         startLabel: "Start",
         finishLabel: "Ziel",
         stopsCount: n => `${n} Stationen`,
@@ -2938,13 +2945,13 @@
         coords: [41.404072, 2.155841],
         wiki: 'https://ca.wikipedia.org/wiki/Pla%C3%A7a_del_Diamant',
         pt: {
-          notes: [{ type: 'ticket', text: "Visitas guiadas ao abrigo antiaéreo aos domingos às 11h (geralmente em catalão; no segundo domingo do mês em espanhol), 3 € em dinheiro ao guia, inscrição prévia obrigatória." }],
+          notes: [{ type: 'info', text: "O abrigo antiaéreo só pode ser visitado em visitas guiadas aos domingos às 11h – quase sempre em catalão (só no segundo domingo do mês em espanhol), com inscrição prévia. Para a maioria dos visitantes não vale a pena, mas é bom saber o que existe debaixo dos seus pés." }],
           name: 'Plaça del Diamant',
           shortDesc: 'A praça do romance mais famoso da Catalunha.',
           longDesc: "Esta pequena praça dá nome ao romance 'La plaça del Diamant' (1962), de Mercè Rodoreda, considerado o romance mais famoso da literatura catalã. Aqui, num baile da Festa Major, a jovem Natàlia conhece Quimet, que passa a chamá-la de 'Colometa' (pombinha). Uma escultura de bronze na praça lembra a personagem."
         },
         de: {
-          notes: [{ type: 'ticket', text: 'Führungen durch den Luftschutzbunker sonntags um 11 Uhr (meist auf Katalanisch, am zweiten Sonntag im Monat auf Spanisch), 3 € bar beim Guide, Anmeldung nötig.' }],
+          notes: [{ type: 'info', text: 'Den Luftschutzbunker kann man nur bei Führungen sonntags um 11 Uhr besichtigen – fast immer auf Katalanisch (nur am zweiten Sonntag im Monat auf Spanisch), mit Anmeldung. Für die meisten Besucher lohnt sich das nicht, aber es ist gut zu wissen, was unter deinen Füßen liegt.' }],
           name: 'Plaça del Diamant',
           shortDesc: 'Der Platz aus Kataloniens berühmtestem Roman.',
           longDesc: 'Der kleine Platz gab Mercè Rodoredas Roman »La plaça del Diamant« (1962) seinen Namen – er gilt als der bekannteste Roman der katalanischen Literatur. Hier lernt die junge Natàlia beim Tanzfest der Festa Major Quimet kennen, der sie fortan »Colometa« (Täubchen) nennt. Eine Bronzefigur auf dem Platz erinnert an sie.'
@@ -3046,17 +3053,23 @@
       {
         key: 'park-guell',
         cats: ['gaudi', 'park', 'view'],
-        coords: [41.41361, 2.15278],
+        coords: [41.412825, 2.152046],   // side entrance – usually quieter than the main gate
         wiki: 'https://ca.wikipedia.org/wiki/Park_G%C3%BCell',
         img: 'Park Güell02.jpg',
         pt: {
-          notes: [{ type: 'ticket', text: 'A Zona Monumental só com ingresso com horário marcado, comprado online: 18 € (2026). Aberto todos os dias aprox. 9h30–19h30; os horários da manhã esgotam rápido. A área de bosque em volta é gratuita.', url: 'https://parkguell.barcelona', linkLabel: 'parkguell.barcelona' }],
+          notes: [
+            { type: 'ticket', text: 'A Zona Monumental só com ingresso com horário marcado, comprado online: 18 € (2026). Aberto todos os dias aprox. 9h30–19h30; os horários da manhã esgotam rápido. A área de bosque em volta é gratuita.', url: 'https://parkguell.barcelona', linkLabel: 'parkguell.barcelona' },
+            { type: 'info', text: 'O ponto no mapa é uma entrada lateral – aqui costuma ter bem menos gente do que na entrada principal com o dragão.' }
+          ],
           name: 'Park Güell',
           shortDesc: 'O parque de Gaudí, com o dragão e o banco ondulado.',
           longDesc: 'Eusebi Güell queria construir aqui um bairro-jardim de luxo com uns sessenta lotes – a partir de 1900 só duas casas foram erguidas, nenhuma delas de Gaudí, porque o lugar era considerado longe demais da cidade. Sobrou a infraestrutura cheia de fantasia de Gaudí: a salamandra de mosaico, a sala de colunas e o banco ondulado. Em 1926 virou parque público e desde 1984 é Patrimônio Mundial da UNESCO.'
         },
         de: {
-          notes: [{ type: 'ticket', text: 'Der Monumentalbereich nur mit Zeitticket, online zu kaufen: 18 € (Stand 2026). Täglich etwa 9:30–19:30 Uhr; die Vormittags-Slots sind schnell ausgebucht. Der Waldbereich drumherum ist kostenlos.', url: 'https://parkguell.barcelona', linkLabel: 'parkguell.barcelona' }],
+          notes: [
+            { type: 'ticket', text: 'Der Monumentalbereich nur mit Zeitticket, online zu kaufen: 18 € (Stand 2026). Täglich etwa 9:30–19:30 Uhr; die Vormittags-Slots sind schnell ausgebucht. Der Waldbereich drumherum ist kostenlos.', url: 'https://parkguell.barcelona', linkLabel: 'parkguell.barcelona' },
+            { type: 'info', text: 'Der Punkt auf der Karte ist ein Seiteneingang – hier ist meist deutlich weniger los als am Haupteingang mit dem Drachen.' }
+          ],
           name: 'Park Güell',
           shortDesc: 'Gaudís Park mit Drache und Schlangenbank.',
           longDesc: 'Eusebi Güell wollte hier eine Luxus-Gartenstadt mit rund sechzig Grundstücken anlegen – ab 1900 wurden aber nur zwei Häuser gebaut, keines von Gaudí, weil die Lage als zu weit draußen galt. Übrig blieb Gaudís fantasievolle Infrastruktur: der Mosaik-Salamander, die Säulenhalle und die geschwungene Bank. 1926 wurde das Gelände ein öffentlicher Park, seit 1984 ist er UNESCO-Welterbe.'
@@ -3360,6 +3373,34 @@
       }
     ];
 
+    // ===== Route 4: Gràcia, from Metro Fontana up to Park Güell =====
+    const fromExtra = key => extraPlaces.find(p => p.key === key);
+    const graciaStops = [
+      {
+        id: 1,
+        key: 'metro-fontana',
+        cats: ['transport'],
+        coords: [41.40250, 2.15260],
+        wiki: '',
+        pt: {
+          notes: [{ route: true, type: 'info', text: 'Dica: reserve antes os ingressos do Park Güell (horário marcado, online) e da Casa Vicens – para o parque, um horário no fim da tarde. O Mercat de la Llibertat fecha aos domingos.' }],
+          name: 'Metro Fontana',
+          shortDesc: 'Início no coração de Gràcia (linha L3).',
+          longDesc: "A estação Fontana, da linha verde L3, fica na Gran de Gràcia, a antiga rua principal da vila. Daqui você entra logo na Carrer d'Astúries, quase sem carros – e depois vai de praça em praça por Gràcia, até subir ao Park Güell."
+        },
+        de: {
+          notes: [{ route: true, type: 'info', text: 'Tipp: Tickets für Park Güell (Zeitfenster, online) und Casa Vicens vorher buchen – für den Park am besten einen Slot am späten Nachmittag. Der Mercat de la Llibertat ist sonntags geschlossen.' }],
+          name: 'Metro Fontana',
+          shortDesc: 'Start mitten in Gràcia (Linie L3).',
+          longDesc: 'Die Station Fontana der grünen Linie L3 liegt an der Gran de Gràcia, der alten Hauptstraße des Dorfes. Von hier geht es gleich in die fast autofreie Carrer d\'Astúries – und dann von Platz zu Platz durch Gràcia, bis hinauf zum Park Güell.'
+        },
+        highlights: []
+      },
+      ...['carrer-asturies', 'placa-del-diamant', 'carrer-verdi', 'placa-virreina', 'placa-del-sol',
+          'placa-vila-gracia', 'casa-fuster', 'mercat-llibertat', 'casa-vicens', 'park-guell']
+        .map((key, i) => reuseStop(fromExtra(key), i + 2))
+    ];
+
     // ===== Tours =====
     // To add a tour: create a stops array like the ones above and add an entry here.
     // Every stop has a stable `key`; "visited" ticks are stored per key, so they
@@ -3438,6 +3479,28 @@
         },
         stops: portStops,
         toilets: portToilets
+      },
+      {
+        id: 'gracia',
+        legacyKey: 'bcn_tour_completed_gracia',
+        distance: '~4–5 km',
+        duration: '~5–6 h',
+        transport: [],
+        highlights: ['placa-vila-gracia', 'placa-del-diamant', 'casa-vicens', 'park-guell'],
+        pt: {
+          title: 'Gràcia → Park Güell',
+          desc: "A antiga vila de Gràcia de praça em praça: ruas quase sem carros, terraços, a torre do relógio, a Plaça del Diamant de Rodoreda, o mercado modernista e a primeira casa de Gaudí – e, no fim, a subida até o Park Güell.",
+          effort: 'Caminhos curtos entre as praças; só o último trecho até o Park Güell é uma subida perceptível.',
+          best: 'Comece no fim da manhã e reserve o Park Güell para o fim da tarde.'
+        },
+        de: {
+          title: 'Gràcia → Park Güell',
+          desc: 'Das alte Dorf Gràcia von Platz zu Platz: fast autofreie Gassen, Terrassen, der Glockenturm, Rodoredas Plaça del Diamant, die Jugendstil-Markthalle und Gaudís erstes Haus – und zum Schluss hinauf in den Park Güell.',
+          effort: 'Kurze Wege zwischen den Plätzen, nur das letzte Stück zum Park Güell geht spürbar bergauf.',
+          best: 'Am späten Vormittag starten und für den Park Güell ein Ticket am späten Nachmittag buchen.'
+        },
+        stops: graciaStops,
+        toilets: []
       }
     ];
 
@@ -3495,6 +3558,12 @@
 
     const catalog = [];
     const catalogByKey = {};
+    extraPlaces.forEach(place => {
+      const item = JSON.parse(JSON.stringify(place));
+      item.tours = [];
+      catalogByKey[item.key] = item;
+      catalog.push(item);
+    });
     routes.forEach(route => route.stops.forEach(stop => {
       let item = catalogByKey[stop.key];
       if (!item) {
@@ -3512,12 +3581,6 @@
       }
       item.tours.push({ routeId: route.id, n: stop.id });
     }));
-    extraPlaces.forEach(place => {
-      const item = JSON.parse(JSON.stringify(place));
-      item.tours = [];
-      catalogByKey[item.key] = item;
-      catalog.push(item);
-    });
     const allToilets = [];
     routes.forEach(r => r.toilets.forEach(t => { if (!allToilets.some(x => x.name === t.name)) allToilets.push(t); }));
 
@@ -4544,6 +4607,52 @@
     })();
 
     // ---------- Live GPS ----------
+    // ---------- Compass: which way the phone is pointing ----------
+    let heading = null;          // degrees clockwise from north, smoothed
+    let lastCompassAt = 0;
+    let compassHandler = null, compassEvent = null, headingFrame = null;
+
+    function drawHeading() {
+      headingFrame = null;
+      const el = userMarker && userMarker.getElement && userMarker.getElement();
+      const cone = el && el.querySelector('.user-cone');
+      if (!cone) return;
+      cone.classList.toggle('on', heading !== null);
+      if (heading !== null) cone.style.transform = `rotate(${heading}deg)`;
+    }
+    function setHeading(h, fromGps) {
+      if (!fromGps) lastCompassAt = Date.now();
+      if (heading === null) heading = h;
+      else heading += ((h - heading + 540) % 360 - 180) * 0.35;   // smooth, taking the short way round
+      heading = (heading + 360) % 360;
+      if (!headingFrame) headingFrame = requestAnimationFrame(drawHeading);
+    }
+    function screenAngle() {
+      return (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (window.orientation || 0);
+    }
+    function startCompass() {
+      if (compassHandler) return;
+      compassHandler = (e) => {
+        let h = null;
+        if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) h = e.webkitCompassHeading;   // iPhone
+        else if (e.absolute && typeof e.alpha === 'number') h = 360 - e.alpha;                                       // Android
+        if (h === null) return;
+        setHeading((h + screenAngle()) % 360);
+      };
+      const listen = (name) => { compassEvent = name; window.addEventListener(name, compassHandler, true); };
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(state => { if (state === 'granted') listen('deviceorientation'); }).catch(() => {});
+      } else if ('ondeviceorientationabsolute' in window) {
+        listen('deviceorientationabsolute');
+      } else {
+        listen('deviceorientation');
+      }
+    }
+    function stopCompass() {
+      if (compassHandler && compassEvent) window.removeEventListener(compassEvent, compassHandler, true);
+      compassHandler = null; compassEvent = null; heading = null; lastCompassAt = 0;
+    }
+
     window.toggleGPS = function() {
       const btn = document.getElementById('gps-btn');
       const label = document.getElementById('label-gps');
@@ -4556,6 +4665,7 @@
         watchId = null;
         if (userMarker) map.removeLayer(userMarker);
         userMarker = null;
+        stopCompass();
         userCoords = null;
         lastSortCoords = null;
         btn.classList.remove(...activeCls);
@@ -4566,6 +4676,7 @@
         return;
       }
       if (!('geolocation' in navigator)) { alert(txt.noGps); return; }
+      startCompass();   // must run inside the tap: iPhones only ask for compass access then
       btn.classList.add(...activeCls);
       btn.classList.remove(...idleCls);
       label.innerText = txt.gpsSearching;
@@ -4573,14 +4684,28 @@
         (pos) => {
           userCoords = [pos.coords.latitude, pos.coords.longitude];
           if (!userMarker) {
-            const userIcon = L.divIcon({ className: 'user-location-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
+            const userIcon = L.divIcon({
+              className: '', iconSize: [18, 18], iconAnchor: [9, 9],
+              html: `<div class="user-loc">
+                <svg class="user-cone" viewBox="0 0 80 80" aria-hidden="true">
+                  <defs><radialGradient id="cone-fade" cx="40" cy="40" r="40" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#2563eb" stop-opacity=".75"/><stop offset=".85" stop-color="#2563eb" stop-opacity=".12"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></radialGradient></defs>
+                  <path d="M40 40 L22.7 4 A40 40 0 0 1 57.3 4 Z" fill="url(#cone-fade)"/>
+                </svg>
+                <div class="user-location-marker"></div></div>`
+            });
             userMarker = L.marker(userCoords, { icon: userIcon, zIndexOffset: 1000 }).addTo(map).bindPopup(`<b>${T().userLocation}</b>`);
+            drawHeading();
             autoFit = false;
             map.setView(userCoords, 16);
           } else {
             userMarker.setLatLng(userCoords);
           }
           label.innerText = T().gpsActive;
+          // Without a compass reading, use the walking direction from GPS (only reliable while moving)
+          if (Date.now() - lastCompassAt > 3000 && typeof pos.coords.heading === 'number' && !isNaN(pos.coords.heading) && (pos.coords.speed || 0) > 0.8) {
+            setHeading(pos.coords.heading, true);
+          }
           // Explore list is sorted by distance; re-sort only after moving a bit
           if (view === 'explore' && (!lastSortCoords || distanceMeters(lastSortCoords, userCoords) > 40)) {
             lastSortCoords = userCoords;
